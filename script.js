@@ -272,3 +272,9 @@ function atualizarIconeIndicador() {
     indicador.style.backgroundImage = `url('${imagemPersonagem}')`;
 }
   
+document.addEventListener('DOMContentLoaded', function () {
+    const iOS = /iP(hone|od|ad)/.test(navigator.userAgent) && !window.MSStream;
+    if (iOS) {
+        document.body.classList.add('ios-safe');
+    }
+});

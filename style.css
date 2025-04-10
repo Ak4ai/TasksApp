@@ -881,3 +881,15 @@ textarea:focus {
   opacity: 0;
 }
 
+.ios-safe .top-info-bar {
+  padding-top: calc(env(safe-area-inset-top, 10px) + 5px);
+}
+
+.ios-safe body {
+  padding-top: calc(env(safe-area-inset-top, 10px) + 50px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 10px) + 60px);
+}
+
+.ios-safe .bottom-nav {
+  padding-bottom: env(safe-area-inset-bottom, 10px);
+}
