@@ -273,15 +273,18 @@ function atualizarIconeIndicador() {
 }
   
 document.addEventListener('DOMContentLoaded', function () {
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const isStandalone = window.navigator.standalone === true;
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent.toLowerCase());
+    const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
-    if (isIOS && isStandalone) {
+    if (isIOS && isInStandaloneMode) {
         document.body.classList.add('ios-pwa');
-        mostrarMensagem('Aplicativo PWA em execução no iOS');
-    }
-    else {
-        document.body.classList.remove('ios-pwa');
-        mostrarMensagem('Aplicativo PWA não está em execução no iOS ou não é um aplicativo instalado');
+        mostrarMensagem('✅ PWA em execução no iOS (modo standalone)');
+    } else if (isIOS) {
+        mostrarMensagem('⚠️ PWA em execução no iOS (não em modo standalone)');
+    } else if (window.matchMedia('(display-mode: standalone)').matches) {
+        document.body.classList.add('pwa');
+        mostrarMensagem('✅ PWA em execução (modo standalone)');
+    } else {
+        mostrarMensagem('⚠️ PWA não está em modo standalone');
     }
 });
