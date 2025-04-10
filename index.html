@@ -1,0 +1,77 @@
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+        <link rel="icon" type="image/png" href="android-icon-192x192.png">
+        <link rel="manifest" href="manifest.json">
+        <link rel="stylesheet" href="style.css?v=1.0.6">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tasks</title>
+        <meta name="theme-color" content="#29243e"> <!-- Android -->
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- iOS -->
+    </head>
+    <body>
+        <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            }, function(error) {
+                console.log('ServiceWorker registration failed: ', error);
+            });
+            });
+        }
+        </script>
+        <div id="blur-background"></div>
+        <div id="popup-alert">
+            <span id="popup-alert-text"></span>
+        </div>  
+        <div id="custom-dialog" class="dialog-container" style="display: none;">
+            <div class="dialog-message" id="dialog-message"></div>
+            <div class="dialog-buttons">
+                <button id="dialog-ok-button">OK</button>
+            </div>
+        </div>
+        <div id="pull-up-indicator"></div>
+        <div id="black-overlay"></div>
+        <div id="essential-info" class="hidden">
+            <div class="top-section">
+                <img id="status-img" alt="Essential Info Image">
+                <div class="text-section">
+                    <h2 id="status-nome"></h2>
+                    <h4>Status Base:</h4>
+                </div>
+            </div>
+        </div>         
+        <div id="essential-info2" class="hidden">
+            <h3>Anotações:</h3>
+            <div class="textarea-wrapper">
+            <textarea id="anotacoes" placeholder="Escreva suas anotações aqui..." onchange="salvarAnotacoes()"></textarea>
+            </div>
+        </div>         
+        <div id="deviceready" class="blink"></div>
+        <div class="bottom-nav">
+            <button class="nav-button">🏠</button>
+            <button class="nav-button">📋</button>
+            <button class="nav-button">⚙️</button>
+        </div>        
+        <div class="container">
+            <div id="app">
+                <div id="app-body">
+                    <div class="card purple-card">
+                        <p>TAREFAS</p>
+                        <p>REALIZADAS</p>
+                        <p>ALARMES</p>
+                    </div>
+                    <div class="card blue-card">
+                        <p>TAREFAS</p>
+                        <p>PARA REALIZAR</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="google.js?v=1.0.11" defer></script>     
+        <script src="script.js?v=1.0.9" defer></script>    
+        <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>  
+    </body>
+</html>

@@ -1,0 +1,852 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: #352F44; /* Cor de fundo */
+  overflow-x: hidden; /* Evita o scroll horizontal */
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+.container {
+  border: 1px solid #999;
+  color: #FAF0E6;
+  box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.3);
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.222);
+  background-color: #5C5470;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  transition: all ease .2s;
+  max-width: 600px;
+  width: 80%;
+  margin: 20px;
+}
+
+
+#app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#app-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.card {
+  max-width: 550px;
+  width: 70vw;
+  padding: 20px;
+  color: white;
+  text-align: center;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.purple-card {
+  background: #B9B4C7;
+}
+
+.blue-card {
+  background: #B9B4C7;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background-color: #5c547006;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-top: 2px solid #5C5470;
+  z-index: 1000;
+}
+
+.nav-button {
+  background: none;
+  border: 3px ;
+  color: white;
+  font-size: 14px;
+  padding: 1px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.nav-button:hover {
+  transform: scale(1.2);
+  background-color: none !important;
+  border: #aca4c0 solid 2px;
+}
+
+/* Estilos para caixas de entrada de texto */
+input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.222);
+  background-color: #27243e80;
+  color: #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  box-sizing: border-box; /* Garante que o padding não aumente a largura total */
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Sombra ao focar */
+}
+
+/* Ajusta a posição para dispositivos móveis ficar no centro */
+@media (max-width: 768px) {
+  #check-defesa {
+    justify-content: center;
+    right: 0;
+    top: 0;
+  }
+
+  #check-defesa label,
+  #check-defesa span {
+    display: none;
+  }
+}
+
+/* Estilos para caixas de seleção (checkbox) */
+input[type="checkbox"] {
+  appearance: none; /* Remove o estilo padrão do sistema operacional */
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.222);
+  background-color: #27243e80;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  top: 2.5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Sombra ao focar */
+}
+
+input[type="checkbox"]:checked {
+  background-color: #4CAF50; /* Cor de fundo quando marcado */
+  border: 1px solid #4CAF50;
+}
+
+input[type="checkbox"]:checked::after {
+  content: '✔'; /* Marca de verificação */
+  color: white;
+  font-size: 16px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+input[type="checkbox"]:focus {
+  border: 1px solid rgb(255, 255, 255);
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Sombra ao focar */
+  outline: none; /* Remove a borda de foco padrão */
+}
+
+/* Estilo quando o input está em foco */
+input:focus {
+  border: 1px solid rgb(255, 255, 255);
+  box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.3);
+  outline: none; /* Remove a borda de foco padrão */
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Sombra ao focar */
+}
+
+/* Estilo para o dropdown do select */
+select::-ms-expand {
+  display: none; /* Esconde o ícone de dropdown no Internet Explorer */
+  background-color: #3e2424;
+}
+
+select {
+  /* Estilos gerais do select */
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  color: #ccc;
+  text-align-last: center;
+  border-radius: 4px;
+  font-size: 16px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Sombra ao focar */
+  border: 1px solid rgba(255, 255, 255, 0.222);
+  background-color: #27243e80;
+  appearance: none; /* Remove o estilo padrão do sistema operacional */
+  cursor: pointer; /* Altera o cursor ao passar o mouse */
+  box-sizing: border-box; /* Garante que o padding não aumente a largura total */
+}
+
+/* Estilo para a lista suspensa das opções */
+select option {
+  border: 1px solid rgba(255, 255, 255, 0.222);
+  background-color: #28243e80;
+  color: #ccc;
+}
+
+/* Estilo quando o mouse passa por cima de uma opção */
+select option:hover {
+  background-color: #f0f0f0; /* Cor de fundo ao passar o mouse */
+  color: #000; /* Cor do texto ao passar o mouse */
+}
+
+/* Estilo quando o select está em foco */
+select:focus {
+  border: 1px solid rgba(250, 243, 243, 0.923);
+  background-color: #27243e;
+  outline: none; /* Remove a borda de foco padrão */
+  box-shadow: 0 0 5px rgba(240, 237, 237, 0.5); /* Sombra ao focar */
+}
+
+/* Estilo para o dropdown aberto */
+select:focus option:checked {
+  background-color: #07101a94; /* Cor de fundo das opções selecionadas ao focar */
+  color: #fff; /* Cor do texto das opções selecionadas ao focar */
+}
+
+
+.tabs, .subtabs {
+  display: flex;
+  cursor: pointer;
+  color: #8684a1;
+  background-color: #27254091;  
+  margin-bottom: 10px;
+}
+
+.tab, .subtab {
+  flex: 1;
+  box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.3);
+  padding: 10px;
+  background-color: #9790b390;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.222);
+  background-color: #28254091;
+  transition: all ease .2s;
+  max-width: 350px;
+}
+
+/* Ajuste para dispositivos móveis */
+@media (max-width: 400px) {
+  .tab, .subtab {
+    padding: 8px;
+    font-size: 11px !important;
+    max-width: 100%;
+  }
+}
+
+/* Ajuste para dispositivos móveis */
+@media (max-width: 768px) {
+  .tab, .subtab {
+    padding: 8px;
+    font-size: 13px;
+    max-width: 100%;
+  }
+}
+
+.tab.active, .subtab.active {
+  background-color: #7d76a6b8;
+  color: #25243e;
+  border-bottom: none;
+}
+
+.content, .subcontent {
+  border: 1px solid #bebdca6b;
+  text-align: center;
+  padding: 20px;
+  display: none;
+}
+
+.content.active, .subcontent.active {
+  display: block;
+}
+
+.status-info {
+  display: block;
+  justify-content: space-between;
+}
+
+.status-column {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+}
+
+.status-item {
+  margin: 10px;
+}
+
+.status-info2 {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.status-column2 {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+}
+
+button {
+  margin: 5px 5px;
+  padding: 10px 20px;
+  color: #29243e2f;
+  background-color: #9690b300;
+  border: 1px solid #ebe0e0;
+  border-radius: 0.5rem;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background-color 0.4s ease, transform 0.4s ease;
+}
+
+/* Pseudo-elemento para o efeito ripple */
+button::after {
+  content: "";
+  position: absolute;
+  top: var(--mouse-y, 50%);
+  left: var(--mouse-x, 50%);
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.166) 0%, transparent 60%);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
+}
+
+button:hover {
+  background-color: #9390b327;
+  transform: scale(1.05);
+}
+
+button:hover::after {
+  width: 300%;
+  height: 300%;
+  opacity: 1;
+}
+
+/* Efeito de clique: encolher um pouco */
+button:active {
+  transform: scale(0.95);
+}
+
+.collapsible {
+  cursor: pointer;
+}
+.content-collapsed {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+}
+
+.navbar {
+  background-color: #4CAF50; /* Defina a cor de fundo desejada */
+  color: white; /* Cor do texto */
+  padding: 10px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.dialog-container {
+  border: 1px solid #999999;
+  border-radius: 0.5rem;
+  color: #c9c9da;
+  box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.3);
+  padding: 20px;
+  background-color: rgba(37, 50, 64, 0.167); /* Opacidade ajustada para 80% */
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  transition: all ease 0.5s;
+  width: 80vw; /* Largura igual a 80% da largura da tela */
+  max-width: 600px; /* Largura máxima para manter o tamanho controlado */
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: fixed; /* Fixa o container na tela */
+  top: 65%; /* Ajusta a distância do topo para 70% da altura da tela */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000; /* Garante que o diálogo fique acima de outros elementos */
+  overflow: hidden; /* Garante que a rolagem é controlada pela mensagem e não pelo container */
+}
+
+.dialog-message {
+  margin-bottom: 20px;
+  text-align: center;
+  overflow-y: auto; /* Permite rolagem vertical se o texto ultrapassar o limite */
+  max-height: 110px; /* Define uma altura máxima para a área de texto */
+  width: 100%; /* Garante que o texto use toda a largura disponível */
+  padding: 5px; /* Adiciona algum preenchimento interno */
+  box-sizing: border-box; /* Inclui o padding e border no cálculo da largura e altura */
+}
+
+.dialog-buttons button {
+  margin: 5px 5px;
+  color: #24263e;
+  background-color: #9095b3;
+  border: 1px solid #e1e0eb;
+  border-radius: 0.5rem;
+  padding: 10px 20px;
+}
+
+.dialog-buttons button:hover {
+  background-color: #9390b3;
+}
+
+#blur-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(10px); /* Efeito de blur */
+  z-index: 999; /* Z-index menor que o diálogo para que fique atrás dele */
+  display: none; /* Inicialmente oculto */
+}
+
+/* Estilos para áreas de texto */
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.222);
+  background-color: #26243e80;
+  color: #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  box-sizing: border-box; /* Garante que o padding não aumente a largura total */
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Sombra ao focar */
+  resize: vertical; /* Permite redimensionar verticalmente */
+  height: auto; /* Altura inicial */
+  max-height: 550px; /* Altura máxima */
+  overflow-y: auto; /* Adiciona barra de rolagem vertical quando necessário */
+}
+
+/* Estilo quando a área de texto está em foco */
+textarea:focus {
+  border: 1px solid rgb(255, 255, 255);
+  box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.3);
+  outline: none; /* Remove a borda de foco padrão */
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Sombra ao focar */
+}
+
+/* Estilos para a aba de informações essenciais */
+#essential-info {
+  left: 6%; /* Centraliza horizontalmente */
+  transform: translate(-50%, -50%); /* Ajusta para centralizar corretamente */
+  position: fixed;
+  top: 50%; /* Posição inicial no meio da tela */
+  padding: 20px;
+  overflow-y: auto;
+  z-index: 998;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.222);
+  color: #c9c9da;
+  box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.3);
+  background-color: #2b254091;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  transition: top 0.5s ease; /* Adiciona uma transição suave para a propriedade 'top' */
+  max-width: 200px;
+  width: 50%;
+  margin: 20px;
+} 
+
+/* Estilos para a aba de informações essenciais */
+#essential-info2 {
+  left: 71.5%; /* Centraliza horizontalmente */
+  text-align: center;
+  transform: translate(-50%, -50%); /* Ajusta para centralizar corretamente */
+  position: fixed;
+  top: 50%; /* Posição inicial no meio da tela */
+  padding: 20px;
+  overflow-y: auto;
+  z-index: 998;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.222);
+  color: #c9c9da;
+  box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.3);
+  background-color: #2b254091;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  transition: top 0.5s ease; /* Adiciona uma transição suave para a propriedade 'top' */
+  max-width: 350px;
+  width: 50%;
+  margin: 20px;
+}
+
+#status-img {
+  height: 100%; /* Ajusta a altura da imagem para 100% do contêiner pai */
+  width: 100%; /* Mantém a proporção da largura */
+}
+
+#essential-info.scrolled {
+  top: 50px; /* Ajuste a posição vertical conforme necessário */
+}
+
+#essential-info2.scrolled {
+  top: 50px; /* Ajuste a posição vertical conforme necessário */
+}
+
+#essential-info.hidden {
+  display: none;
+}
+
+#essential-info2.hidden {
+  display: none;
+}
+
+#pull-up-indicator {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  border:#24243e solid 2px;
+  height: 30px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.4);
+  z-index: 9999;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#black-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.518); /* preto semi-transparente */
+  backdrop-filter: blur(8px); /* aplica o desfoque */
+  -webkit-backdrop-filter: blur(8px); /* suporte para Safari */
+  z-index: 998;
+  display: none;
+}
+
+
+
+@media (max-width: 1023px) {
+  #essential-info,
+  #essential-info2 {
+    position: fixed;
+    left: 5vw !important;
+    box-shadow: 0 -2px 10px rgba(255, 255, 255, 0.2);
+    padding: 16px;
+    z-index: 999;
+    display: none;
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    transform: translateY(100%) !important;
+    max-width: none; /* remover limite anterior */
+    width: auto;
+  }
+
+  .abas-mostradas #black-overlay {
+    display: block;
+  }  
+
+  html, body {
+    height: auto;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Aba superior (posicionada com distâncias iguais à esquerda, direita e topo) */
+  #essential-info {
+    flex-direction: column !important;
+    align-items: center;
+    top: 1vh !important;
+    left: 5vw;
+    right: 6vw;
+    height: auto;
+    z-index: 1001;
+    width: auto; /* auto para respeitar os limites de left/right */
+  }
+
+  /* Aba inferior (mesma esquerda e direita, distância inferior igual ao topo do #essential-info) */
+  #essential-info2 {
+    position: fixed;
+    top: calc(1vh + 250px) !important;
+    left: 5vw;
+    right: 6vw;
+    bottom: 5vh;
+    max-height: none; /* <<< importante para evitar conflito */
+    height: calc(100vh - (8vh + 250px) - 8vh);
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 16px;
+    box-sizing: border-box;
+    overflow: hidden;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(100%) !important;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  } 
+
+  .textarea-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  #anotacoes {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    resize: none;
+    padding: 12px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+    outline: none;
+    overflow-y: auto; /* Scroll interno */
+    max-height: 75%;
+    height: 100%;
+  }
+
+  #status-img {
+    height: 50%;
+    width: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.222);
+    border-radius: 3vw;
+  }
+
+  #essential-info .top-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  #essential-info img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  #essential-info .text-section {
+    flex: 1;
+  }
+
+  #essential-info h2 {
+    margin: 0;
+    font-size: 2.1em;
+  }
+
+  #essential-info h4 {
+    margin: 4px 0 0;
+    font-size: 1.5em;
+    font-weight: normal;
+  }
+
+  .status-item {
+    margin-bottom: 10px;
+  }
+
+  .status-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7em;
+  }
+
+  .status-bar {
+    width: 100%;
+    height: 10px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  .abas-mostradas #essential-info,
+  .abas-mostradas #essential-info2 {
+    display: block;
+    transform: translateY(0) !important;
+    opacity: 1;
+  }
+}
+
+
+.item-icon {
+  width: 50px;
+  height: 50px;
+  object-fit: cover; /* Garante que a imagem preencha o espaço sem distorcer */
+}
+ 
+/* Estilos para o toggle switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+/* Esconde o checkbox padrão */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Estilo do slider inspirado na checkbox */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #27243e80; /* Mesmo fundo da checkbox */
+  border: 1px solid rgba(255, 255, 255, 0.222); /* Mesma borda */
+  border-radius: 4px; /* Mesma borda arredondada */
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Sombra semelhante */
+  transition: 0.4s;
+}
+
+/* Círculo interno (knob) */
+.slider:before {
+  content: "";
+  position: absolute;
+  height: 20px; /* Tamanho similar ao da checkbox */
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.4s;
+}
+
+/* Quando marcado, utiliza a cor da checkbox marcada */
+.switch input:checked + .slider {
+  background-color: #4CAF50;
+  border: 1px solid #4CAF50;
+}
+
+/* Move o knob para a direita quando marcado */
+.switch input:checked + .slider:before {
+  transform: translateX(26px); /* Ajuste: 50px (largura total) - 20px (knob) - 4px (margens) */
+}
+
+/* Efeito de foco, utilizando a mesma lógica da checkbox */
+.switch input:focus + .slider {
+  border: 1px solid rgb(255, 255, 255);
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+  outline: none;
+}
+
+/* Estilo para a label do toggle */
+.toggle-label {
+  font-family: sans-serif;
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.slider-container .inventory-item {
+  flex: 0 0 auto;
+  width: 80px;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid #dbdbeb7f;
+  border-radius: 4px;
+  padding: 5px;
+  background-color: #31356340;
+}
+
+.slider-container .inventory-item img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 5px;
+}
+
+.slider-container .inventory-item p {
+  font-size: 12px;
+  margin: 0;
+}
+
+.slider-container .inventory-item.selected {
+  border: 2px solid #4CAF50;
+  background-color: #e6ffe6;
+}
+
+
+/* Custom scrollbar styles */
+.slider-container::-webkit-scrollbar {
+  height: 12px;
+}
+
+.slider-container::-webkit-scrollbar-track {
+  background: #aaaaba;
+  border-radius: 4px;
+}
+
+.slider-container::-webkit-scrollbar-thumb {
+  background: #7e7b96;
+  border-radius: 4px;
+}
+
+.slider-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+#popup-alert {
+  position: fixed;
+  top: -100px;             /* Inicia fora da tela (acima) */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(37, 50, 64, 0.568); /* Opacidade ajustada para 80% */
+  border: 1px solid #999999;
+  border-radius: 0.5rem;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  transition: all ease 0.5s;
+  color: #c9c9da;
+  box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.3);
+  padding: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  opacity: 0;
+  z-index: 1100;
+  transition: top 0.5s ease, opacity 0.5s ease;
+}
+
+/* Classe para mostrar o popup */
+#popup-alert.show {
+  top: 10px;               /* Desce até 20px do topo */
+  opacity: 1;
+}
+
+/* Classe para esconder o popup (fade out) */
+#popup-alert.hide {
+  opacity: 0;
+}
+
