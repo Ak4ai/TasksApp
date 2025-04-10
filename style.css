@@ -2,7 +2,7 @@ html, body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  background-color: #14161c; /* Cor de fundo */
+  background-color: #121318; /* Cor de fundo */
   overflow-x: hidden; /* Evita o scroll horizontal */
 }
 
@@ -18,7 +18,7 @@ body {
 
 .container {
   color: #FAF0E6;
-  background-color: #14161c;
+  background-color: #121318;
   -webkit-backdrop-filter: blur(20px);
   border: #00000003 solid 2px;
   backdrop-filter: blur(20px);
@@ -74,7 +74,7 @@ body {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  border-top: 2px solid #32313b00;
+  border-top: 2px solid #32313b02;
   z-index: 1000;
 }
 
@@ -93,6 +93,40 @@ body {
   background-color: none !important;
   border: #aca4c0 solid 2px;
 }
+
+.top-info-bar {
+  background-color: #1f1f2e00;
+  color: #f0f0f0;
+  display: flex;
+  justify-content: space-around;
+  padding-bottom: 3px;
+  padding-top: 1px;
+  align-items: center;
+  font-size: 3vw;
+  border-bottom: 1px solid #333;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  font-family: sans-serif;
+}
+
+.next-event{
+  color: #ffffff;
+  text-align: center;
+  margin: 0 5px;
+  background-color: #222a39;
+  padding: 5px;
+  border-radius: 3cap;
+}
+
+.top-info-bar span {
+  margin: 0 5px;
+  white-space: nowrap;
+}
+
+/* ESTILOS NAO USADOS */
 
 /* Estilos para caixas de entrada de texto */
 input {
