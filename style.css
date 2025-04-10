@@ -881,15 +881,17 @@ textarea:focus {
   opacity: 0;
 }
 
-.ios-safe .top-info-bar {
-  padding-top: calc(env(safe-area-inset-top, 10px) + 5px);
-}
-
-.ios-safe body {
+body.ios-pwa {
   padding-top: calc(env(safe-area-inset-top, 10px) + 50px);
   padding-bottom: calc(env(safe-area-inset-bottom, 10px) + 60px);
 }
 
-.ios-safe .bottom-nav {
+/* Ajuste para a barra superior */
+body.ios-pwa .top-info-bar {
+  padding-top: calc(env(safe-area-inset-top, 10px) + 5px);
+}
+
+/* Ajuste para a barra inferior */
+body.ios-pwa .bottom-nav {
   padding-bottom: env(safe-area-inset-bottom, 10px);
 }

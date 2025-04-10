@@ -273,8 +273,15 @@ function atualizarIconeIndicador() {
 }
   
 document.addEventListener('DOMContentLoaded', function () {
-    const iOS = /iP(hone|od|ad)/.test(navigator.userAgent) && !window.MSStream;
-    if (iOS) {
-        document.body.classList.add('ios-safe');
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone = window.navigator.standalone === true;
+
+    if (isIOS && isStandalone) {
+        document.body.classList.add('ios-pwa');
+        console.log('Aplicativo PWA em execução no iOS');
+    }
+    else {
+        document.body.classList.remove('ios-pwa');
+        console.log('Aplicativo PWA não está em execução no iOS ou não é um aplicativo instalado');
     }
 });
