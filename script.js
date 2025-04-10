@@ -278,10 +278,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (isIOS && isStandalone) {
         document.body.classList.add('ios-pwa');
-        console.log('Aplicativo PWA em execução no iOS');
+        mostrarMensagem('Aplicativo PWA em execução no iOS');
     }
     else {
         document.body.classList.remove('ios-pwa');
-        console.log('Aplicativo PWA não está em execução no iOS ou não é um aplicativo instalado');
+        mostrarMensagem('Aplicativo PWA não está em execução no iOS ou não é um aplicativo instalado');
     }
 });
