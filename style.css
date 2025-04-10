@@ -2,7 +2,7 @@ html, body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  background-color: #352F44; /* Cor de fundo */
+  background-color: #121318; /* Cor de fundo */
   overflow-x: hidden; /* Evita o scroll horizontal */
 }
 
@@ -18,9 +18,9 @@ body {
 
 .container {
   color: #FAF0E6;
-  background-color: #352F44;
+  background-color: #121318;
   -webkit-backdrop-filter: blur(20px);
-  border: #000000 solid 2px;
+  border: #00000003 solid 2px;
   backdrop-filter: blur(20px);
   transition: all ease .2s;
   height: 100%;
@@ -57,11 +57,11 @@ body {
 }
 
 .purple-card {
-  background: #B9B4C7;
+  background: #32313b;
 }
 
 .blue-card {
-  background: #B9B4C7;
+  background: #32313b;
 }
 
 .bottom-nav {
@@ -70,11 +70,11 @@ body {
   left: 0;
   right: 0;
   height: 40px;
-  background-color: #352F44;
+  background-color: #121318;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  border-top: 2px solid #5C5470;
+  border-top: 2px solid #32313b;
   z-index: 1000;
 }
 
@@ -458,7 +458,7 @@ textarea:focus {
   border: 1px solid rgba(255, 255, 255, 0.222);
   color: #c9c9da;
   box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.3);
-  background-color: #2b254091;
+  background-color: #32313b;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   transition: top 0.5s ease; /* Adiciona uma transição suave para a propriedade 'top' */
@@ -481,7 +481,7 @@ textarea:focus {
   border: 1px solid rgba(255, 255, 255, 0.222);
   color: #c9c9da;
   box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.3);
-  background-color: #2b254091;
+  background-color: #32313b;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   transition: top 0.5s ease; /* Adiciona uma transição suave para a propriedade 'top' */

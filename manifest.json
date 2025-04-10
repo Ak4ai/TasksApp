@@ -4,8 +4,8 @@
     "description": "Descrição do seu projeto",
     "start_url": "/TasksApp/",
     "display": "standalone",
-    "background_color": "#352F44",
-    "theme_color": "#352F44",
+    "background_color": "#121318",
+    "theme_color": "#121318",
     "orientation": "portrait",
     "icons": [
       {
