@@ -273,18 +273,24 @@ function atualizarIconeIndicador() {
 }
   
 document.addEventListener('DOMContentLoaded', function () {
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent.toLowerCase());
+    const isIOS = isIOSDevice();
     const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
     if (isIOS && isInStandaloneMode) {
         document.body.classList.add('ios-pwa');
-        mostrarMensagem('✅ PWA em execução no iOS (modo standalone)');
+        mostrarMensagem('✅ PWA em execução no iOS/iPadOS (modo standalone)');
     } else if (isIOS) {
-        mostrarMensagem('⚠️ PWA em execução no iOS (não em modo standalone)');
-    } else if (window.matchMedia('(display-mode: standalone)').matches) {
+        mostrarMensagem('⚠️ PWA em execução no iOS/iPadOS (não em modo standalone)');
+    } else if (isInStandaloneMode) {
         document.body.classList.add('pwa');
-        mostrarMensagem('✅ PWA em execução (modo standalone)');
+        mostrarMensagem('✅ PWA em execução (modo standalone em outro SO)');
     } else {
         mostrarMensagem('⚠️ PWA não está em modo standalone');
     }
 });
+
+function isIOSDevice() {
+    const ua = navigator.userAgent.toLowerCase();
+    return /iphone|ipod|ipad/.test(ua) || 
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
