@@ -2,7 +2,7 @@
     "name": "Tasks App",
     "short_name": "Tasks",
     "description": "Descrição do seu projeto",
-    "start_url": "/Tasks/",
+    "start_url": "/TasksApp/",
     "display": "standalone",
     "background_color": "#29243e",
     "theme_color": "#29243e",
