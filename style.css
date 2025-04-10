@@ -18,12 +18,11 @@ body {
 
 .container {
   color: #FAF0E6;
-  box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.3);
   background-color: #352F44;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   transition: all ease .2s;
-  height: 100vh;
+  height: 100%;
   z-index: 1;
   width: 100vw;
 }
