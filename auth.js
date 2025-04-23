@@ -1,7 +1,7 @@
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { app } from './firebase-config.js';
 // auth.js
-import { carregarTarefas } from './tarefas.js';
+import { carregarTarefas, atualizarDataAtual } from './tarefas.js';
 
 
 const auth = getAuth(app);
@@ -24,6 +24,7 @@ setPersistence(auth, browserLocalPersistence).then(() => {
           if (!jaCarregouTarefas) {
               carregarTarefas();
               jaCarregouTarefas = true;
+              atualizarDataAtual();
           }
       } else {
           loginContainer.style.display = 'flex';
@@ -49,5 +50,7 @@ function loginComGoogle() {
       alert("Erro ao fazer login com Google");
     });
 }
+
+setInterval(atualizarDataAtual, 60 * 60 * 1000);
 
 export { auth };

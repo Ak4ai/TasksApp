@@ -57,6 +57,11 @@ body {
   border-radius: 8px;
   font-size: 18px;
   font-weight: bold;
+  
+  border: #ccc solid 2px;
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 .purple-card {
@@ -79,6 +84,10 @@ body {
   align-items: center;
   border-top: 2px solid #32313b02;
   z-index: 1000;
+  
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 .nav-button {
@@ -89,6 +98,11 @@ body {
   padding: 1px;
   cursor: pointer;
   transition: transform 0.2s ease;
+
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE/Edge */
+  
 }
 
 .nav-button:hover {
@@ -315,6 +329,10 @@ button {
   overflow: hidden;
   cursor: pointer;
   transition: background-color 0.4s ease, transform 0.4s ease;
+  
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 /* Pseudo-elemento para o efeito ripple */
@@ -335,6 +353,10 @@ button::after {
 button:hover {
   background-color: #9390b327;
   transform: scale(1.05);
+  
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 button:hover::after {
@@ -408,6 +430,9 @@ button:active {
   border: 1px solid #e1e0eb;
   border-radius: 0.5rem;
   padding: 10px 20px;
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 .dialog-buttons button:hover {
@@ -739,6 +764,9 @@ body.ios-pwa .bottom-nav {
   background-color: #121318; /* Cor de fundo */
   color: #FAF0E6; /* Cor do texto */
   z-index: 100000;
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 .blue-card p{
@@ -746,13 +774,22 @@ body.ios-pwa .bottom-nav {
   text-align: center;
   border: #ccc solid 2px;
   border-radius: 3rem;
+  border-radius: 1rem;
+  padding: 10px;
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 .purple-card p{
   color: #FAF0E6; /* Cor do texto */
   text-align: center;
   border: #ccc solid 2px;
-  border-radius: 3rem;
+  border-radius: 1rem;
+  padding: 10px;
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 .modal {
@@ -774,7 +811,7 @@ body.ios-pwa .bottom-nav {
   color: white;
   padding: 20px;
   border-radius: 12px;
-  width: 90%;
+  width: 80%;
   max-width: 400px;
   box-shadow: 0 0 15px rgba(0,0,0,0.5);
   position: relative;
