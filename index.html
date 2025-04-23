@@ -1,84 +1,84 @@
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-        <link rel="icon" type="image/png" href="android-icon-192x192.png">
-        <link rel="manifest" href="manifest.json">
-        <link rel="stylesheet" href="style.css?v=1.0.7">
-        <meta charset="UTF-8">
-        <meta name="theme-color" content="#121318"> <!-- Android -->
-        <meta name="background-color" content="#121318"> <!-- iOS -->
-        <meta name="color-scheme" content="light">
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-        <title>Tasks</title>
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- iOS -->
-    </head>
-    <body>
-        <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-            navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
-                console.log('ServiceWorker registration successful with scope: ', registration.scope);
-            }, function(error) {
-                console.log('ServiceWorker registration failed: ', error);
-            });
-            });
-        }
-        </script>
-        <div id="blur-background"></div>
-        <div id="popup-alert">
-            <span id="popup-alert-text"></span>
-        </div>  
-        <div id="custom-dialog" class="dialog-container" style="display: none;">
-            <div class="dialog-message" id="dialog-message"></div>
-            <div class="dialog-buttons">
-                <button id="dialog-ok-button">OK</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#121318" />
+  <meta name="background-color" content="#121318" />
+  <meta name="color-scheme" content="light" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Tasks</title>
+
+  <link rel="icon" type="image/png" href="android-icon-192x192.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css?v=1.0.7" />
+
+  <!-- Markdown-it (usado no app) -->
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+
+  <!-- Firebase SDK (modular) -->
+  <script type="module" src="firebase-config.js"></script>
+  <script type="module" src="auth.js"></script>
+</head>
+<body>
+  <div id="login-container" style="display: none;">
+    <h2>Login with Google</h2>
+    <button id="login-button">Login with Google</button>
+  </div>
+  <div id="blur-background"></div>
+  <div id="popup-alert"><span id="popup-alert-text"></span></div>  
+  <div id="custom-dialog" class="dialog-container" style="display: none;">
+    <div class="dialog-message" id="dialog-message"></div>
+    <div class="dialog-buttons"><button id="dialog-ok-button">OK</button></div>
+  </div>
+  <div id="pull-up-indicator"></div>
+  <div id="black-overlay"></div>
+
+  <div id="deviceready" class="blink"></div>
+  <div class="bottom-nav">
+    <button class="nav-button">🏠</button>
+    <button id="criar-button" class="nav-button">📋</button>
+    <button class="nav-button">⚙️</button>
+  </div>     
+  <div class="top-info-bar">
+    <span class="user-name">👤</span>
+    <span class="current-day">📅</span>
+    <span class="next-event">⏰</span>
+  </div>           
+  <div class="container">
+    <div id="app">
+      <div id="app-body">
+        <div class="card purple-card">
             </div>
+        <div class="card blue-card">
         </div>
-        <div id="pull-up-indicator"></div>
-        <div id="black-overlay"></div>
-        <div id="essential-info" class="hidden">
-            <div class="top-section">
-                <img id="status-img" alt="Essential Info Image">
-                <div class="text-section">
-                    <h2 id="status-nome"></h2>
-                    <h4>Status Base:</h4>
-                </div>
-            </div>
-        </div>         
-        <div id="essential-info2" class="hidden">
-            <h3>Anotações:</h3>
-            <div class="textarea-wrapper">
-            <textarea id="anotacoes" placeholder="Escreva suas anotações aqui..." onchange="salvarAnotacoes()"></textarea>
-            </div>
-        </div>         
-        <div id="deviceready" class="blink"></div>
-        <div class="bottom-nav">
-            <button class="nav-button">🏠</button>
-            <button class="nav-button">📋</button>
-            <button class="nav-button">⚙️</button>
-        </div>     
-        <div class="top-info-bar">
-            <span class="user-name">👤 Lumién Byron</span>
-            <span class="current-day">📅 Quinta-feira, 10 de Abril de 2025</span>
-            <span class="next-event">03:45:12</span>
-        </div>           
-        <div class="container">
-            <div id="app">
-                <div id="app-body">
-                    <div class="card purple-card">
-                        <p>TAREFAS</p>
-                        <p>REALIZADAS</p>
-                        <p>ALARMES</p>
-                    </div>
-                    <div class="card blue-card">
-                        <p>TAREFAS</p>
-                        <p>PARA REALIZAR</p>
-                    </div>
-                </div>
-            </div>
+      </div>
+    </div>
+  </div>
+    <!-- Modal para criar tarefa -->
+    <div id="modal-criar-tarefa" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-button" id="fechar-modal">&times;</span>
+            <h2>Nova Tarefa</h2>
+            <input type="text" id="descricao" placeholder="Descrição da tarefa" />
+            <input type="datetime-local" id="dataLimite" />
+            <button id="botao-criar-tarefa">Criar tarefa</button>
         </div>
-        <script src="google.js?v=1.0.12" defer></script>     
-        <script src="script.js?v=1.0.10" defer></script>    
-        <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>  
-    </body>
+    </div>
+    
+  <!-- Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => console.log('ServiceWorker registrado:', reg.scope))
+          .catch(err => console.error('Erro no ServiceWorker:', err));
+      });
+    }
+  </script>
+
+  <!-- Seu script principal -->
+  <script type="module" src="script.js?v=1.0.10"></script>
+  <script type="module" src="tarefas.js?v=1.0.10"></script>
+</body>
 </html>
