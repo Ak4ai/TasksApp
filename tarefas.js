@@ -1,9 +1,10 @@
 import { auth } from './auth.js';
 import { db } from './firebase-config.js';
-import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { collection, getDocs, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 
 let carregandoTarefas = false;
-let tempoMaisRecente = null; // <- variável global exportável
+let tempoMaisRecente = null;
+let intervaloContador = null;
 
 async function carregarTarefas() {
     if (carregandoTarefas) return;
@@ -20,72 +21,98 @@ async function carregarTarefas() {
     const tarefasRef = collection(db, "usuarios", usuario.uid, "tarefas");
     const snapshot = await getDocs(tarefasRef);
     const agora = new Date();
-
     const tarefas = [];
 
-    snapshot.forEach(doc => {
-        const tarefa = doc.data();
-        const dataLimite = tarefa.dataLimite?.toDate 
-            ? tarefa.dataLimite.toDate() 
-            : new Date(tarefa.dataLimite);
-        tarefas.push({ ...tarefa, dataLimite });
+    snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const dataLimite = data.dataLimite?.toDate
+            ? data.dataLimite.toDate()
+            : new Date(data.dataLimite);
+        tarefas.push({ id: docSnap.id, descricao: data.descricao, dataLimite });
     });
 
-    // Ordenar pela data mais próxima
+    // Ordena e filtra futuras
     tarefas.sort((a, b) => a.dataLimite - b.dataLimite);
+    const tarefasFuturas = tarefas.filter(t => t.dataLimite >= agora);
+    tempoMaisRecente = tarefasFuturas.length ? tarefasFuturas[0].dataLimite : null;
 
-    // Salvar o tempo da tarefa mais urgente (se existir)
-    if (tarefas.length > 0) {
-        tempoMaisRecente = tarefas[0].dataLimite;
-    }
+    atualizarContadorProximaTarefa();
 
-    // Adicionar as tarefas ao card correspondente
-    tarefas.forEach(tarefa => {
-        if (tarefa.dataLimite < agora) {
-            adicionarNaCard(tarefa, 'purple-card', tarefa.dataLimite);
+    tarefas.forEach(t => {
+        if (t.dataLimite < agora) {
+            adicionarNaCard(t, 'purple-card');
         } else {
-            adicionarNaCard(tarefa, 'blue-card', tarefa.dataLimite);
+            adicionarNaCard(t, 'blue-card');
         }
     });
 
     carregandoTarefas = false;
-
-    // Depois de definir tempoMaisRecente
-    if (tarefas.length > 0) {
-        tempoMaisRecente = tarefas[0].dataLimite;
-        atualizarContadorProximaTarefa(); // 👈 Aqui
-    }
-
 }
 
 function limparCards() {
-    document.querySelector('.blue-card').innerHTML = `
-        <span class="card-title">TAREFAS A REALIZAR</span>    
-    `;
-    document.querySelector('.purple-card').innerHTML = `
-        <span class="card-title">TAREFAS REALIZADAS</span>    
-    `;
+    document.querySelector('.blue-card').innerHTML = '<span class="card-title">TAREFAS A REALIZAR</span>';
+    document.querySelector('.purple-card').innerHTML = '<span class="card-title">TAREFAS REALIZADAS</span>';
 }
 
-function adicionarNaCard(tarefa, cardClass, dataLimite) {
+function adicionarNaCard(tarefa, cardClass) {
     const card = document.querySelector(`.${cardClass}`);
-    const tarefaId = `${tarefa.descricao}-${dataLimite.toISOString()}`;
+    if (card.querySelector(`[data-id="${tarefa.id}"]`)) return;
 
-    // Verifica se já existe
-    if (card.querySelector(`[data-id="${tarefaId}"]`)) return;
+    const p = document.createElement('p');
+    const dataFormatada = tarefa.dataLimite.toLocaleDateString('pt-BR');
+    const horaFormatada = tarefa.dataLimite.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 
-    const p = document.createElement("p");
-    p.textContent = tarefa.descricao + " - até " + dataLimite.toLocaleDateString();
-    p.setAttribute("data-id", tarefaId);
+    p.textContent = `${tarefa.descricao} - até ${dataFormatada} às ${horaFormatada}`;
+    p.setAttribute('data-id', tarefa.id);
+    p.addEventListener('click', () => abrirModalEdicao(tarefa));
 
     card.appendChild(p);
 }
 
-let intervaloContador = null;
+async function atualizarTarefaNoFirestore(id, descricao, dataLimite) {
+    const usuario = auth.currentUser;
+    const refDoc = doc(db, "usuarios", usuario.uid, "tarefas", id);
+    await updateDoc(refDoc, { descricao, dataLimite });
+}
+
+async function excluirTarefaDoFirestore(id) {
+    const usuario = auth.currentUser;
+    const refDoc = doc(db, "usuarios", usuario.uid, "tarefas", id);
+    await deleteDoc(refDoc);
+}
+
+function abrirModalEdicao(tarefa) {
+    const modal = document.getElementById('modal-tarefa');
+    modal.style.display = 'flex';
+
+    document.getElementById('editar-descricao').value = tarefa.descricao;
+    document.getElementById('editar-dataLimite').value = tarefa.dataLimite.toISOString().slice(0,16);
+
+    document.getElementById('salvar-edicao').onclick = async () => {
+        const novaDesc = document.getElementById('editar-descricao').value;
+        const novaData = new Date(document.getElementById('editar-dataLimite').value);
+        await atualizarTarefaNoFirestore(tarefa.id, novaDesc, novaData);
+        modal.style.display = 'none';
+        carregarTarefas();
+    };
+
+    document.getElementById('excluir-tarefa').onclick = async () => {
+        await excluirTarefaDoFirestore(tarefa.id);
+        modal.style.display = 'none';
+        carregarTarefas();
+    };
+
+    document.getElementById('fechar-modal-editar').onclick = () => {
+        modal.style.display = 'none';
+    };
+}
 
 function atualizarContadorProximaTarefa() {
     const span = document.querySelector('.next-event');
-    if (!tempoMaisRecente || !(tempoMaisRecente instanceof Date)) {
+    if (!tempoMaisRecente) {
         span.textContent = '⏰ Nenhuma tarefa pendente';
         return;
     }
@@ -93,42 +120,27 @@ function atualizarContadorProximaTarefa() {
     function atualizar() {
         const agora = new Date();
         const diff = tempoMaisRecente - agora;
-
         if (diff <= 0) {
             span.textContent = '⏰ Tarefa vencida!';
             clearInterval(intervaloContador);
             return;
         }
-
-        const horas = Math.floor(diff / (1000 * 60 * 60));
-        const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const segundos = Math.floor((diff % (1000 * 60)) / 1000);
-
+        const horas = Math.floor(diff / (1000*60*60));
+        const minutos = Math.floor((diff % (1000*60*60))/(1000*60));
+        const segundos = Math.floor((diff % (1000*60))/1000);
         span.textContent = `⏰ ${horas}h ${minutos}m ${segundos}s`;
     }
 
-    // Atualiza agora e inicia intervalo
     atualizar();
-    clearInterval(intervaloContador); // Limpa contador anterior se existir
+    clearInterval(intervaloContador);
     intervaloContador = setInterval(atualizar, 1000);
 }
 
 function atualizarDataAtual() {
     const span = document.querySelector('.current-day');
     const agora = new Date();
-
-    const opcoes = {
-        weekday: 'long',    // Segunda-feira
-        day: 'numeric',     // 23
-        month: 'numeric',      // Abril
-        year: 'numeric'     // 2025
-    };
-
-    // Exibe: 📅 quarta-feira, 23 de abril de 2025
-    span.textContent = '📅 ' + agora.toLocaleDateString('pt-BR', opcoes).replace(/^\w/, c => c.toUpperCase());
+    const opcoes = { weekday: 'long', day: 'numeric', month: 'numeric', year: 'numeric' };
+    span.textContent = '📅 ' + agora.toLocaleDateString('pt-BR', opcoes).replace(/^\w/, c=>c.toUpperCase());
 }
 
-
-
-export { carregarTarefas, tempoMaisRecente };
-export { atualizarDataAtual }; // <- exporta a função para uso em auth.js
+export { carregarTarefas, tempoMaisRecente, atualizarDataAtual };
