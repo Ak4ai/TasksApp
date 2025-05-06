@@ -10,8 +10,8 @@ const filaDeMensagens = [];
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    const mensagemDeBoasVindas = "Bem-vindo ao sistema!";
-    mostrarMensagem(mensagemDeBoasVindas);
+    // const mensagemDeBoasVindas = "Bem-vindo ao sistema!";
+    // mostrarMensagem(mensagemDeBoasVindas);
 
     document.getElementById('botao-criar-tarefa').addEventListener('click', () => {
         console.log("Botão Criar Tarefa clicado!");
@@ -133,4 +133,149 @@ document.getElementById('fechar-modal').addEventListener('click', () => {
     document.getElementById('modal-criar-tarefa').style.display = 'none';
 });
   
+// script.js
+import { atualizarDataAtual } from './tarefas.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+  atualizarDataAtual();
+  // configura tabs
+  document.querySelectorAll('.bottom-nav .nav-button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const alvo = btn.dataset.tab;
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.getElementById(alvo).classList.add('active');
+      document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (alvo === 'tab-tasks') {
+        carregarTarefas();
+      }
+    });
+  });
+  // inicializa na home
+  document.querySelector('.nav-button[data-tab="tab-home"]').click();
+});
+
+// ===== Swipe para trocar de aba =====
+let touchStartX = 0;
+let touchEndX = 0;
+const minSwipeDistance = 50; // distância mínima em px para considerar swipe
+
+// Captura início do toque
+document.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].screenX;
+}, false);
+
+// Captura fim do toque e trata o swipe
+document.addEventListener('touchend', e => {
+  touchEndX = e.changedTouches[0].screenX;
+  handleSwipe();
+}, false);
+
+function handleSwipe() {
+  const deltaX = touchEndX - touchStartX;
+  if (Math.abs(deltaX) < minSwipeDistance) return; // muito curto, ignora
+
+  // Lista de botões de navegação na ordem visual
+  const navButtons = Array.from(document.querySelectorAll('.bottom-nav .nav-button'));
+  const activeBtn = document.querySelector('.bottom-nav .nav-button.active');
+  let idx = navButtons.indexOf(activeBtn);
+
+  if (deltaX < 0) {
+    // swipe para a esquerda → avançar aba
+    idx = (idx + 1) % navButtons.length;
+  } else {
+    // swipe para a direita → voltar aba
+    // idx = (idx - 1 + navButtons.length) % navButtons.length;
+  }
+
+  navButtons[idx].click(); // dispara o clique, mantendo seu carregamento de tarefas
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    let startX = 0;
+    let isAtLeftEdge = false;
+    const indicator = document.getElementById('pull-up-indicator');
+  
+    if (!indicator) return;
+  
+    // Ajuste o CSS do indicador para ficar na esquerda/vertical centralizado:
+    // #pull-up-indicator {
+    //   position: fixed;
+    //   left: 0;
+    //   top: 50%;
+    //   transform: translateY(-50%) scale(0.8);
+    //   opacity: 0;
+    //   transition: transform 0.2s ease, opacity 0.2s ease;
+    // }
+  
+    window.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+      const windowWidth = window.innerWidth;
+      // região de início: primeiros 20% da largura
+      const leftThreshold = windowWidth * 0.2;
+  
+      if (startX > leftThreshold) {
+        isAtLeftEdge = false;
+        indicator.style.opacity = '0';
+        return;
+      }
+  
+      isAtLeftEdge = true;
+      indicator.style.opacity = '1';
+    });
+  
+    window.addEventListener('touchmove', (e) => {
+      if (!isAtLeftEdge) return;
+  
+      const currentX = e.touches[0].clientX;
+      const distance = currentX - startX;  // positiva para a direita
+  
+      if (distance > 0 && distance < 100) {
+        // move o indicador para a direita à medida que arrasta
+        indicator.style.transform =
+          `translateY(-50%) translateX(${distance / 2}px) scale(${1 + distance / 200})`;
+        indicator.style.opacity = `${Math.min(1, distance / 50)}`;
+      }
+    });
+  
+    window.addEventListener('touchend', (e) => {
+      const endX = e.changedTouches[0].clientX;
+      const swipeDistance = endX - startX;
+  
+      // reset visual
+      indicator.style.opacity = '0';
+      indicator.style.transform = 'translateY(-50%) scale(0.8)';
+  
+      // aciona ação se arrastou > 280px da borda esquerda
+      if (isAtLeftEdge && swipeDistance > 280) {
+        document.body.classList.add('abas-mostradas');
+      }
+    });
+});
   

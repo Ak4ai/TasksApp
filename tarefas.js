@@ -113,7 +113,7 @@ function abrirModalEdicao(tarefa) {
 function atualizarContadorProximaTarefa() {
     const span = document.querySelector('.next-event');
     if (!tempoMaisRecente) {
-        span.textContent = '⏰ Nenhuma tarefa pendente';
+        span.textContent = '⏰ N/a';
         return;
     }
 

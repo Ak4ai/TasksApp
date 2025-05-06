@@ -21,65 +21,88 @@
   <script type="module" src="auth.js"></script>
 </head>
 <body>
-  <div id="login-container" style="display: flex;">
+  <!-- LOGIN -->
+  <div id="login-container" style="display: none;">
     <h2>Login with Google</h2>
     <button id="login-button">Login with Google</button>
   </div>
+
+  <!-- BLUR & POPUPS -->
+  <div id="pull-up-indicator"></div>
   <div id="blur-background"></div>
   <div id="popup-alert"><span id="popup-alert-text"></span></div>  
   <div id="custom-dialog" class="dialog-container" style="display: none;">
     <div class="dialog-message" id="dialog-message"></div>
-    <div class="dialog-buttons"><button id="dialog-ok-button">OK</button></div>
+    <div class="dialog-buttons">
+      <button id="dialog-ok-button">OK</button>
+    </div>
   </div>
-  <div id="pull-up-indicator"></div>
-  <div id="black-overlay"></div>
 
-  <div id="deviceready" class="blink"></div>
-  <div class="bottom-nav">
-    <button class="nav-button">🏠</button>
-    <button id="criar-button" class="nav-button">📋</button>
-    <button class="nav-button">⚙️</button>
-  </div>     
+  <!-- MODAIS -->
+  <div id="modal-criar-tarefa" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close-button" id="fechar-modal">&times;</span>
+      <h2>Nova Tarefa</h2>
+      <input type="text" id="descricao" placeholder="Descrição da tarefa" />
+      <input type="datetime-local" id="dataLimite" />
+      <button id="botao-criar-tarefa">Criar tarefa</button>
+    </div>
+  </div>
+  <div id="modal-tarefa" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span id="fechar-modal-editar" class="close-button">&times;</span>
+      <h2>Editar Tarefa</h2>
+      <input type="text" id="editar-descricao" placeholder="Descrição da tarefa" />
+      <input type="datetime-local" id="editar-dataLimite" />
+      <button id="salvar-edicao">Salvar</button>
+      <button id="excluir-tarefa" class="danger">Excluir</button>
+    </div>
+  </div>
+
+  <!-- BARRA SUPERIOR -->
   <div class="top-info-bar">
     <span class="user-name">👤</span>
     <span class="current-day">📅</span>
     <span class="next-event">⏰</span>
-  </div>           
-  <div class="container">
-    <div id="app">
-      <div id="app-body">
-        <div class="card purple-card">
-            </div>
-        <div class="card blue-card">
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <!-- Aba Home -->
+    <div id="tab-home" class="tab-content active">
+      <h1>Bem‑vindo ao Tasks!</h1>
+    </div>
+
+    <!-- Aba Tarefas -->
+    <div id="tab-tasks" class="tab-content">
+      <div id="app">
+        <button id="criar-button">Criar Tarefa</button>
+        <div id="app-body">
+          <div class="card purple-card">
+            <span class="card-title">TAREFAS REALIZADAS</span>
+          </div>
+          <div class="card blue-card">
+            <span class="card-title">TAREFAS A REALIZAR</span>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Aba Configurações -->
+    <div id="tab-settings" class="tab-content">
+      <h2>Configurações</h2>
+      <!-- Exemplo: botão de logout, tema, etc. -->
+      <button id="logout-button">Logout</button>
+    </div>
   </div>
-    <!-- Modal para criar tarefa -->
-    <div id="modal-criar-tarefa" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close-button" id="fechar-modal">&times;</span>
-            <h2>Nova Tarefa</h2>
-            <input type="text" id="descricao" placeholder="Descrição da tarefa" />
-            <input type="datetime-local" id="dataLimite" />
-            <button id="botao-criar-tarefa">Criar tarefa</button>
-        </div>
-    </div>
-    <!-- Remova o segundo fechar-modal duplicado e o class="hidden" -->
-    <div id="modal-tarefa" class="modal" style="display: none;">
-        <div class="modal-content">
-        <!-- botão de fechar com novo id -->
-        <span id="fechar-modal-editar" class="close-button">&times;</span>
-        <h2>Editar Tarefa</h2>
-        <input type="text" id="editar-descricao" placeholder="Descrição da tarefa">
-        <input type="datetime-local" id="editar-dataLimite">
-        <button id="salvar-edicao">Salvar</button>
-        <button id="excluir-tarefa" class="danger">Excluir</button>
-        </div>
-    </div>
-  
-      
-    
+
+  <!-- NAVEGAÇÃO INFERIOR -->
+  <div class="bottom-nav">
+    <button class="nav-button" data-tab="tab-home">🏠</button>
+    <button class="nav-button" data-tab="tab-tasks">📋</button>
+    <button class="nav-button" data-tab="tab-settings">⚙️</button>
+  </div>
+
   <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
@@ -91,7 +114,7 @@
     }
   </script>
 
-  <!-- Seu script principal -->
+  <!-- SCRIPTS PRINCIPAIS -->
   <script type="module" src="script.js?v=1.0.10"></script>
   <script type="module" src="tarefas.js?v=1.0.10"></script>
 </body>

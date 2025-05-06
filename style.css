@@ -95,27 +95,6 @@ body {
   -ms-user-select: none; /* IE/Edge */
 }
 
-.nav-button {
-  background: none;
-  border: 3px ;
-  color: white;
-  font-size: 14px;
-  padding: 1px;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-
-  user-select: none;
-  -webkit-user-select: none; /* Safari */
-  -ms-user-select: none; /* IE/Edge */
-  
-}
-
-.nav-button:hover {
-  transform: scale(1.2);
-  background-color: none !important;
-  border: #aca4c0 solid 2px;
-}
-
 .top-info-bar {
   background-color: #1f1f2e00;
   color: #f0f0f0;
@@ -259,31 +238,46 @@ select:focus option:checked {
 }
 
 
-.tabs, .subtabs {
-  display: flex;
+/* style.css */
+.tab-content { display: none; padding: 1rem; }
+.tab-content.active { display: block; }
+
+h1,h2,h3{
+  color: #ccc;
+}
+
+.bottom-nav {
+  display: flex; justify-content: space-around;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #121318; padding: .5rem 0;
+}
+.nav-button {
+  background: none; border: none; font-size: 1.5rem;
+  opacity: .6; transition: opacity .2s;
+}
+.nav-button.active, .nav-button:hover {
+  opacity: 1;
+}
+
+/* estilo comum */
+.nav-button {
+  background: none;
+  border: 3px solid transparent;
+  color: white;
+  font-size: 14px;
+  padding: 1px;
   cursor: pointer;
-  color: #8684a1;
-  background-color: #27254091;  
-  margin-bottom: 10px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  user-select: none;
 }
 
-.tab, .subtab {
-  flex: 1;
-  box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.3);
-  padding: 10px;
-  background-color: #9790b390;
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.222);
-  background-color: #28254091;
-  transition: all ease .2s;
-  max-width: 350px;
+/* hover e active iguais */
+.nav-button:hover,
+.nav-button.active {
+  transform: scale(1.2);
+  border-color: #aca4c0;
 }
 
-.tab.active, .subtab.active {
-  background-color: #7d76a6b8;
-  color: #25243e;
-  border-bottom: none;
-}
 
 .content, .subcontent {
   border: 1px solid #bebdca6b;
@@ -326,7 +320,7 @@ select:focus option:checked {
 button {
   margin: 5px 5px;
   padding: 10px 20px;
-  color: #29243e2f;
+  color: #ccc;
   background-color: #9690b300;
   border: 1px solid #ebe0e0;
   border-radius: 0.5rem;
@@ -373,24 +367,6 @@ button:hover::after {
 /* Efeito de clique: encolher um pouco */
 button:active {
   transform: scale(0.95);
-}
-
-.collapsible {
-  cursor: pointer;
-}
-.content-collapsed {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.2s ease-out;
-}
-
-.navbar {
-  background-color: #4CAF50; /* Defina a cor de fundo desejada */
-  color: white; /* Cor do texto */
-  padding: 10px;
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
 }
 
 .dialog-container {
@@ -549,12 +525,12 @@ textarea:focus {
 
 #pull-up-indicator {
   position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 50%;              /* centraliza verticalmente */
+  left: 0;               /* encostado na borda esquerda */
+  transform: translateY(-50%) scale(0.8); /* ajuste inicial */
   width: 30px;
-  border:#24243e solid 2px;
   height: 30px;
+  border: #24243e solid 2px;
   border-radius: 50%;
   background-size: cover;
   background-position: center;
@@ -564,7 +540,16 @@ textarea:focus {
   transition: transform 0.3s ease, opacity 0.3s ease;
   opacity: 0;
   pointer-events: none;
+  transform-origin: left center; /* escala a partir da borda esquerda */
 }
+
+/* durante o drag (aplique dinamicamente inline pelo JS) */
+/* exemplo de estilo final quando ativo: */
+#pull-up-indicator.active {
+  opacity: 1;
+  transform: translateY(-50%) translateX(20px) scale(1.1);
+}
+
 
 #black-overlay {
   position: fixed;
