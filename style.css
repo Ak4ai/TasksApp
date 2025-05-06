@@ -263,7 +263,8 @@ h1,h2,h3{
   background: none; border: none; font-size: 1.5rem;
   opacity: .6; transition: opacity .2s;
 }
-.nav-button.active, .nav-button:hover {
+
+.nav-button.active{
   opacity: 1;
 }
 
@@ -285,17 +286,13 @@ h1,h2,h3{
   transform: scale(1.2);
   border-color: #aca4c0;
 }
-.nav-button:hover {
-  transform: scale(1.2);
-  border-color: #ccc;
-}
 
-/* Desativa hover em touch */
-@media (hover: none) {
+
+ 
+@media (min-width: 1050px) {
   .nav-button:hover {
-    opacity: .6; /* mesmo que default */
-    transform: none;
-    border-color: transparent;
+    transform: scale(1.2);
+    border-color: #ccc;
   }
 }
 
@@ -370,25 +367,29 @@ button::after {
   transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
 }
 
-button:hover {
-  background-color: #9390b327;
-  transform: scale(1.05);
+@media (min-width: 1050px) {
+  button:hover {
+    background-color: #9390b327;
+    transform: scale(1.05);
+    
+    user-select: none;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE/Edge */
+  }
   
-  user-select: none;
-  -webkit-user-select: none; /* Safari */
-  -ms-user-select: none; /* IE/Edge */
+  button:hover::after {
+    width: 300%;
+    height: 300%;
+    opacity: 1;
+  }
+
+  /* Efeito de clique: encolher um pouco */
+  button:active {
+    transform: scale(0.95);
+  }
 }
 
-button:hover::after {
-  width: 300%;
-  height: 300%;
-  opacity: 1;
-}
 
-/* Efeito de clique: encolher um pouco */
-button:active {
-  transform: scale(0.95);
-}
 
 .dialog-container {
   border: 1px solid #999999;
