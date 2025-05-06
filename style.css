@@ -237,6 +237,11 @@ select:focus option:checked {
   color: #fff; /* Cor do texto das opções selecionadas ao focar */
 }
 
+.nav-button.disable-hover:hover {
+  transform: none !important;
+  border-color: transparent !important;
+  opacity: 0.6 !important;
+}
 
 /* style.css */
 .tab-content { display: none; padding: 1rem; }

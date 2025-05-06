@@ -193,17 +193,20 @@ document.getElementById('criar-button').addEventListener('click', () => {
       idx = (idx - 1 + navButtons.length) % navButtons.length;
     }
   
-    // Força remoção de hover visual em todos os botões
+    // Aplica a classe que desativa visualmente o hover
     navButtons.forEach(btn => {
-      btn.classList.remove('active');
+      btn.classList.add('disable-hover');
       btn.blur();
-  
-      // Força reflow para limpar hover
-      void btn.offsetWidth;
     });
   
     navButtons[idx].click();
+  
+    // Remove a classe depois de um tempo (reset)
+    setTimeout(() => {
+      navButtons.forEach(btn => btn.classList.remove('disable-hover'));
+    }, 300);
   }
+  
   
   
 
