@@ -280,6 +280,10 @@ h1,h2,h3{
   transform: scale(1.2);
   border-color: #aca4c0;
 }
+.nav-button:hover {
+  transform: scale(1.2);
+  border-color: #ccc;
+}
 
 /* Desativa hover em touch */
 @media (hover: none) {
