@@ -127,69 +127,75 @@ async function adicionarTarefa(descricao, dataLimite) {
 // Abrir e fechar modal
 document.getElementById('criar-button').addEventListener('click', () => {
     document.getElementById('modal-criar-tarefa').style.display = 'flex';
-});
-  
-document.getElementById('fechar-modal').addEventListener('click', () => {
-    document.getElementById('modal-criar-tarefa').style.display = 'none';
-});
-  
-// script.js
-import { atualizarDataAtual } from './tarefas.js';
-
-document.addEventListener('DOMContentLoaded', () => {
-  atualizarDataAtual();
-  // configura tabs
-  document.querySelectorAll('.bottom-nav .nav-button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const alvo = btn.dataset.tab;
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.getElementById(alvo).classList.add('active');
-      document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      if (alvo === 'tab-tasks') {
-        carregarTarefas();
-      }
-    });
   });
-  // inicializa na home
-  document.querySelector('.nav-button[data-tab="tab-home"]').click();
-});
-
-// ===== Swipe para trocar de aba =====
-let touchStartX = 0;
-let touchEndX = 0;
-const minSwipeDistance = 50; // distância mínima em px para considerar swipe
-
-// Captura início do toque
-document.addEventListener('touchstart', e => {
-  touchStartX = e.changedTouches[0].screenX;
-}, false);
-
-// Captura fim do toque e trata o swipe
-document.addEventListener('touchend', e => {
-  touchEndX = e.changedTouches[0].screenX;
-  handleSwipe();
-}, false);
-
-function handleSwipe() {
-  const deltaX = touchEndX - touchStartX;
-  if (Math.abs(deltaX) < minSwipeDistance) return; // muito curto, ignora
-
-  // Lista de botões de navegação na ordem visual
-  const navButtons = Array.from(document.querySelectorAll('.bottom-nav .nav-button'));
-  const activeBtn = document.querySelector('.bottom-nav .nav-button.active');
-  let idx = navButtons.indexOf(activeBtn);
-
-  if (deltaX < 0) {
-    // swipe para a esquerda → avançar aba
-    idx = (idx + 1) % navButtons.length;
-  } else {
-    // swipe para a direita → voltar aba
-    // idx = (idx - 1 + navButtons.length) % navButtons.length;
-  }
-
-  navButtons[idx].click(); // dispara o clique, mantendo seu carregamento de tarefas
+  
+  document.getElementById('fechar-modal').addEventListener('click', () => {
+    document.getElementById('modal-criar-tarefa').style.display = 'none';
+  });
+  
+  // Importação
+  import { atualizarDataAtual } from './tarefas.js';
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    atualizarDataAtual();
+  
+    // Configura tabs
+    document.querySelectorAll('.bottom-nav .nav-button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const alvo = btn.dataset.tab;
+  
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById(alvo).classList.add('active');
+  
+        // Remove classes ativas e foca
+        document.querySelectorAll('.nav-button').forEach(b => {
+          b.classList.remove('active');
+          b.blur(); // <-- remove foco/hover preso
+        });
+  
+        btn.classList.add('active');
+  
+        if (alvo === 'tab-tasks') {
+          carregarTarefas();
+        }
+      });
+    });
+  
+    // Inicializa na home
+    document.querySelector('.nav-button[data-tab="tab-home"]').click();
+  });
+  
+  // ===== Swipe para trocar de aba =====
+  let touchStartX = 0;
+  let touchEndX = 0;
+  const minSwipeDistance = 50; // distância mínima em px para considerar swipe
+  
+  document.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, false);
+  
+  document.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+  }, false);
+  
+  function handleSwipe() {
+    const deltaX = touchEndX - touchStartX;
+    if (Math.abs(deltaX) < minSwipeDistance) return;
+  
+    const navButtons = Array.from(document.querySelectorAll('.bottom-nav .nav-button'));
+    const activeBtn = document.querySelector('.bottom-nav .nav-button.active');
+    let idx = navButtons.indexOf(activeBtn);
+  
+    if (deltaX < 0) {
+      idx = (idx + 1) % navButtons.length;
+    } else {
+      idx = (idx - 1 + navButtons.length) % navButtons.length;
+    }
+  
+    navButtons[idx].click(); // Isso já dispara o blur pelo código acima
 }
+  
 
 
 

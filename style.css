@@ -275,15 +275,16 @@ h1,h2,h3{
 }
 
 /* hover e active iguais */
-.nav-button:hover,
+
 .nav-button.active {
   transform: scale(1.2);
   border-color: #aca4c0;
 }
 
-/* Desativa hover para dispositivos móveis */
+/* Desativa hover em touch */
 @media (hover: none) {
   .nav-button:hover {
+    opacity: .6; /* mesmo que default */
     transform: none;
     border-color: transparent;
   }
