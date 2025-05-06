@@ -93,6 +93,28 @@
       <h2>Configurações</h2>
       <!-- Exemplo: botão de logout, tema, etc. -->
       <button id="logout-button">Logout</button>
+      <button id="clear-cache-button">Limpar Cache</button>
+
+      <script>
+        document.getElementById('clear-cache-button').addEventListener('click', () => {
+          if (confirm('Tem certeza que deseja limpar o cache, LocalStorage e recarregar a página?')) {
+            // Limpar LocalStorage
+            localStorage.clear();
+
+            // Limpar Cache
+            if ('caches' in window) {
+              caches.keys().then(cacheNames => {
+                cacheNames.forEach(cacheName => {
+                  caches.delete(cacheName);
+                });
+              });
+            }
+
+            // Hard Refresh
+            location.reload(true);
+          }
+        });
+      </script>
     </div>
   </div>
 
