@@ -193,8 +193,18 @@ document.getElementById('criar-button').addEventListener('click', () => {
       idx = (idx - 1 + navButtons.length) % navButtons.length;
     }
   
-    navButtons[idx].click(); // Isso já dispara o blur pelo código acima
-}
+    // Força remoção de hover visual em todos os botões
+    navButtons.forEach(btn => {
+      btn.classList.remove('active');
+      btn.blur();
+  
+      // Força reflow para limpar hover
+      void btn.offsetWidth;
+    });
+  
+    navButtons[idx].click();
+  }
+  
   
 
 
