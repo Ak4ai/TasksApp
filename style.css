@@ -244,6 +244,9 @@ select:focus option:checked {
 
 h1,h2,h3{
   color: #ccc;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
 }
 
 .bottom-nav {
@@ -276,6 +279,14 @@ h1,h2,h3{
 .nav-button.active {
   transform: scale(1.2);
   border-color: #aca4c0;
+}
+
+/* Desativa hover para dispositivos móveis */
+@media (hover: none) {
+  .nav-button:hover {
+    transform: none;
+    border-color: transparent;
+  }
 }
 
 
