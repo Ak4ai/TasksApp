@@ -110,18 +110,41 @@ function isIOSDevice() {
 
 
 async function adicionarTarefa(descricao, dataLimite) {
-    const usuario = auth.currentUser;
-    if (!usuario) return;
-  
-    const tarefasRef = collection(db, "usuarios", usuario.uid, "tarefas");
-    await addDoc(tarefasRef, {
-      descricao,
-      dataLimite: Timestamp.fromDate(new Date(dataLimite)),
-      finalizada: false
-    });
-  
-    carregarTarefas(); // recarrega a UI
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+
+  // 1) Coleta valores do DOM
+  const tipo = document.getElementById('tipo-tarefa').value;
+  const dataLimiteDate = new Date(dataLimite);
+
+  // 2) Monta o objeto base
+  const novaTarefa = {
+    descricao,
+    dataLimite: Timestamp.fromDate(dataLimiteDate),
+    finalizada: false,
+    tipo
+  };
+
+  // 3) Adiciona campos específicos
+  if (tipo === 'periodico') {
+    const freq = document.getElementById('frequenciaSelecao').value;
+    novaTarefa.frequencia = freq; // 'diario', 'semanal', 'mensal', etc.
+  }
+
+  if (tipo === 'personalizado') {
+    const padrao = document.getElementById('padraoPersonalizado').value;
+    // Exemplo: "2025-05-10,2025-05-15,2025-06-01"
+    novaTarefa.padraoPersonalizado = padrao;
+  }
+
+  // 4) Grava no Firestore
+  const tarefasRef = collection(db, "usuarios", usuario.uid, "tarefas");
+  await addDoc(tarefasRef, novaTarefa);
+
+  // 5) Recarrega a UI
+  carregarTarefas();
 }
+
 
 
 // Abrir e fechar modal
@@ -237,6 +260,50 @@ document.getElementById('criar-button').addEventListener('click', () => {
 
 
 document.addEventListener('DOMContentLoaded', () => {
+  const tipoSel       = document.getElementById('tipo-tarefa');
+  const freqWrap      = document.getElementById('frequencia-wrapper');
+  const padraoWrap    = document.getElementById('padrao-wrapper');
+  const modalCriar    = document.getElementById('modal-criar-tarefa');
+  const btnAbrirModal = document.getElementById('criar-button');
+  const btnFechar     = document.getElementById('fechar-modal');
+  const btnCriarTarefa= document.getElementById('botao-criar-tarefa');
+
+  // 1) Função que mostra ou esconde os wrappers de acordo com o tipo
+  function ajustarWrappers() {
+    const tipo = tipoSel.value;
+    if (tipo === 'periodico') {
+      freqWrap.style.display   = 'block';
+      padraoWrap.style.display = 'none';
+    } else if (tipo === 'personalizado') {
+      freqWrap.style.display   = 'none';
+      padraoWrap.style.display = 'block';
+    } else { // nao-periodico
+      freqWrap.style.display   = 'none';
+      padraoWrap.style.display = 'none';
+    }
+  }
+
+  // 2) Quando o select muda, ajusta imediatamente
+  tipoSel.addEventListener('change', ajustarWrappers);
+
+  // 3) Ao abrir o modal, resetar valores e ajustar visibilidade antes de mostrar
+  btnAbrirModal.addEventListener('click', () => {
+    tipoSel.value = 'periodico';  // ou valor padrão de sua escolha
+    ajustarWrappers();
+    modalCriar.style.display = 'flex';
+  });
+
+  // 4) Ao fechar o modal (X), apenas esconde
+  btnFechar.addEventListener('click', () => {
+    modalCriar.style.display = 'none';
+  });
+
+  // 5) Ao criar a tarefa, garantir que wrappers estejam ajustados
+  btnCriarTarefa.addEventListener('click', () => {
+    ajustarWrappers();
+    // aqui você chama sua função adicionarTarefa(...)
+    // ex: adicionarTarefa(descricaoInput.value, dataLimiteInput.value);
+  });
     let startX = 0;
     let isAtLeftEdge = false;
     const indicator = document.getElementById('pull-up-indicator');
@@ -298,3 +365,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
   
+

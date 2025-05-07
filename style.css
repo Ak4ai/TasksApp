@@ -1,10 +1,11 @@
 html, body {
   margin: 0;
   padding: 0;
-  min-height: 100vh;
+  min-height: 150vh;
+
   background-color: #121318; /* Cor de fundo */
   overflow-x: hidden; /* Evita o scroll horizontal */
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 
 body {
@@ -96,22 +97,30 @@ body {
 }
 
 .top-info-bar {
-  background-color: #1f1f2e00;
-  color: #f0f0f0;
-  display: flex;
-  justify-content: space-around;
-  padding-bottom: 3px;
-  padding-top: 1px;
-  align-items: center;
-  font-size: 3vw;
-  border-bottom: 1px solid #333;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 1000;
+  
+  background-color: rgba(31,31,46,0.9); /* use rgba para não zerar o canal alpha */
+  color: #f0f0f0;
   font-family: sans-serif;
+  font-size: 3vw;
+  
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 1px 0 3px;
+  
+  border-bottom: 1px solid #333;
+  
+  /* z-index bem alto para garantir prioridade */
+  z-index: 9999;
+  
+  /* cria um novo contexto de empilhamento confiável */
+  transform: translateZ(0);
 }
+
 
 .next-event{
   color: #ffffff;
@@ -855,4 +864,104 @@ body.ios-pwa .bottom-nav {
   top: 10px;
   font-size: 24px;
   cursor: pointer;
+}
+
+.task-rect {
+  position: relative;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 1rem;
+  margin: .5rem 0;
+  cursor: pointer;
+  background-color: #381e47;
+  transition: 
+    background-color .3s ease,
+    box-shadow .3s ease,
+    transform .2s ease;
+}
+
+/* Paleta suave por tipo */
+.task-rect[data-tipo="periodico"] {
+  border-color: #a3d5ff;
+  background-color: #381e47;
+}
+.task-rect[data-tipo="nao-periodico"] {
+  border-color: #ffd8a3;
+  background-color: #381e47;
+}
+.task-rect[data-tipo="personalizado"] {
+  border-color: #d5ffa3;
+  background-color: #381e47;
+}
+
+.task-rect:hover {
+  background-color: #fefefe;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+
+/* Badge que aparece no hover */
+.task-rect .tipo-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: .2rem .6rem;
+  border-radius: 0.5rem;
+  font-size: .75rem;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(-10%);
+  transition: opacity .2s ease, transform .2s ease;
+  pointer-events: none;
+}
+
+/* Cores do badge conforme tipo */
+.task-rect[data-tipo="periodico"] .tipo-badge {
+  background-color: #66b3ff;
+  color: #084c8d;
+}
+.task-rect[data-tipo="nao-periodico"] .tipo-badge {
+  background-color: #ffb366;
+  color: #8d4908;
+}
+.task-rect[data-tipo="personalizado"] .tipo-badge {
+  background-color: #8dba08;
+  color: #3e4f00;
+}
+
+/* Mostrar badge no hover */
+.task-rect:hover .tipo-badge {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+#tipo-tarefa {
+  /* LAYOUT */
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  padding: 0.5rem 1rem;
+  margin: 0.5rem 0 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  color: #333;
+  background-color: #fff;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2210%22%20height%3D%227%22%20viewBox%3D%220%200%2010%207%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M0%200l5%207%205-7z%22%20fill%3D%22%23333%22/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 0.65rem auto;
+  
+  /* Transição suave ao focar */
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#tipo-tarefa:focus {
+  outline: none;
+  border-color: #667eea;        /* ex.: um lilás suave */
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
 }

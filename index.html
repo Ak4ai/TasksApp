@@ -43,8 +43,27 @@
     <div class="modal-content">
       <span class="close-button" id="fechar-modal">&times;</span>
       <h2>Nova Tarefa</h2>
+      <div id="frequencia-wrapper" style="display:none">
+        <label>Frequência:</label>
+        <select id="frequenciaSelecao">
+          <option value="diario">Diário</option>
+          <option value="semanal">Semanal</option>
+          <option value="mensal">Mensal</option>
+        </select>
+      </div>
+      
+      <div id="padrao-wrapper" style="display:none">
+        <label>Padrão personalizado:</label>
+        <input id="padraoPersonalizado" type="text" placeholder="Ex: 2025-05-10,2025-05-15,2025-06-01"/>
+      </div>
       <input type="text" id="descricao" placeholder="Descrição da tarefa" />
       <input type="datetime-local" id="dataLimite" />
+      <select id="tipo-tarefa">
+        <option value="periodico">Importante Periódico</option>
+        <option value="nao-periodico">Importante Não Periódico</option>
+        <option value="personalizado">Personalizado</option>
+      </select>
+      
       <button id="botao-criar-tarefa">Criar tarefa</button>
     </div>
   </div>
@@ -76,6 +95,18 @@
     <!-- Aba Tarefas -->
     <div id="tab-tasks" class="tab-content">
       <div id="app">
+        <div id="tarefas-periodico" class="task-group">
+          <h2>Periódicas</h2>
+          <div class="tasks-container"></div>
+        </div>
+        <div id="tarefas-nao-periodico" class="task-group">
+          <h2>Não Periódicas</h2>
+          <div class="tasks-container"></div>
+        </div>
+        <div id="tarefas-personalizado" class="task-group">
+          <h2>Personalizadas</h2>
+          <div class="tasks-container"></div>
+        </div>        
         <button id="criar-button">Criar Tarefa</button>
         <div id="app-body">
           <div class="card purple-card">
