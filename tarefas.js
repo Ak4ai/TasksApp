@@ -45,9 +45,9 @@ async function carregarTarefas() {
 
     // mapa de containers por tipo
     const containers = {
-        periodico: document.querySelector('#tarefas-periodico .tasks-container'),
+        'periodico': document.querySelector('#tarefas-periodico .tasks-container'),
         'nao-periodico': document.querySelector('#tarefas-nao-periodico .tasks-container'),
-        personalizado: document.querySelector('#tarefas-personalizado .tasks-container'),
+        'personalizado': document.querySelector('#tarefas-personalizado .tasks-container'),
     };
   
     // limpar todos
@@ -74,8 +74,8 @@ async function carregarTarefas() {
       <!-- badge oculta, só aparece no hover -->
       <span class="tipo-badge">
         ${{
-          periodico: 'Importante Não-Periódico',
-          'nao-periodico': 'Importante Periódico',
+          periodico: 'Importante Periódico',
+          'nao-periodico': 'Importante Não-Periódico',
           personalizado: 'Personalizado'
         }[tipo]}
       </span>
@@ -104,9 +104,23 @@ async function carregarTarefas() {
     });
 
     carregandoTarefas = false;
-
+    atualizarXP(tarefasVencidas);
 }
 
+function atualizarXP(tarefasConcluidas) {
+  const xpPorTarefa = 10;
+  const xpTotal = tarefasConcluidas.length * xpPorTarefa;
+  const nivel = Math.floor(xpTotal / 100) + 1;
+  const xpAtual = xpTotal % 100;
+  const porcentagem = Math.min(100, (xpAtual / 100) * 100);
+
+  const xpInfo = document.querySelector('.xp-info');
+  if (!xpInfo) return;
+
+  xpInfo.querySelector('strong').textContent = `Nível ${nivel}`;
+  xpInfo.querySelector('.xp-fill').style.width = `${porcentagem}%`;
+  xpInfo.querySelector('span').textContent = `XP: ${xpAtual} / 100`;
+}
 
 
 

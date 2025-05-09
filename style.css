@@ -39,6 +39,7 @@ body {
 
 
 #app {
+  gap: 25px;
   width: 100%;
   height: 100%;
   display: flex;
@@ -976,42 +977,51 @@ body.ios-pwa .bottom-nav {
 
 
 
-.character-box {
+.main-content {
+  padding-top: 60px; 
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center; /* Garante que o conteúdo dentro da box esteja centralizado */
-  background-color: #1f1f1f;
-  color: white;
-  padding: 10px;
-  margin: 0 10px;
-  border-radius: 10px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-  gap: 15px;
-  z-index: 1000; /* Garantir que a box fique sobre outros elementos */
+  gap: 20px;
 }
 
+.character-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #1f1f1f;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 10px;
+  margin: 10px 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
 
 .character-box img {
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
-  object-fit: cover;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 8px;
 }
 
 .xp-info {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .xp-bar {
-  width: 100%;
-  height: 8px;
-  background-color: #444;
-  border-radius: 5px;
-  margin: 5px 0;
+  height: 6px;
+  width: 100px;
+  background: #444;
+  border-radius: 4px;
+  margin: 4px 0;
+  overflow: hidden;
 }
 
 .xp-fill {
   height: 100%;
-  background-color: limegreen;
-  border-radius: 5px;
+  background: #32cd32;
+  width: 0%;
+  transition: width 0.4s ease-in-out;
 }
+
