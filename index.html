@@ -101,6 +101,14 @@
   <!-- CONTEÚDO PRINCIPAL -->
   <div class="main-content">
    
+
+  
+    
+  
+  <!-- TABS -->
+  <div class="tabs">
+    <!-- Aba Home -->
+    <div id="tab-home" class="tab-content active">
     <!-- QUADRADO PERSONAGEM -->
     <div class="character-box">
       <img src="PERSONAGEM.jpeg" alt="Personagem" />
@@ -111,16 +119,7 @@
         </div>
         <span>XP: 0 / 100</span>
       </div>
-    </div>
-  
-    
-  
-  <!-- TABS -->
-  <div class="tabs">
-    <!-- Aba Home -->
-    <div id="tab-home" class="tab-content active">
-      <h1>Bem‑vindo ao R.U.N.A!</h1>
-    </div>
+    </div>    </div>
 
     <!-- Aba Tarefas -->
     <div id="tab-tasks" class="tab-content">
@@ -153,9 +152,11 @@
     <div id="tab-settings" class="tab-content">
       <h2>Configurações</h2>
       <!-- Exemplo: botão de logout, tema, etc. -->
-      <button id="logout-button">Logout</button>
-      <button id="clear-cache-button">Limpar Cache</button>
-
+      <div class="settings-container">
+        <h3>Configurações do Usuário</h3>
+        <button id="logout-button">Logout</button>
+        <button id="clear-cache-button">Limpar Cache</button>
+      </div>
       <script>
         document.getElementById('clear-cache-button').addEventListener('click', () => {
           if (confirm('Tem certeza que deseja limpar o cache, LocalStorage e recarregar a página?')) {

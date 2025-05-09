@@ -1,22 +1,17 @@
 html, body {
   margin: 0;
   padding: 0;
-  min-height: 150vh;
-
+  height: 100%;    
   background-color: #121318; /* Cor de fundo */
-  overflow-x: hidden; /* Evita o scroll horizontal */
-  overflow-y: auto;
+  overflow: hidden; /* Evita o scroll horizontal */
 }
 
 body {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
+  flex-direction: column;
+  height: 100vh;        /* 100% da viewport */
 }
+
 
 .container {
   color: #FAF0E6;
@@ -25,11 +20,9 @@ body {
   border: #ffffff03 solid 2px;
   backdrop-filter: blur(20px);
   transition: all ease .2s;
-  height: 100%;
   z-index: 1;
   width: 100vw;
   overflow-x: hidden; /* Evita o scroll horizontal */
-  overflow-y: hidden;
 }
 
 .hidden {
@@ -82,19 +75,21 @@ body {
   background-color: #381e47;
 }
 
+.main-content {
+  flex: 1 1 auto;
+  min-height: 0;        /* <— ESSENCIAL para o scroll interno funcionar */
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+}
 
 .bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 40px;
-  background-color: #121318;
+  flex: 0 0 auto;
+  height: 60px; /* ou qualquer altura desejada */
+  background: #1e1f24;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  border-top: 2px solid #32313b02;
-  z-index: 1000;
   
   user-select: none;
   -webkit-user-select: none; /* Safari */
@@ -102,28 +97,13 @@ body {
 }
 
 .top-info-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  
-  background-color: rgba(31,31,46,0.9); /* use rgba para não zerar o canal alpha */
-  color: #f0f0f0;
-  font-family: sans-serif;
-  font-size: 3vw;
-  
+  flex: 0 0 auto;
+  height: 50px; /* ou qualquer altura desejada */
+  background: #1e1f24;
+  color: white;
   display: flex;
-  justify-content: space-around;
   align-items: center;
-  padding: 1px 0 3px;
-  
-  border-bottom: 1px solid #333;
-  
-  /* z-index bem alto para garantir prioridade */
-  z-index: 9999;
-  
-  /* cria um novo contexto de empilhamento confiável */
-  transform: translateZ(0);
+  justify-content: space-around;
 }
 
 
@@ -268,11 +248,18 @@ h1,h2,h3{
   justify-content: center;
 }
 
-.bottom-nav {
-  display: flex; justify-content: space-around;
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: #121318; padding: .5rem 0;
+#tab-settings > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 5px;
+  padding: 10px;
+  background-color: #27243e80;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
+
 .nav-button {
   background: none; border: none; font-size: 1.5rem;
   opacity: .6; transition: opacity .2s;
@@ -980,16 +967,6 @@ body.ios-pwa .bottom-nav {
   outline: none;
   border-color: #667eea;        /* ex.: um lilás suave */
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
-}
-
-
-
-.main-content {
-  padding-top: 60px; 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
 }
 
 .character-box {
