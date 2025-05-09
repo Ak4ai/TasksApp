@@ -814,10 +814,11 @@ body.ios-pwa .bottom-nav {
 }
 
 .modal {
+  overflow-y: auto;
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 100%; /* 90% da largura da tela */
   height: 100%;
   backdrop-filter: blur(5px);
   background-color: rgba(0, 0, 0, 0.6);
@@ -828,17 +829,24 @@ body.ios-pwa .bottom-nav {
 }
 
 .modal-content {
+  margin: 35px;
+  display: flex;
+  flex-direction: column;
   background-color: #1e1f25;
   color: white;
   padding: 20px;
   border-radius: 12px;
   width: 80%;
   max-width: 400px;
+  max-height: 90vh;
   box-shadow: 0 0 15px rgba(0,0,0,0.5);
   position: relative;
+  overflow-y: auto;
 }
 
+
 .modal-content input {
+  margin-bottom: 10px;
   width: 100%;
   margin: 10px 0;
   padding: 10px;
@@ -965,3 +973,5 @@ body.ios-pwa .bottom-nav {
   border-color: #667eea;        /* ex.: um lilás suave */
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
 }
+
+

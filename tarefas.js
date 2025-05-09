@@ -1,12 +1,16 @@
 import { auth } from './auth.js';
 import { db } from './firebase-config.js';
-import { collection, getDocs, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { collection, getDocs, doc, updateDoc, deleteDoc,Timestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 
 let carregandoTarefas = false;
 let tempoMaisRecente = null;
 let intervaloContador = null;
+let tarefasFuturas = [];
+let tarefasVencidas = [];
+
 
 async function carregarTarefas() {
+
     if (carregandoTarefas) return;
     carregandoTarefas = true;
 
@@ -50,7 +54,8 @@ async function carregarTarefas() {
     Object.values(containers).forEach(c => c.innerHTML = '');
     
     // ordenar por dataLimite asc
-    tarefas.sort((a,b) => a.dataLimite - b.dataLimite);
+    tarefas.sort((a, b) => a.dataLimite - b.dataLimite);
+
     
     tarefas.forEach(t => {
         const now = new Date();
@@ -84,7 +89,8 @@ async function carregarTarefas() {
 
     // Ordena e filtra futuras
     tarefas.sort((a, b) => a.dataLimite - b.dataLimite);
-    const tarefasFuturas = tarefas.filter(t => t.dataLimite >= agora);
+    tarefasFuturas = tarefas.filter(t => t.dataLimite >= agora);
+    tarefasVencidas = tarefas.filter(t => t.dataLimite < agora);
     tempoMaisRecente = tarefasFuturas.length ? tarefasFuturas[0].dataLimite : null;
 
     atualizarContadorProximaTarefa();
@@ -118,7 +124,6 @@ function adicionarNaCard(tarefa, cardClass) {
 
     p.textContent = `${tarefa.descricao} - até ${dataFormatada} às ${horaFormatada}`;
     p.setAttribute('data-id', tarefa.id);
-    //p.addEventListener('click', () => abrirModalEdicao(tarefa)); COMENTADO POR ENQUANTO
 
     card.appendChild(p);
 }
@@ -141,7 +146,7 @@ function abrirModalDetalhe(tarefa) {
   
     document.getElementById('editar-descricao').value = tarefa.descricao;
     document.getElementById('editar-dataLimite').value = tarefa.dataLimite.toISOString().slice(0,16);
-    document.getElementById('tipo-tarefa').textContent = {
+    document.getElementById('tipo-tarefa').value = {
       'periodico': 'Importante Periódico',
       'nao-periodico': 'Não Periódico',
       'personalizado': 'Personalizado'
@@ -165,59 +170,36 @@ function abrirModalDetalhe(tarefa) {
         modal.style.display = 'none';
     };
   }
-  
-
-function abrirModalEdicao(tarefa) {
-    const modal = document.getElementById('modal-tarefa');
-    modal.style.display = 'flex';
-
-    document.getElementById('editar-descricao').value = tarefa.descricao;
-    document.getElementById('editar-dataLimite').value = tarefa.dataLimite.toISOString().slice(0,16);
-
-    document.getElementById('salvar-edicao').onclick = async () => {
-        const novaDesc = document.getElementById('editar-descricao').value;
-        const novaData = new Date(document.getElementById('editar-dataLimite').value);
-        await atualizarTarefaNoFirestore(tarefa.id, novaDesc, novaData);
-        modal.style.display = 'none';
-        carregarTarefas();
-    };
-
-    document.getElementById('excluir-tarefa').onclick = async () => {
-        await excluirTarefaDoFirestore(tarefa.id);
-        modal.style.display = 'none';
-        carregarTarefas();
-    };
-
-    document.getElementById('fechar-modal-editar').onclick = () => {
-        modal.style.display = 'none';
-    };
-}
 
 function atualizarContadorProximaTarefa() {
-    const span = document.querySelector('.next-event');
-    if (!tempoMaisRecente) {
-        span.textContent = '⏰ N/a';
-        return;
-    }
+  const span = document.querySelector('.next-event');
 
-    function atualizar() {
-        const agora = new Date();
-        const diff = tempoMaisRecente - agora;
-        if (diff <= 0) {
-            span.textContent = '⏰ Tarefa vencida!';
-            clearInterval(intervaloContador);
-            return;
-        }
-        const horas = Math.floor(diff / (1000*60*60));
-        const minutos = Math.floor((diff % (1000*60*60))/(1000*60));
-        const segundos = Math.floor((diff % (1000*60))/1000);
-        span.textContent = `⏰ ${horas}h ${minutos}m ${segundos}s`;
-    }
+  clearInterval(intervaloContador);
 
-    atualizar();
-    clearInterval(intervaloContador);
-    intervaloContador = setInterval(atualizar, 1000);
+  intervaloContador = setInterval(() => {
+      const agora = new Date();
+
+      // Remove vencidas da lista
+      tarefasFuturas = tarefasFuturas.filter(t => t.dataLimite > agora);
+      tempoMaisRecente = tarefasFuturas.length ? tarefasFuturas[0].dataLimite : null;
+
+      if (!tempoMaisRecente) {
+          span.textContent = '⏰ Sem tarefas futuras';
+          return;
+      }
+
+      const diff = tempoMaisRecente - agora;
+      if (diff <= 0) {
+          span.textContent = '⏰ Tarefa vencida!';
+      } else {
+          const horas = Math.floor(diff / (1000 * 60 * 60));
+          const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const segundos = Math.floor((diff % (1000 * 60)) / 1000);
+          span.textContent = `⏰ Próx. em ${horas}h ${minutos}m ${segundos}s`;
+      }
+  }, 1000);
 }
+
 
 function atualizarDataAtual() {
     const span = document.querySelector('.current-day');
@@ -273,4 +255,58 @@ async function ajustarRecurrentes(tarefas) {
       return updateDoc(refDoc, { dataLimite: Timestamp.fromDate(u.novaData) });
     }));
   }
-  
+  document.querySelector('.next-event').addEventListener('click', () => {
+
+    const modalNextEvent = document.getElementById('modal-next-event');  // Novo modal para o "Next Event"
+    if (modalNextEvent.style.display === 'flex') {
+      return;  
+    }
+    modalNextEvent.style.display = 'flex';
+    const contentNextEvent = document.querySelector('#modal-next-event .modal-content');
+
+    // Criando a lista de tarefas vencidas
+    const listaVencidas = tarefasVencidas.map(t => {
+        const data = t.dataLimite.toLocaleString('pt-BR');
+        return `<li><strong>${t.descricao}</strong> - Vencida em: ${data}</li>`;
+    }).join('');
+
+    // Criando a lista de tarefas futuras e calculando o tempo restante
+    const listaFuturas = tarefasFuturas.map(t => {
+        const dataLimite = new Date(t.dataLimite);
+        const tempoRestante = calcularTempoRestante(dataLimite);  // Função que calcula o tempo restante
+        const data = dataLimite.toLocaleString('pt-BR');
+        return `<li><strong>${t.descricao}</strong> - Próximo evento em: ${data} (Restante: ${tempoRestante})</li>`;
+    }).join('');
+
+    // Atualizando o conteúdo do modal
+    contentNextEvent.innerHTML = `
+        <span id="fechar-modal-next-event" class="close-button">&times;</span>
+        <h2>Tarefas Vencidas</h2>
+        <ul>${listaVencidas || '<em>Nenhuma tarefa vencida.</em>'}</ul>
+
+        <h2>Próximos Eventos</h2>
+        <ul>${listaFuturas || '<em>Nenhum evento futuro.</em>'}</ul>
+    `;
+
+    // Evento de fechar o modal
+    document.getElementById('fechar-modal-next-event').onclick = () => {
+        document.getElementById('modal-next-event').style.display = 'none';
+    };
+});
+
+// Função que calcula o tempo restante até a tarefa futura
+function calcularTempoRestante(dataLimite) {
+    const agora = new Date();
+    const diff = dataLimite - agora;  // Diferença em milissegundos
+    if (diff <= 0) {
+        return "Já passou";
+    }
+
+    const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    return `${dias} dias, ${horas} horas e ${minutos} minutos`;
+}
+
+
