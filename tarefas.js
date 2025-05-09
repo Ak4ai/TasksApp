@@ -1,6 +1,6 @@
 import { auth } from './auth.js';
 import { db } from './firebase-config.js';
-import { collection, getDocs, doc, updateDoc, deleteDoc,Timestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { collection, getDocs, getDoc, doc, updateDoc, deleteDoc,Timestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 
 let carregandoTarefas = false;
 let tempoMaisRecente = null;
@@ -104,7 +104,12 @@ async function carregarTarefas() {
     });
 
     carregandoTarefas = false;
+
 }
+
+
+
+
 
 function limparCards() {
     document.querySelector('.blue-card').innerHTML = '<span class="card-title">TAREFAS A REALIZAR</span>';
