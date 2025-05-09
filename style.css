@@ -808,34 +808,37 @@ body.ios-pwa .bottom-nav {
 }
 
 .modal {
-  overflow: auto;               /* permite rolagem de toda a área se quiser */
+  overflow-y: auto;
   position: fixed;
-  top: 0; left: 0;
-  width: 100%;
+  top: 0;
+  left: 0;
+  width: 100%; /* 90% da largura da tela */
   height: 100%;
   backdrop-filter: blur(5px);
   background-color: rgba(0, 0, 0, 0.6);
   display: flex;
-  align-items: center;          /* centraliza verticalmente */
+  align-items: center;
   justify-content: center;
   z-index: 2000;
-  padding: 35px;                /* garante distância das laterais em todos os casos */
-  box-sizing: border-box;
 }
 
 .modal-content {
+  margin: 35px;
+  display: flex;
+  flex-direction: column;
   background-color: #1e1f25;
   color: white;
   padding: 20px;
   border-radius: 12px;
   width: 90%;
   max-width: 500px;
-
-  /* controla a altura para nunca ultrapassar a viewport */
-  max-height: calc(100vh - 70px);  
-  overflow-y: auto;             /* scroll interno quando estourar */
-  overflow-x: hidden;
+  max-height: none; /* Remova a limitação */
+  height: auto;     /* Permite crescer conforme o conteúdo */
   box-shadow: 0 0 15px rgba(0,0,0,0.5);
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 85%;
 }
 
 
