@@ -1052,3 +1052,42 @@ body.ios-pwa .bottom-nav {
   opacity: 0;
   transform: translateX(-20px);
 }
+
+
+#lista-tarefas-organizada {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.grupo-tipo {
+  flex: 1 1 200px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  color:#1e1f24;
+}
+
+.grupo-tipo-titulo {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  color: #333;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 0.25rem;
+}
+
+.grupo-tipo-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.grupo-tipo-lista li {
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.grupo-tipo-lista li small {
+  color: #666;
+}

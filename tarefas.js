@@ -263,10 +263,7 @@ function abrirModalDetalhe(tarefa) {
       const segundos = Math.floor((diff % (1000 * 60)) / 1000);
       span.textContent = `⏰ Próx. em ${horas}h ${minutos}m ${segundos}s`;
     }, 1000);
-  }
-  
-  
-
+}
 
 function atualizarDataAtual() {
     const span = document.querySelector('.current-day');
@@ -321,6 +318,7 @@ async function ajustarRecurrentes(tarefas) {
       return updateDoc(refDoc, { dataLimite: Timestamp.fromDate(u.novaData) });
     }));
   }
+
   document.querySelector('.next-event').addEventListener('click', () => {
     const modalNextEvent = document.getElementById('modal-next-event');
     if (modalNextEvent.style.display === 'flex') return;
@@ -365,7 +363,7 @@ async function ajustarRecurrentes(tarefas) {
     document.getElementById('fechar-modal-next-event').onclick = () => {
       modalNextEvent.style.display = 'none';
     };
-  });
+});
   
 
 // Função que calcula o tempo restante até a tarefa futura
@@ -392,32 +390,61 @@ document.getElementById('ordenar-tempo').addEventListener('click', () => {
 });
 
 function mostrarTarefasOrganizadas(criterio) {
-  console.log(tarefasFuturas);
-  const container = document.getElementById('lista-tarefas-organizada');
   const agora = new Date();
+  const listaContainer = document.getElementById('lista-tarefas-organizada');
 
-  const lista = [...tarefasFuturas].filter(t => !t.finalizada && t.dataLimite > agora);
+  // filtra só futuras e não-finalizadas
+  const futuras = tarefasFuturas.filter(t => !t.finalizada && t.dataLimite > agora);
 
+  // Se for ordenação POR TEMPO, renderiza igual antes
   if (criterio === 'tempo') {
-    lista.sort((a, b) => a.dataLimite - b.dataLimite);
-  } else if (criterio === 'tipo') {
-    lista.sort((a, b) => (a.tipo || '').localeCompare(b.tipo || ''));
+    futuras.sort((a, b) => a.dataLimite - b.dataLimite);
+    const items = futuras.map(t => {
+      const data = t.dataLimite.toLocaleString('pt-BR');
+      const restante = calcularTempoRestante(t.dataLimite);
+      return `<li><strong>${t.descricao}</strong> — até ${data} (Restante: ${restante})</li>`;
+    }).join('');
+    listaContainer.innerHTML = `<h2>Próximos Eventos</h2><ul>${items || '<em>Nenhuma tarefa futura.</em>'}</ul>`;
+    return;
   }
 
-  const html = lista.map(t => {
-    const tempoRestante = calcularTempoRestante(t.dataLimite);
-    const data = t.dataLimite.toLocaleString('pt-BR');
-    const tipoLabel = {
+  // --- ordenação POR TIPO ---
+  // 1. agrupa por tipo
+  const grupos = futuras.reduce((acc, t) => {
+    const label = {
       'periodico': 'Periódico',
       'nao-periodico': 'Não Periódico',
       'personalizado': 'Personalizado'
-    }[t.tipo || 'personalizado'];
+    }[t.tipo] || 'Outros';
+    if (!acc[label]) acc[label] = [];
+    acc[label].push(t);
+    return acc;
+  }, {});
 
-    return `<li><strong>${t.descricao}</strong> — ${tipoLabel} — ${data} (${tempoRestante})</li>`;
-  }).join('');
+  // 2. para cada grupo, ordena por data interna e gera HTML
+  let html = '';
+  Object.keys(grupos).forEach(label => {
+    const arr = grupos[label];
+    arr.sort((a, b) => a.dataLimite - b.dataLimite);
+    const itens = arr.map(t => {
+      const data = t.dataLimite.toLocaleString('pt-BR');
+      const restante = calcularTempoRestante(t.dataLimite);
+      return `<li>
+      <strong>${t.descricao}</strong> — até ${data} (Restante: ${restante})
+    </li>`;    
+    }).join('');
+    html += `
+      <div class="grupo-tipo">
+        <h3 class="grupo-tipo-titulo">${label}</h3>
+        <ul class="grupo-tipo-lista">${itens}</ul>
+      </div>
+    `;
+  });
 
-  container.innerHTML = `<ul>${html || '<em>Nenhuma tarefa futura.</em>'}</ul>`;
+  listaContainer.innerHTML = html || '<em>Nenhuma tarefa futura.</em>';
 }
+
+
 
 
 
