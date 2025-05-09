@@ -7,7 +7,7 @@
   <meta name="background-color" content="#121318" />
   <meta name="color-scheme" content="light" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Tasks</title>
+  <title>R.U.N.A</title>
 
   <link rel="icon" type="image/png" href="android-icon-192x192.png" />
   <link rel="manifest" href="manifest.json" />
@@ -79,9 +79,17 @@
   </div>
   <div id="modal-next-event" class="modal" style="display: none;">
     <div class="modal-content">
-        <!-- O conteúdo será preenchido via JavaScript -->
+      <span id="fechar-modal-next-event" class="close-button">&times;</span>
+  
+      <div class="ordenar-buttons">
+        <button id="ordenar-tipo">🔀 Por Tipo</button>
+        <button id="ordenar-tempo">⏳ Por Tempo</button>
+      </div>
+  
+      <div id="lista-tarefas-organizada"></div>
     </div>
-</div>
+  </div>
+  
 
  <!-- BARRA SUPERIOR -->
  <div class="top-info-bar">
@@ -101,7 +109,7 @@
         <div class="xp-bar">
           <div class="xp-fill" style="width: 20%;"></div>
         </div>
-        <span>XP: 20 / 100</span>
+        <span>XP: 0 / 100</span>
       </div>
     </div>
   
@@ -111,7 +119,7 @@
   <div class="tabs">
     <!-- Aba Home -->
     <div id="tab-home" class="tab-content active">
-      <h1>Bem‑vindo ao Tasks!</h1>
+      <h1>Bem‑vindo ao R.U.N.A!</h1>
     </div>
 
     <!-- Aba Tarefas -->
@@ -132,10 +140,10 @@
         <button id="criar-button">Criar Tarefa</button>
         <div id="app-body">
           <div class="card purple-card">
-            <span class="card-title">TAREFAS REALIZADAS</span>
+            <span class="card-title">TAREFAS EXPIRADAS</span>
           </div>
           <div class="card blue-card">
-            <span class="card-title">TAREFAS A REALIZAR</span>
+            <span class="card-title">TAREFAS CONCLUÍDAS</span>
           </div>
         </div>
       </div>

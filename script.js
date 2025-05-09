@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // mostrarMensagem(mensagemDeBoasVindas);
 
     document.getElementById('botao-criar-tarefa').addEventListener('click', () => {
-        console.log("Botão Criar Tarefa clicado!");
         const desc = document.getElementById('descricao').value;
         const dataLimite = document.getElementById('dataLimite').value;
         if (desc && dataLimite) {
@@ -188,48 +187,68 @@ document.getElementById('criar-button').addEventListener('click', () => {
     document.querySelector('.nav-button[data-tab="tab-home"]').click();
   });
   
-  // ===== Swipe para trocar de aba =====
   let touchStartX = 0;
-  let touchEndX = 0;
-  const minSwipeDistance = 50; // distância mínima em px para considerar swipe
-  
-  document.addEventListener('touchstart', e => {
-    touchStartX = e.changedTouches[0].screenX;
-  }, false);
-  
-  document.addEventListener('touchend', e => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe();
-  }, false);
-  
-  function handleSwipe() {
-    const deltaX = touchEndX - touchStartX;
-    if (Math.abs(deltaX) < minSwipeDistance) return;
-  
-    const navButtons = Array.from(document.querySelectorAll('.bottom-nav .nav-button'));
-    const activeBtn = document.querySelector('.bottom-nav .nav-button.active');
-    let idx = navButtons.indexOf(activeBtn);
-  
-    if (deltaX < 0) {
-      idx = (idx + 1) % navButtons.length;
-    } else {
-      idx = (idx - 1 + navButtons.length) % navButtons.length;
-    }
-  
-    // Aplica a classe que desativa visualmente o hover
-    navButtons.forEach(btn => {
-      btn.classList.add('disable-hover');
-      btn.blur();
-    });
-  
-    navButtons[idx].click();
-  
-    // Remove a classe depois de um tempo (reset)
-    setTimeout(() => {
-      navButtons.forEach(btn => btn.classList.remove('disable-hover'));
-    }, 300);
+let touchEndX = 0;
+const minSwipeDistance = 100; // AUMENTADO para reduzir sensibilidade
+
+document.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].screenX;
+}, false);
+
+document.addEventListener('touchend', e => {
+  touchEndX = e.changedTouches[0].screenX;
+  handleSwipe();
+}, false);
+
+function handleSwipe() {
+  const deltaX = touchEndX - touchStartX;
+  if (Math.abs(deltaX) < minSwipeDistance) return;
+
+  const navButtons = Array.from(document.querySelectorAll('.bottom-nav .nav-button'));
+  const activeBtn = document.querySelector('.bottom-nav .nav-button.active');
+  const activeTabId = activeBtn.dataset.tab;
+  const activeTab = document.getElementById(activeTabId);
+  let idx = navButtons.indexOf(activeBtn);
+
+  // Determinar próximo índice
+  if (deltaX < 0) {
+    idx = (idx + 1) % navButtons.length;
+  } else {
+    idx = (idx - 1 + navButtons.length) % navButtons.length;
   }
-  
+
+  const nextBtn = navButtons[idx];
+  const nextTabId = nextBtn.dataset.tab;
+  const nextTab = document.getElementById(nextTabId);
+
+  // Aplica classe de animação de saída
+  activeTab.classList.add('tab-exit');
+  nextTab.classList.add('tab-enter');
+
+  setTimeout(() => {
+    // Troca aba ativa
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    nextTab.classList.add('active');
+
+    navButtons.forEach(b => b.classList.remove('active'));
+    nextBtn.classList.add('active');
+
+    // Remove animações após transição
+    activeTab.classList.remove('tab-exit');
+    nextTab.classList.remove('tab-enter');
+  }, 250); // deve ser igual ao tempo da animação CSS
+
+  // Desativa hover momentaneamente
+  navButtons.forEach(btn => {
+    btn.classList.add('disable-hover');
+    btn.blur();
+  });
+
+  setTimeout(() => {
+    navButtons.forEach(btn => btn.classList.remove('disable-hover'));
+  }, 300);
+}
+
   
   
 

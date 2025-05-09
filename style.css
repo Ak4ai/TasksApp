@@ -58,26 +58,30 @@ body {
 .card {
   max-width: 550px;
   width: 70vw;
-  padding: 20px;
+  padding: 1rem;
   color: white;
-  text-align: center;
-  border-radius: 8px;
-  font-size: 18px;
-  font-weight: bold;
-  
-  border: #ccc solid 2px;
-  user-select: none;
-  -webkit-user-select: none; /* Safari */
-  -ms-user-select: none; /* IE/Edge */
+  text-align: left;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: normal;
+  margin: 0.5rem 0;
+  background-color: #381e47;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: 
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
 }
 
 .purple-card {
-  background: #32313b;
+  background-color: #381e47;
 }
 
 .blue-card {
-  background: #32313b;
+  background-color: #381e47;
 }
+
 
 .bottom-nav {
   position: fixed;
@@ -837,13 +841,16 @@ body.ios-pwa .bottom-nav {
   color: white;
   padding: 20px;
   border-radius: 12px;
-  width: 80%;
-  max-width: 400px;
-  max-height: 90vh;
+  width: 90%;
+  max-width: 500px;
+  max-height: none; /* Remova a limitação */
+  height: auto;     /* Permite crescer conforme o conteúdo */
   box-shadow: 0 0 15px rgba(0,0,0,0.5);
   position: relative;
   overflow-y: auto;
+  overflow-x: hidden;
 }
+
 
 
 .modal-content input {
@@ -1025,3 +1032,44 @@ body.ios-pwa .bottom-nav {
   transition: width 0.4s ease-in-out;
 }
 
+.checkbox-tarefa {
+  margin-right: 8px;
+  transform: scale(1.2);
+  cursor: pointer;
+}
+.ordenar-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap; /* útil em telas pequenas */
+}
+
+.ordenar-buttons button {
+  padding: 6px 12px;
+  background: #444;
+  color: white;
+  border: 1px solid #999;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.ordenar-buttons button:hover {
+  background: #666;
+}
+
+
+.tab-content {
+  opacity: 1;
+  transform: translateX(0);
+  transition: all 0.25s ease;
+}
+
+.tab-enter {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.tab-exit {
+  opacity: 0;
+  transform: translateX(-20px);
+}

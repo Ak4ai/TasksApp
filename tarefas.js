@@ -1,111 +1,139 @@
 import { auth } from './auth.js';
 import { db } from './firebase-config.js';
 import { collection, getDocs, getDoc, doc, updateDoc, deleteDoc,Timestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+export { carregarTarefas, tempoMaisRecente, atualizarDataAtual };
 
 let carregandoTarefas = false;
 let tempoMaisRecente = null;
 let intervaloContador = null;
 let tarefasFuturas = [];
-let tarefasVencidas = [];
+let tarefasExpiradas = [];
+let tarefasConcluidas = [];
+
+function renderizarTarefa(t) {
+  const div = document.createElement('div');
+  div.classList.add('task-rect');
+  div.setAttribute('data-id', t.id);
+  div.setAttribute('data-tipo', t.tipo || 'personalizado');
+
+  div.innerHTML = `
+    <input type="checkbox" class="checkbox-tarefa" title="Marcar como feita" ${t.finalizada ? 'checked' : ''}>
+    <strong>${t.descricao}</strong><br>
+    <small>Até: ${t.dataLimite.toLocaleString('pt-BR')}</small>
+    <span class="tipo-badge">
+      ${{
+        periodico: 'Importante Periódico',
+        'nao-periodico': 'Importante Não-Periódico',
+        personalizado: 'Personalizado'
+      }[t.tipo || 'personalizado']}
+    </span>
+  `;
+
+  const checkbox = div.querySelector('.checkbox-tarefa');
+  checkbox.addEventListener('click', async (e) => {
+    e.stopPropagation();
+  
+    const usuario = auth.currentUser;
+    await updateDoc(doc(db, "usuarios", usuario.uid, "tarefas", t.id), {
+      finalizada: checkbox.checked
+    });
+  
+    // Remover tarefa do DOM
+    div.remove();
+  
+    // Atualizar listas locais (remover das futuras e adicionar na concluídas)
+    tarefasFuturas = tarefasFuturas.filter(task => task.id !== t.id);
+    if (checkbox.checked) {
+      tarefasConcluidas.push(t);
+      adicionarNaCard(t, 'blue-card');
+    } else {
+      tarefasFuturas.push(t);
+      const container = document.querySelector(`#tarefas-${t.tipo} .tasks-container`);
+      const novaDiv = renderizarTarefa(t);
+      container.appendChild(novaDiv);
+    }
+  
+    atualizarXP(tarefasConcluidas);
+    atualizarContadorProximaTarefa();
+  });
+  
+
+  div.addEventListener('click', () => abrirModalDetalhe(t));
+
+  return div;
+}
 
 
 async function carregarTarefas() {
+  if (carregandoTarefas) return;
+  carregandoTarefas = true;
 
-    if (carregandoTarefas) return;
-    carregandoTarefas = true;
-
-    const usuario = auth.currentUser;
-    if (!usuario) {
-        carregandoTarefas = false;
-        return;
-    }
-
-    limparCards();
-
-    const tarefasRef = collection(db, "usuarios", usuario.uid, "tarefas");
-    const snapshot = await getDocs(tarefasRef);
-    const agora = new Date();
-    const tarefas = [];
-
-
-      snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        tarefas.push({
-          id: docSnap.id,
-          descricao: data.descricao,
-          dataLimite: data.dataLimite.toDate(),
-          tipo: data.tipo || 'personalizado',
-          frequencia: data.frequencia,
-          padraoPersonalizado: data.padraoPersonalizado
-        });
-      });
-      
-      await ajustarRecurrentes(tarefas);
-      
-
-    // mapa de containers por tipo
-    const containers = {
-        'periodico': document.querySelector('#tarefas-periodico .tasks-container'),
-        'nao-periodico': document.querySelector('#tarefas-nao-periodico .tasks-container'),
-        'personalizado': document.querySelector('#tarefas-personalizado .tasks-container'),
-    };
-  
-    // limpar todos
-    Object.values(containers).forEach(c => c.innerHTML = '');
-    
-    // ordenar por dataLimite asc
-    tarefas.sort((a, b) => a.dataLimite - b.dataLimite);
-
-    
-    tarefas.forEach(t => {
-        const now = new Date();
-        if (t.dataLimite < now) return;
-  
-    const div = document.createElement('div');
-    div.classList.add('task-rect');
-    // Isto aqui faz o CSS colorir conforme o tipo
-    const tipo = t.tipo || 'personalizado';
-    div.setAttribute('data-tipo', tipo);
-  
-    div.setAttribute('data-id', t.id);
-    div.innerHTML = `
-      <strong>${t.descricao}</strong><br>
-      <small>Até: ${t.dataLimite.toLocaleString('pt-BR')}</small>
-      <!-- badge oculta, só aparece no hover -->
-      <span class="tipo-badge">
-        ${{
-          periodico: 'Importante Periódico',
-          'nao-periodico': 'Importante Não-Periódico',
-          personalizado: 'Personalizado'
-        }[tipo]}
-      </span>
-    `;
-  
-    div.addEventListener('click', () => abrirModalDetalhe(t));
-    containers[tipo].appendChild(div);
-  });
-  
-  
-
-    // Ordena e filtra futuras
-    tarefas.sort((a, b) => a.dataLimite - b.dataLimite);
-    tarefasFuturas = tarefas.filter(t => t.dataLimite >= agora);
-    tarefasVencidas = tarefas.filter(t => t.dataLimite < agora);
-    tempoMaisRecente = tarefasFuturas.length ? tarefasFuturas[0].dataLimite : null;
-
-    atualizarContadorProximaTarefa();
-
-    tarefas.forEach(t => {
-        if (t.dataLimite < agora) {
-            adicionarNaCard(t, 'purple-card');
-        } else {
-            adicionarNaCard(t, 'blue-card');
-        }
-    });
-
+  const usuario = auth.currentUser;
+  if (!usuario) {
     carregandoTarefas = false;
-    atualizarXP(tarefasVencidas);
+    return;
+  }
+
+  limparCards();
+
+  const tarefasRef = collection(db, "usuarios", usuario.uid, "tarefas");
+  const snapshot = await getDocs(tarefasRef);
+  const agora = new Date();
+  const tarefas = [];
+
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    tarefas.push({
+      id: docSnap.id,
+      descricao: data.descricao,
+      dataLimite: data.dataLimite.toDate(),
+      tipo: data.tipo || 'personalizado',
+      finalizada: data.finalizada || false,
+      frequencia: data.frequencia,
+      padraoPersonalizado: data.padraoPersonalizado
+    });
+  });
+
+  await ajustarRecurrentes(tarefas);
+
+  const containers = {
+    'periodico': document.querySelector('#tarefas-periodico .tasks-container'),
+    'nao-periodico': document.querySelector('#tarefas-nao-periodico .tasks-container'),
+    'personalizado': document.querySelector('#tarefas-personalizado .tasks-container'),
+  };
+
+  // LIMPAR CONTAINERS (antes de popular)
+  Object.values(containers).forEach(c => c.innerHTML = '');
+
+  // SEPARAR TAREFAS
+  tarefasFuturas   = tarefas.filter(t => !t.finalizada && t.dataLimite >= agora);
+  tarefasExpiradas = tarefas.filter(t => !t.finalizada && t.dataLimite <  agora);
+  tarefasConcluidas= tarefas.filter(t =>  t.finalizada);
+
+  // ORDENAR POR DATA
+  tarefas.sort((a, b) => a.dataLimite - b.dataLimite);
+
+  // RENDERIZAR FUTURAS
+  tarefasFuturas.forEach(t => {
+    const div = renderizarTarefa(t);
+    containers[t.tipo].appendChild(div);
+  });
+
+  // ADICIONAR NO CARD DE CONCLUÍDAS E EXPIRADAS
+  tarefasExpiradas.forEach(t => adicionarNaCard(t, 'purple-card'));
+  tarefasConcluidas.forEach(t => adicionarNaCard(t, 'blue-card'));
+
+  // ATUALIZA XP
+  atualizarXP(tarefasConcluidas);
+
+  // ATUALIZA PRÓXIMA TAREFA
+  tempoMaisRecente = tarefasFuturas.length ? tarefasFuturas[0].dataLimite : null;
+  atualizarContadorProximaTarefa();
+
+  carregandoTarefas = false;
 }
+
+
 
 function atualizarXP(tarefasConcluidas) {
   const xpPorTarefa = 10;
@@ -125,9 +153,10 @@ function atualizarXP(tarefasConcluidas) {
 
 
 
+
 function limparCards() {
-    document.querySelector('.blue-card').innerHTML = '<span class="card-title">TAREFAS A REALIZAR</span>';
-    document.querySelector('.purple-card').innerHTML = '<span class="card-title">TAREFAS REALIZADAS</span>';
+    document.querySelector('.blue-card').innerHTML = '<span class="card-title">TAREFAS CONCLUÍDAS</span>';
+    document.querySelector('.purple-card').innerHTML = '<span class="card-title">TAREFAS EXPIRADAS</span>';
 }
 
 function adicionarNaCard(tarefa, cardClass) {
@@ -190,34 +219,53 @@ function abrirModalDetalhe(tarefa) {
     };
   }
 
-function atualizarContadorProximaTarefa() {
-  const span = document.querySelector('.next-event');
-
-  clearInterval(intervaloContador);
-
-  intervaloContador = setInterval(() => {
+  function atualizarContadorProximaTarefa() {
+    const span = document.querySelector('.next-event');
+  
+    clearInterval(intervaloContador);
+  
+    intervaloContador = setInterval(() => {
       const agora = new Date();
-
-      // Remove vencidas da lista
-      tarefasFuturas = tarefasFuturas.filter(t => t.dataLimite > agora);
-      tempoMaisRecente = tarefasFuturas.length ? tarefasFuturas[0].dataLimite : null;
-
-      if (!tempoMaisRecente) {
-          span.textContent = '⏰ Sem tarefas futuras';
-          return;
+  
+      // Remover tarefas vencidas da lista de futuras
+      const aindaFuturas = [];
+      tarefasFuturas.forEach(t => {
+        if (t.dataLimite <= agora) {
+          // Venceu: mover para expiradas
+          tarefasExpiradas.push(t);
+  
+          // Remover visual da lista
+          const elem = document.querySelector(`[data-id="${t.id}"]`);
+          if (elem) elem.remove();
+  
+          // Adicionar no card de expiradas
+          adicionarNaCard(t, 'purple-card');
+        } else {
+          aindaFuturas.push(t); // ainda válida
+        }
+      });
+  
+      tarefasFuturas = aindaFuturas;
+  
+      // Atualizar próxima tarefa (se houver)
+      if (tarefasFuturas.length === 0) {
+        span.textContent = '⏰ Sem tarefas futuras';
+        tempoMaisRecente = null;
+        return;
       }
-
+  
+      tarefasFuturas.sort((a, b) => a.dataLimite - b.dataLimite);
+      tempoMaisRecente = tarefasFuturas[0].dataLimite;
+  
       const diff = tempoMaisRecente - agora;
-      if (diff <= 0) {
-          span.textContent = '⏰ Tarefa vencida!';
-      } else {
-          const horas = Math.floor(diff / (1000 * 60 * 60));
-          const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          const segundos = Math.floor((diff % (1000 * 60)) / 1000);
-          span.textContent = `⏰ Próx. em ${horas}h ${minutos}m ${segundos}s`;
-      }
-  }, 1000);
-}
+      const horas = Math.floor(diff / (1000 * 60 * 60));
+      const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const segundos = Math.floor((diff % (1000 * 60)) / 1000);
+      span.textContent = `⏰ Próx. em ${horas}h ${minutos}m ${segundos}s`;
+    }, 1000);
+  }
+  
+  
 
 
 function atualizarDataAtual() {
@@ -227,7 +275,6 @@ function atualizarDataAtual() {
     span.textContent = '📅 ' + agora.toLocaleDateString('pt-BR', opcoes).replace(/^\w/, c=>c.toUpperCase());
 }
 
-export { carregarTarefas, tempoMaisRecente, atualizarDataAtual };
 
 async function ajustarRecurrentes(tarefas) {
     const usuario = auth.currentUser;
@@ -275,43 +322,51 @@ async function ajustarRecurrentes(tarefas) {
     }));
   }
   document.querySelector('.next-event').addEventListener('click', () => {
-
-    const modalNextEvent = document.getElementById('modal-next-event');  // Novo modal para o "Next Event"
-    if (modalNextEvent.style.display === 'flex') {
-      return;  
-    }
+    const modalNextEvent = document.getElementById('modal-next-event');
+    if (modalNextEvent.style.display === 'flex') return;
+  
     modalNextEvent.style.display = 'flex';
-    const contentNextEvent = document.querySelector('#modal-next-event .modal-content');
-
-    // Criando a lista de tarefas vencidas
-    const listaVencidas = tarefasVencidas.map(t => {
-        const data = t.dataLimite.toLocaleString('pt-BR');
-        return `<li><strong>${t.descricao}</strong> - Vencida em: ${data}</li>`;
+  
+    
+    // Tarefas VENCIDAS (a data já passou e não foram concluídas)
+    const listaExpiradas = tarefasExpiradas.map(t => {
+      const data = t.dataLimite.toLocaleString('pt-BR');
+      return `<li><strong>${t.descricao}</strong> - Vencida em: ${data}</li>`;
     }).join('');
-
-    // Criando a lista de tarefas futuras e calculando o tempo restante
+  
+    // Tarefas FUTURAS (com data futura)
     const listaFuturas = tarefasFuturas.map(t => {
-        const dataLimite = new Date(t.dataLimite);
-        const tempoRestante = calcularTempoRestante(dataLimite);  // Função que calcula o tempo restante
-        const data = dataLimite.toLocaleString('pt-BR');
-        return `<li><strong>${t.descricao}</strong> - Próximo evento em: ${data} (Restante: ${tempoRestante})</li>`;
+      const dataLimite = new Date(t.dataLimite);
+      const tempoRestante = calcularTempoRestante(dataLimite);
+      const data = dataLimite.toLocaleString('pt-BR');
+      return `<li><strong>${t.descricao}</strong> - Próximo evento em: ${data} (Restante: ${tempoRestante})</li>`;
     }).join('');
+  
+    // Tarefas CONCLUÍDAS (checkbox marcados manualmente)
+    const listaConcluidas = tarefasConcluidas.map(t => {
+      const data = t.dataLimite.toLocaleString('pt-BR');
+      return `<li><strong>${t.descricao}</strong> - Concluída até: ${data}</li>`;
+    }).join('');
+  
+    const listaContainer = document.getElementById('lista-tarefas-organizada');
 
-    // Atualizando o conteúdo do modal
-    contentNextEvent.innerHTML = `
-        <span id="fechar-modal-next-event" class="close-button">&times;</span>
-        <h2>Tarefas Vencidas</h2>
-        <ul>${listaVencidas || '<em>Nenhuma tarefa vencida.</em>'}</ul>
+    listaContainer.innerHTML = `
+      <h2>Tarefas Vencidas</h2>
+      <ul>${listaExpiradas || '<em>Nenhuma tarefa vencida.</em>'}</ul>
 
-        <h2>Próximos Eventos</h2>
-        <ul>${listaFuturas || '<em>Nenhum evento futuro.</em>'}</ul>
+      <h2>Próximos Eventos</h2>
+      <ul>${listaFuturas || '<em>Nenhum evento futuro.</em>'}</ul>
+
+      <h2>Tarefas Concluídas</h2>
+      <ul>${listaConcluidas || '<em>Nenhuma tarefa concluída.</em>'}</ul>
     `;
 
-    // Evento de fechar o modal
+  
     document.getElementById('fechar-modal-next-event').onclick = () => {
-        document.getElementById('modal-next-event').style.display = 'none';
+      modalNextEvent.style.display = 'none';
     };
-});
+  });
+  
 
 // Função que calcula o tempo restante até a tarefa futura
 function calcularTempoRestante(dataLimite) {
@@ -327,5 +382,42 @@ function calcularTempoRestante(dataLimite) {
 
     return `${dias} dias, ${horas} horas e ${minutos} minutos`;
 }
+// Eventos dos botões de ordenação
+document.getElementById('ordenar-tipo').addEventListener('click', () => {
+  mostrarTarefasOrganizadas('tipo');
+});
+
+document.getElementById('ordenar-tempo').addEventListener('click', () => {
+  mostrarTarefasOrganizadas('tempo');
+});
+
+function mostrarTarefasOrganizadas(criterio) {
+  console.log(tarefasFuturas);
+  const container = document.getElementById('lista-tarefas-organizada');
+  const agora = new Date();
+
+  const lista = [...tarefasFuturas].filter(t => !t.finalizada && t.dataLimite > agora);
+
+  if (criterio === 'tempo') {
+    lista.sort((a, b) => a.dataLimite - b.dataLimite);
+  } else if (criterio === 'tipo') {
+    lista.sort((a, b) => (a.tipo || '').localeCompare(b.tipo || ''));
+  }
+
+  const html = lista.map(t => {
+    const tempoRestante = calcularTempoRestante(t.dataLimite);
+    const data = t.dataLimite.toLocaleString('pt-BR');
+    const tipoLabel = {
+      'periodico': 'Periódico',
+      'nao-periodico': 'Não Periódico',
+      'personalizado': 'Personalizado'
+    }[t.tipo || 'personalizado'];
+
+    return `<li><strong>${t.descricao}</strong> — ${tipoLabel} — ${data} (${tempoRestante})</li>`;
+  }).join('');
+
+  container.innerHTML = `<ul>${html || '<em>Nenhuma tarefa futura.</em>'}</ul>`;
+}
+
 
 
