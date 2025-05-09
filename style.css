@@ -97,6 +97,7 @@ body {
 }
 
 .top-info-bar {
+  font-size: 12px;
   flex: 0 0 auto;
   height: 50px; /* ou qualquer altura desejada */
   background: #1e1f24;
@@ -749,6 +750,7 @@ body.ios-pwa {
 /* Ajuste para a barra superior */
 body.ios-pwa .top-info-bar {
   padding-top: calc(env(safe-area-inset-top, 10px) + 5px);
+  
 }
 
 /* Ajuste para a barra inferior */
