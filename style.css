@@ -843,7 +843,6 @@ body.ios-pwa .bottom-nav {
 
 
 
-.modal-content input {
   margin-bottom: 10px;
   width: 100%;
   margin: 10px 0;
@@ -900,7 +899,7 @@ body.ios-pwa .bottom-nav {
   background-color: #381e47;
 }
 
-.task-rect:hover {
+.task-rect:hover { /* Cor quando o mouse passa por cima */
   background-color: #fefefe;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   transform: translateY(-2px);

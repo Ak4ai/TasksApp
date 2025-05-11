@@ -155,8 +155,8 @@ function atualizarXP(tarefasConcluidas) {
 
 
 function limparCards() {
-    document.querySelector('.blue-card').innerHTML = '<span class="card-title">TAREFAS CONCLUÍDAS</span>';
-    document.querySelector('.purple-card').innerHTML = '<span class="card-title">TAREFAS EXPIRADAS</span>';
+  document.querySelector('.purple-card').innerHTML = '<span class="card-title">TAREFAS EXPIRADAS</span>';
+  document.querySelector('.blue-card').innerHTML = '<span class="card-title">TAREFAS CONCLUÍDAS</span>';
 }
 
 function adicionarNaCard(tarefa, cardClass) {
