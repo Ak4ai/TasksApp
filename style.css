@@ -842,7 +842,7 @@ body.ios-pwa .bottom-nav {
 }
 
 
-
+.modal-content input {
   margin-bottom: 10px;
   width: 100%;
   margin: 10px 0;
@@ -888,15 +888,15 @@ body.ios-pwa .bottom-nav {
 /* Paleta suave por tipo */
 .task-rect[data-tipo="periodico"] {
   border-color: #a3d5ff;
-  background-color: #381e47;
+  background-color: #8f68a5;
 }
 .task-rect[data-tipo="nao-periodico"] {
   border-color: #ffd8a3;
-  background-color: #381e47;
+  background-color: #8f68a5;
 }
 .task-rect[data-tipo="personalizado"] {
   border-color: #d5ffa3;
-  background-color: #381e47;
+  background-color: #8f68a5;
 }
 
 .task-rect:hover { /* Cor quando o mouse passa por cima */

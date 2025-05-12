@@ -32,27 +32,28 @@ function renderizarTarefa(t) {
   const checkbox = div.querySelector('.checkbox-tarefa');
   checkbox.addEventListener('click', async (e) => {
     e.stopPropagation();
-  
+
+    // 1) apenas marca como finalizada e atualiza o Firestore
     const usuario = auth.currentUser;
-    await updateDoc(doc(db, "usuarios", usuario.uid, "tarefas", t.id), {
-      finalizada: checkbox.checked
-    });
-  
-    // Remover tarefa do DOM
+    await updateDoc(
+      doc(db, "usuarios", usuario.uid, "tarefas", t.id),
+      { finalizada: checkbox.checked }
+    );
+
+    // 2) move visualmente para o card de concluídas
     div.remove();
-  
-    // Atualizar listas locais (remover das futuras e adicionar na concluídas)
     tarefasFuturas = tarefasFuturas.filter(task => task.id !== t.id);
     if (checkbox.checked) {
       tarefasConcluidas.push(t);
       adicionarNaCard(t, 'blue-card');
     } else {
+      // caso desmarque, volta para futuras
       tarefasFuturas.push(t);
       const container = document.querySelector(`#tarefas-${t.tipo} .tasks-container`);
-      const novaDiv = renderizarTarefa(t);
-      container.appendChild(novaDiv);
+      container.appendChild(renderizarTarefa(t));
     }
-  
+
+    // 3) recalcula o XP (baseado em tarefasConcluidas)
     atualizarXP(tarefasConcluidas);
     atualizarContadorProximaTarefa();
   });
@@ -174,6 +175,7 @@ function adicionarNaCard(tarefa, cardClass) {
     p.setAttribute('data-id', tarefa.id);
 
     card.appendChild(p);
+  adicionarIconeDeExcluir(p, tarefa);
 }
 
 async function atualizarTarefaNoFirestore(id, descricao, dataLimite) {
@@ -186,6 +188,22 @@ async function excluirTarefaDoFirestore(id) {
     const usuario = auth.currentUser;
     const refDoc = doc(db, "usuarios", usuario.uid, "tarefas", id);
     await deleteDoc(refDoc);
+}
+
+function adicionarIconeDeExcluir(pElem, tarefa) {
+  const btn = document.createElement('button');
+  btn.textContent = '🗑';
+  btn.title = 'Excluir permanentemente';
+  btn.style.marginLeft = '8px';
+  btn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    // Remove do Firestore
+    await excluirTarefaDoFirestore(tarefa.id);
+    // Remove apenas do DOM, **não** de tarefasConcluidas nem tarefasExpiradas
+    pElem.remove();
+    // NÃO chama atualizarXP() — assim o XP não cai
+  });
+  pElem.appendChild(btn);
 }
 
 function abrirModalDetalhe(tarefa) {
