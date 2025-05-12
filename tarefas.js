@@ -1,6 +1,6 @@
 import { auth } from './auth.js';
 import { db } from './firebase-config.js';
-import { collection, getDocs, getDoc, doc, updateDoc, deleteDoc,Timestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { collection, getDocs, getDoc, doc, updateDoc, deleteDoc,Timestamp, addDoc } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 export { carregarTarefas, tempoMaisRecente, atualizarDataAtual };
 
 let carregandoTarefas = false;
@@ -31,32 +31,26 @@ function renderizarTarefa(t) {
 
   const checkbox = div.querySelector('.checkbox-tarefa');
   checkbox.addEventListener('click', async (e) => {
-    e.stopPropagation();
+  e.stopPropagation();
+  const usuario = auth.currentUser;
 
-    // 1) apenas marca como finalizada e atualiza o Firestore
-    const usuario = auth.currentUser;
-    await updateDoc(
-      doc(db, "usuarios", usuario.uid, "tarefas", t.id),
-      { finalizada: checkbox.checked }
-    );
+  // 1) marca no Firestore
+  await updateDoc(
+    doc(db, "usuarios", usuario.uid, "tarefas", t.id),
+    { finalizada: checkbox.checked }
+  );
 
-    // 2) move visualmente para o card de concluídas
-    div.remove();
-    tarefasFuturas = tarefasFuturas.filter(task => task.id !== t.id);
-    if (checkbox.checked) {
-      tarefasConcluidas.push(t);
-      adicionarNaCard(t, 'blue-card');
-    } else {
-      // caso desmarque, volta para futuras
-      tarefasFuturas.push(t);
-      const container = document.querySelector(`#tarefas-${t.tipo} .tasks-container`);
-      container.appendChild(renderizarTarefa(t));
-    }
+  // 2) se período e marcado, cria próxima instância
+  if (t.tipo === 'periodico' && checkbox.checked) {
+    await processarTarefaPeriodicaAoMarcar({
+      ...t,
+      finalizada: true
+    });
+  }
 
-    // 3) recalcula o XP (baseado em tarefasConcluidas)
-    atualizarXP(tarefasConcluidas);
-    atualizarContadorProximaTarefa();
-  });
+  // 3) atualiza UI / XP etc.
+  carregarTarefas();
+});
   
 
   div.addEventListener('click', () => abrirModalDetalhe(t));
@@ -291,51 +285,96 @@ function atualizarDataAtual() {
 }
 
 
-async function ajustarRecurrentes(tarefas) {
-    const usuario = auth.currentUser;
-    const updates = []; // { id, newDate }[]
-  
-    tarefas.forEach(t => {
-      if (t.tipo !== 'periodico') return;
-  
-      let next = new Date(t.dataLimite);
-      const agora = new Date();
-  
-      // enquanto a data já tiver passado, gere a próxima
-      while (next < agora) {
-        switch (t.frequencia) {
-          case 'diario':
-            next.setDate(next.getDate() + 1);
-            break;
-          case 'semanal':
-            next.setDate(next.getDate() + 7);
-            break;
-          case 'mensal':
-            next.setMonth(next.getMonth() + 1);
-            break;
-          default:
-            // se for um número de dias
-            if (typeof t.frequencia === 'number') {
-              next = new Date(next.getTime() + t.frequencia * 86400000);
-            } else {
-              return;
-            }
+export async function ajustarRecurrentes(tarefas) {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+  const tarefasColecao = collection(db, "usuarios", usuario.uid, "tarefas");
+  const hoje = new Date();
+
+  // para não disparar múltiplas criações por task, iteramos uma a uma
+  for (const t of tarefas) {
+    if (t.tipo !== 'periodico'            // só periódicas
+        || t.finalizada                   // já finalizadas
+        || t.dataLimite >= hoje           // ainda não expirou
+    ) {
+      continue;
+    }
+
+    // calcula apenas UMA vez o próximo prazo
+    const next = new Date(t.dataLimite);
+    switch (t.frequencia) {
+      case 'diario':  next.setDate(next.getDate() + 1); break;
+      case 'semanal': next.setDate(next.getDate() + 7); break;
+      case 'mensal':  next.setMonth(next.getMonth() + 1); break;
+      default:
+        if (typeof t.frequencia === 'number') {
+          next.setDate(next.getDate() + t.frequencia);
         }
-      }
-  
-      // se mudou, agenda update
-      if (next.getTime() !== t.dataLimite.getTime()) {
-        updates.push({ id: t.id, novaData: next });
-        t.dataLimite = next;  // já altera no objeto para renderização
-      }
-    });
-  
-    // faz os updates em lote
-    await Promise.all(updates.map(u => {
-      const refDoc = doc(db, "usuarios", usuario.uid, "tarefas", u.id);
-      return updateDoc(refDoc, { dataLimite: Timestamp.fromDate(u.novaData) });
-    }));
+    }
+
+    // 1) cria a nova tarefa na coleção
+    const novaTarefa = {
+      descricao: t.descricao,
+      tipo: t.tipo,
+      frequencia: t.frequencia,
+      dataLimite: Timestamp.fromDate(next),
+      finalizada: false
+    };
+    if (t.padraoPersonalizado != null) {
+      novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
+    }
+    await addDoc(tarefasColecao, novaTarefa);
+
+    // 2) marca a antiga como finalizada (para não recriar de novo)
+    const refAntigo = doc(db, "usuarios", usuario.uid, "tarefas", t.id);
+    await updateDoc(refAntigo, { finalizada: true });
   }
+}
+
+export async function processarTarefaPeriodicaAoMarcar(t) {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+
+  // só tarefas periódicas recém-concluídas
+  if (t.tipo !== 'periodico' || !t.finalizada) {
+    return;
+  }
+
+  // calcula a próxima data **uma única vez**
+  const next = new Date(t.dataLimite);
+  switch (t.frequencia) {
+    case 'diario':
+      next.setDate(next.getDate() + 1);
+      break;
+    case 'semanal':
+      next.setDate(next.getDate() + 7);
+      break;
+    case 'mensal':
+      next.setMonth(next.getMonth() + 1);
+      break;
+    default:
+      if (typeof t.frequencia === 'number') {
+        next.setDate(next.getDate() + t.frequencia);
+      }
+  }
+
+  // 1) cria a nova tarefa com a próxima data
+  const tarefasColecao = collection(db, "usuarios", usuario.uid, "tarefas");
+  const novaTarefa = {
+    descricao: t.descricao,
+    tipo: t.tipo,
+    frequencia: t.frequencia,
+    dataLimite: Timestamp.fromDate(next),
+    finalizada: false
+  };
+  if (t.padraoPersonalizado != null) {
+    novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
+  }
+  await addDoc(tarefasColecao, novaTarefa);
+
+  // 2) marca a tarefa original como finalizada (já feito pelo listener)
+  // nada mais necessário aqui pois já foi atualizada antes de chamar esta função
+}
 
   document.querySelector('.next-event').addEventListener('click', () => {
     const modalNextEvent = document.getElementById('modal-next-event');
