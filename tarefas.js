@@ -101,22 +101,46 @@ async function carregarTarefas() {
   Object.values(containers).forEach(c => c.innerHTML = '');
 
   // SEPARAR TAREFAS
-  tarefasFuturas   = tarefas.filter(t => !t.finalizada && t.dataLimite >= agora);
-  tarefasExpiradas = tarefas.filter(t => !t.finalizada && t.dataLimite <  agora);
-  tarefasConcluidas= tarefas.filter(t =>  t.finalizada);
+  tarefasFuturas    = tarefas.filter(t => !t.finalizada && t.dataLimite >= agora);
+  tarefasExpiradas  = tarefas.filter(t => !t.finalizada && t.dataLimite <  agora);
+  tarefasConcluidas = tarefas.filter(t =>  t.finalizada);
 
   // ORDENAR POR DATA
   tarefas.sort((a, b) => a.dataLimite - b.dataLimite);
 
-  // RENDERIZAR FUTURAS
+  // RENDERIZAR FUTURAS NAS RESPECTIVAS ABAS
   tarefasFuturas.forEach(t => {
     const div = renderizarTarefa(t);
     containers[t.tipo].appendChild(div);
   });
 
-  // ADICIONAR NO CARD DE CONCLUÍDAS E EXPIRADAS
+  // 1) Continua populando os cards que você já tinha
   tarefasExpiradas.forEach(t => adicionarNaCard(t, 'purple-card'));
   tarefasConcluidas.forEach(t => adicionarNaCard(t, 'blue-card'));
+
+  // 2) AQUI VEM A PARTE NOVA: popular TODOS os containers de "expired-tasks" e "completed-tasks"
+  
+  // Seleciona **todos** os containers de tarefas expiradas
+  const allExpiredLists = document.querySelectorAll('.expired-tasks');
+  tarefasExpiradas.forEach(t => {
+    const data = t.dataLimite.toLocaleString('pt-BR');
+    allExpiredLists.forEach(container => {
+      const li = document.createElement('li');
+      li.innerHTML = `<strong>${t.descricao}</strong> - Vencida em: ${data}`;
+      container.appendChild(li);
+    });
+  });
+
+  // Seleciona **todos** os containers de tarefas concluídas
+  const allCompletedLists = document.querySelectorAll('.completed-tasks');
+  tarefasConcluidas.forEach(t => {
+    const data = t.dataLimite.toLocaleString('pt-BR');
+    allCompletedLists.forEach(container => {
+      const li = document.createElement('li');
+      li.innerHTML = `<strong>${t.descricao}</strong> - Concluída até: ${data}`;
+      container.appendChild(li);
+    });
+  });
 
   // ATUALIZA XP
   atualizarXP(tarefasConcluidas);
@@ -144,10 +168,6 @@ function atualizarXP(tarefasConcluidas) {
   xpInfo.querySelector('.xp-fill').style.width = `${porcentagem}%`;
   xpInfo.querySelector('span').textContent = `XP: ${xpAtual} / 100`;
 }
-
-
-
-
 
 function limparCards() {
   document.querySelector('.purple-card').innerHTML = '<span class="card-title">TAREFAS EXPIRADAS</span>';

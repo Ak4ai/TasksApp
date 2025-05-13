@@ -100,90 +100,101 @@
   
   <!-- CONTEÚDO PRINCIPAL -->
   <div class="main-content">
-   
-
-  
     
-  
-  <!-- TABS -->
-  <div class="tabs">
-    <!-- Aba Home -->
-    <div id="tab-home" class="tab-content active">
-    <!-- QUADRADO PERSONAGEM -->
-    <div class="character-box">
-      <img src="PERSONAGEM.jpeg" alt="Personagem" />
-      <div class="xp-info">
-        <strong>Nível 1</strong>
-        <div class="xp-bar">
-          <div class="xp-fill" style="width: 20%;"></div>
-        </div>
-        <span>XP: 0 / 100</span>
-      </div>
-    </div>    </div>
-
-    <!-- Aba Tarefas -->
-    <div id="tab-tasks" class="tab-content">
-      <div id="app">
-        <div id="tarefas-periodico" class="task-group">
-          <h2>Periódicas</h2>
-          <div class="tasks-container"></div>
-        </div>
-        <div id="tarefas-nao-periodico" class="task-group">
-          <h2>Não Periódicas</h2>
-          <div class="tasks-container"></div>
-        </div>
-        <div id="tarefas-personalizado" class="task-group">
-          <h2>Personalizadas</h2>
-          <div class="tasks-container"></div>
-        </div>        
-        <button id="criar-button">Criar Tarefa</button>
-        <div id="app-body">
-          <div class="card purple-card">
-            <span class="card-title">TAREFAS EXPIRADAS</span>
+    
+    <!-- TABS -->
+    <div class="tabs">
+      <!-- Aba Home -->
+      <div id="tab-home" class="tab-content active">
+      <!-- QUADRADO PERSONAGEM -->
+      <div class="character-box">
+        <img src="PERSONAGEM.jpeg" alt="Personagem" />
+        <div class="xp-info">
+          <strong>Nível 1</strong>
+          <div class="xp-bar">
+            <div class="xp-fill" style="width: 20%;"></div>
           </div>
-          <div class="card blue-card">
-            <span class="card-title">TAREFAS CONCLUÍDAS</span>
-          </div>
+          <span>XP: 0 / 100</span>
+        </div>
+      </div>    </div>
+
+      <!-- Aba Tarefas Periódicas -->
+      <div id="tab-tasks" class="tab-content">
+        <div id="app">
+          <div id="tarefas-periodico" class="task-group">
+            <h2>Periódicas</h2>
+            <div class="tasks-container"></div>
+          </div>   
+          <button id="criar-button">Criar Tarefa</button>
         </div>
       </div>
-    </div>
 
-    <!-- Aba Configurações -->
-    <div id="tab-settings" class="tab-content">
-      <h2>Configurações</h2>
-      <!-- Exemplo: botão de logout, tema, etc. -->
-      <div class="settings-container">
-        <h3>Configurações do Usuário</h3>
-        <button id="logout-button">Logout</button>
-        <button id="clear-cache-button">Limpar Cache</button>
+      <!-- Aba Tarefas Nao Periodicas-->
+      <div id="tab-tasks-nao-periodicas" class="tab-content">
+          <div id="tarefas-nao-periodico" class="task-group">
+            <h2>Não Periódicas</h2>
+            <div class="tasks-container"></div>
+          </div>
       </div>
-      <script>
-        document.getElementById('clear-cache-button').addEventListener('click', () => {
-          if (confirm('Tem certeza que deseja limpar o cache, LocalStorage e recarregar a página?')) {
-            // Limpar LocalStorage
-            localStorage.clear();
 
-            // Limpar Cache
-            if ('caches' in window) {
-              caches.keys().then(cacheNames => {
-                cacheNames.forEach(cacheName => {
-                  caches.delete(cacheName);
+      <!-- Aba Tarefas Personalizadas-->
+      <div id="tab-tasks-personalizadas" class="tab-content">
+          <div id="tarefas-personalizado" class="task-group">
+            <h2>Personalizadas</h2>
+            <div class="tasks-container"></div>
+          </div>
+      </div>
+
+
+      <!-- Aba Configurações -->
+      <div id="tab-settings" class="tab-content">
+        <h2>Configurações</h2>
+        <!-- Exemplo: botão de logout, tema, etc. -->
+        <div class="settings-container">
+          <h3>Configurações do Usuário</h3>
+          <button id="logout-button">Logout</button>
+          <button id="clear-cache-button">Limpar Cache</button>
+        </div>
+        <script>
+          document.getElementById('clear-cache-button').addEventListener('click', () => {
+            if (confirm('Tem certeza que deseja limpar o cache, LocalStorage e recarregar a página?')) {
+              // Limpar LocalStorage
+              localStorage.clear();
+
+              // Limpar Cache
+              if ('caches' in window) {
+                caches.keys().then(cacheNames => {
+                  cacheNames.forEach(cacheName => {
+                    caches.delete(cacheName);
+                  });
                 });
-              });
-            }
+              }
 
-            // Hard Refresh
-            location.reload(true);
-          }
-        });
-      </script>
+              // Hard Refresh
+              location.reload(true);
+            }
+          });
+        </script>
+      </div>
     </div>
-  </div>
+
+    <div id="app-body">
+      <div class="card purple-card">
+        <span class="card-title">TAREFAS EXPIRADAS</span>
+        <div class="expired-tasks"></div>
+      </div>
+      <div class="card blue-card">
+        <span class="card-title">TAREFAS CONCLUÍDAS</span>
+        <div class="completed-tasks"></div>
+      </div>
+    </div>
   </div>
   <!-- NAVEGAÇÃO INFERIOR -->
   <div class="bottom-nav">
     <button class="nav-button" data-tab="tab-home">🏠</button>
     <button class="nav-button" data-tab="tab-tasks">📋</button>
+    <button class="nav-button" data-tab="tab-tasks-nao-periodicas">📋</button>
+    <button class="nav-button" data-tab="tab-tasks-personalizadas">📋</button>
     <button class="nav-button" data-tab="tab-settings">⚙️</button>
   </div>
 

@@ -180,6 +180,11 @@ document.getElementById('criar-button').addEventListener('click', () => {
         if (alvo === 'tab-tasks') {
           carregarTarefas();
         }
+
+        
+
+        // ⬇️ ATUALIZA VISIBILIDADE DO APP BODY
+        atualizarVisibilidadeAppBody();
       });
     });
   
@@ -236,6 +241,11 @@ function handleSwipe() {
     // Remove animações após transição
     activeTab.classList.remove('tab-exit');
     nextTab.classList.remove('tab-enter');
+
+    
+
+    // ⬇️ ATUALIZA VISIBILIDADE DO APP BODY
+    atualizarVisibilidadeAppBody();
   }, 250); // deve ser igual ao tempo da animação CSS
 
   // Desativa hover momentaneamente
@@ -249,7 +259,23 @@ function handleSwipe() {
   }, 300);
 }
 
-  
+function atualizarVisibilidadeAppBody() {
+  const abaAtiva = document.querySelector('.tab-content.active');
+  const appBody = document.getElementById('app-body');
+
+  const abasComTarefas = [
+    'tab-tasks',
+    'tab-tasks-nao-periodicas',
+    'tab-tasks-personalizadas'
+  ];
+
+  if (abaAtiva && abasComTarefas.includes(abaAtiva.id)) {
+    appBody.style.display = 'flex';
+  } else {
+    appBody.style.display = 'none';
+  }
+}
+
   
 
 
