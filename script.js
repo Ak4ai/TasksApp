@@ -147,9 +147,12 @@ async function adicionarTarefa(descricao, dataLimite) {
 
 
 // Abrir e fechar modal
-document.getElementById('criar-button').addEventListener('click', () => {
+document.querySelectorAll('.criar-button').forEach(botao => {
+  botao.addEventListener('click', () => {
     document.getElementById('modal-criar-tarefa').style.display = 'flex';
   });
+});
+
   
   document.getElementById('fechar-modal').addEventListener('click', () => {
     document.getElementById('modal-criar-tarefa').style.display = 'none';
@@ -262,6 +265,7 @@ function handleSwipe() {
 function atualizarVisibilidadeAppBody() {
   const abaAtiva = document.querySelector('.tab-content.active');
   const appBody = document.getElementById('app-body');
+  const navSeparator = document.querySelector('.bottom-nav-separator');
 
   const abasComTarefas = [
     'tab-tasks',
@@ -269,12 +273,17 @@ function atualizarVisibilidadeAppBody() {
     'tab-tasks-personalizadas'
   ];
 
-  if (abaAtiva && abasComTarefas.includes(abaAtiva.id)) {
-    appBody.style.display = 'flex';
-  } else {
-    appBody.style.display = 'none';
+  const mostrar = abaAtiva && abasComTarefas.includes(abaAtiva.id);
+
+  // Atualiza app-body
+  appBody.style.display = mostrar ? 'flex' : 'none';
+
+  // Atualiza estilo do separador
+  if (navSeparator) {
+    navSeparator.classList.toggle('active', mostrar);
   }
 }
+
 
   
 
@@ -305,13 +314,13 @@ function atualizarVisibilidadeAppBody() {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  const tipoSel       = document.getElementById('tipo-tarefa');
-  const freqWrap      = document.getElementById('frequencia-wrapper');
-  const padraoWrap    = document.getElementById('padrao-wrapper');
-  const modalCriar    = document.getElementById('modal-criar-tarefa');
-  const btnAbrirModal = document.getElementById('criar-button');
-  const btnFechar     = document.getElementById('fechar-modal');
-  const btnCriarTarefa= document.getElementById('botao-criar-tarefa');
+  const tipoSel           = document.getElementById('tipo-tarefa');
+  const freqWrap          = document.getElementById('frequencia-wrapper');
+  const padraoWrap        = document.getElementById('padrao-wrapper');
+  const modalCriar        = document.getElementById('modal-criar-tarefa');
+  const botoesAbrirModal  = document.querySelectorAll('.criar-button');
+  const btnFechar         = document.getElementById('fechar-modal');
+  const btnCriarTarefa    = document.getElementById('botao-criar-tarefa');
 
   // 1) Função que mostra ou esconde os wrappers de acordo com o tipo
   function ajustarWrappers() {
@@ -331,11 +340,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2) Quando o select muda, ajusta imediatamente
   tipoSel.addEventListener('change', ajustarWrappers);
 
-  // 3) Ao abrir o modal, resetar valores e ajustar visibilidade antes de mostrar
-  btnAbrirModal.addEventListener('click', () => {
-    tipoSel.value = 'periodico';  // ou valor padrão de sua escolha
-    ajustarWrappers();
-    modalCriar.style.display = 'flex';
+  // Corrigido: aplicar a função para cada botão com a classe 'criar-button'
+  botoesAbrirModal.forEach(botao => {
+    botao.addEventListener('click', () => {
+      tipoSel.value = 'periodico';  // ou valor padrão
+      ajustarWrappers();            // ajustar visibilidade de elementos
+      modalCriar.style.display = 'flex'; // mostrar modal
+    });
   });
 
   // 4) Ao fechar o modal (X), apenas esconde

@@ -120,29 +120,35 @@
 
       <!-- Aba Tarefas Periódicas -->
       <div id="tab-tasks" class="tab-content">
-        <div id="app">
+        <div class="app">
           <div id="tarefas-periodico" class="task-group">
             <h2>Periódicas</h2>
             <div class="tasks-container"></div>
           </div>   
-          <button id="criar-button">Criar Tarefa</button>
+          <button class="criar-button">Criar Tarefa</button>
         </div>
       </div>
 
       <!-- Aba Tarefas Nao Periodicas-->
       <div id="tab-tasks-nao-periodicas" class="tab-content">
+        <div class="app">
           <div id="tarefas-nao-periodico" class="task-group">
             <h2>Não Periódicas</h2>
             <div class="tasks-container"></div>
           </div>
+          <button class="criar-button">Criar Tarefa</button>
+        </div>
       </div>
 
       <!-- Aba Tarefas Personalizadas-->
       <div id="tab-tasks-personalizadas" class="tab-content">
+        <div class="app">
           <div id="tarefas-personalizado" class="task-group">
             <h2>Personalizadas</h2>
             <div class="tasks-container"></div>
           </div>
+          <button class="criar-button">Criar Tarefa</button>
+        </div>
       </div>
 
 
@@ -192,9 +198,11 @@
   <!-- NAVEGAÇÃO INFERIOR -->
   <div class="bottom-nav">
     <button class="nav-button" data-tab="tab-home">🏠</button>
-    <button class="nav-button" data-tab="tab-tasks">📋</button>
-    <button class="nav-button" data-tab="tab-tasks-nao-periodicas">📋</button>
-    <button class="nav-button" data-tab="tab-tasks-personalizadas">📋</button>
+    <div class="bottom-nav-separator">
+      <button class="nav-button" data-tab="tab-tasks">📋</button>
+      <button class="nav-button" data-tab="tab-tasks-nao-periodicas">📋</button>
+      <button class="nav-button" data-tab="tab-tasks-personalizadas">📋</button>
+    </div>
     <button class="nav-button" data-tab="tab-settings">⚙️</button>
   </div>
 
