@@ -29,6 +29,23 @@ function renderizarTarefa(t) {
     </span>
   `;
 
+  if (anexoRaw) {
+    const anexo = JSON.parse(anexoRaw);
+
+    // Cria link de visualização/download
+    const link = document.createElement('a');
+    link.href = anexo.base64;
+    link.download = anexo.nome;
+    link.textContent = `📎 ${anexo.nome}`;
+    link.target = '_blank'; // abre em nova aba para visualização
+    link.style.display = 'block';
+    link.style.marginTop = '4px';
+    link.style.color = '#007BFF';
+    link.style.textDecoration = 'underline';
+
+    div.appendChild(link);
+  }
+
   const checkbox = div.querySelector('.checkbox-tarefa');
   checkbox.addEventListener('click', async (e) => {
   e.stopPropagation();

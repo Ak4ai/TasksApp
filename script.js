@@ -104,7 +104,14 @@ function isIOSDevice() {
 }
 
 
-
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 
 
@@ -138,7 +145,26 @@ async function adicionarTarefa(descricao, dataLimite) {
 
   // 4) Grava no Firestore
   const tarefasRef = collection(db, "usuarios", usuario.uid, "tarefas");
-  await addDoc(tarefasRef, novaTarefa);
+  const docRef = await addDoc(tarefasRef, novaTarefa);
+
+
+  // Lida com o anexo (se houver)
+  console.log("input anexoArquivo existe?", document.getElementById('anexoArquivo'));
+  const input = document.getElementById('anexoArquivo');
+  const arquivo = input.files[0];
+
+  if (arquivo) {
+    const base64 = await fileToBase64(arquivo);
+    const anexoObj = {
+      nome: arquivo.name,
+      tipo: arquivo.type,
+      base64: base64
+    };
+
+    // Salva no localStorage usando o ID da tarefa
+    localStorage.setItem(`anexos_${docRef.id}`, JSON.stringify(anexoObj));
+  }
+
 
   // 5) Recarrega a UI
   carregarTarefas();
