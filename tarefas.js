@@ -29,6 +29,8 @@ function renderizarTarefa(t) {
     </span>
   `;
 
+  // Verifica se existe anexo no localStorage
+  const anexoRaw = localStorage.getItem(`anexos_${t.id}`);
   if (anexoRaw) {
     const anexo = JSON.parse(anexoRaw);
 
