@@ -1,6 +1,6 @@
 {
-    "name": "Tasks App",
-    "short_name": "Tasks",
+    "name": "R.U.N.A App",
+    "short_name": "RUNA",
     "description": "Descrição do seu projeto",
     "start_url": "/TasksApp/",
     "display": "standalone",
