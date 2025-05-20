@@ -9,6 +9,22 @@ let intervaloContador = null;
 let tarefasFuturas = [];
 let tarefasExpiradas = [];
 let tarefasConcluidas = [];
+const subTagsPorCategoria = {
+  "Físico": ["Corrida", "Treino", "Alongamento", "Natação", "Ciclismo"],
+  "Intelecto": ["Leitura", "Prova", "Pesquisa", "Programação", "Estudo"],
+  "Social": ["Reunião", "Networking", "Festa", "Voluntariado"],
+  "Criativo": ["Desenho", "Escrita", "Música", "Fotografia"],
+  "Espiritual": ["Meditação", "Yoga", "Orações"]
+};
+const classesJogador = {
+  "Guerreiro": { bonusCategorias: ["Físico"], bonusXP: 0.5 },        // +50% XP em tarefas Físicas
+  "Mago": { bonusCategorias: ["Intelecto"], bonusXP: 0.5 }, // +50% XP em tarefas Intelecto
+  "Ladino": { bonusCategorias: ["Social"], bonusXP: 0.5 },  // +50% XP em tarefas Social
+  "Bardo": { bonusCategorias: ["Criativo"], bonusXP: 0.5 },    // +50% XP em tarefas Criativo
+  "Bruxo": { bonusCategorias: ["Espiritual"], bonusXP: 0.5 }   // +50% XP em tarefas Espiritual
+};
+
+
 
 function renderizarTarefa(t) {
   const div = document.createElement('div');
@@ -28,6 +44,22 @@ function renderizarTarefa(t) {
       }[t.tipo || 'personalizado']}
     </span>
   `;
+
+  // Adiciona visualização de tags se existirem
+  if (t.tags && t.tags.length) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "tag-list-wrapper";
+
+  t.tags.forEach((tag, index) => {
+    const tagElem = document.createElement("span");
+    tagElem.classList.add("tag", `tag-nivel-${index + 1}`);
+    tagElem.textContent = tag;
+    wrapper.appendChild(tagElem);
+  });
+
+  div.appendChild(wrapper);
+}
+
 
   // Verifica se existe anexo no localStorage
   const anexoRaw = localStorage.getItem(`anexos_${t.id}`);
@@ -50,33 +82,51 @@ function renderizarTarefa(t) {
 
   const checkbox = div.querySelector('.checkbox-tarefa');
   checkbox.addEventListener('click', async (e) => {
-  e.stopPropagation();
-  const usuario = auth.currentUser;
+    e.stopPropagation();
+    const usuario = auth.currentUser;
 
-  // 1) marca no Firestore
-  await updateDoc(
-    doc(db, "usuarios", usuario.uid, "tarefas", t.id),
-    { finalizada: checkbox.checked }
-  );
+    // 1) marca no Firestore
+    await updateDoc(
+      doc(db, "usuarios", usuario.uid, "tarefas", t.id),
+      { finalizada: checkbox.checked }
+    );
 
-  // 2) se período e marcado, cria próxima instância
-  if (t.tipo === 'periodico' && checkbox.checked) {
-    await processarTarefaPeriodicaAoMarcar({
-      ...t,
-      finalizada: true
-    });
-  }
+    // 2) se período e marcado, cria próxima instância
+    if (t.tipo === 'periodico' && checkbox.checked) {
+      await processarTarefaPeriodicaAoMarcar({
+        ...t,
+        finalizada: true
+      });
+    }
 
-  // 3) atualiza UI / XP etc.
-  carregarTarefas();
-});
-  
+    // 3) atualiza UI / XP etc.
+    carregarTarefas();
+  });
 
   div.addEventListener('click', () => abrirModalDetalhe(t));
 
   return div;
 }
 
+
+document.getElementById("tagPrincipal").addEventListener("change", (e) => {
+  const subTagSelect = document.getElementById("tagSecundaria");
+  const valorPrincipal = e.target.value;
+
+  subTagSelect.innerHTML = '<option value="">-- Subcategoria --</option>';
+
+  if (valorPrincipal && subTagsPorCategoria[valorPrincipal]) {
+    subTagsPorCategoria[valorPrincipal].forEach(sub => {
+      const opt = document.createElement("option");
+      opt.value = sub;
+      opt.textContent = sub;
+      subTagSelect.appendChild(opt);
+    });
+    subTagSelect.disabled = false;
+  } else {
+    subTagSelect.disabled = true;
+  }
+});
 
 async function carregarTarefas() {
   if (carregandoTarefas) return;
@@ -104,7 +154,8 @@ async function carregarTarefas() {
       tipo: data.tipo || 'personalizado',
       finalizada: data.finalizada || false,
       frequencia: data.frequencia,
-      padraoPersonalizado: data.padraoPersonalizado
+      padraoPersonalizado: data.padraoPersonalizado,
+      tags: data.tags || []
     });
   });
 
@@ -162,7 +213,9 @@ async function carregarTarefas() {
   });
 
   // ATUALIZA XP
-  atualizarXP(tarefasConcluidas);
+  const classeAtual = localStorage.getItem('classeAtiva') || 'Guerreiro';
+  atualizarXP(tarefasConcluidas, classeAtual);
+
 
   // ATUALIZA PRÓXIMA TAREFA
   tempoMaisRecente = tarefasFuturas.length ? tarefasFuturas[0].dataLimite : null;
@@ -171,11 +224,64 @@ async function carregarTarefas() {
   carregandoTarefas = false;
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+  const classeAtivaSpan = document.getElementById('classe-ativa');
+  const classeSelector = document.getElementById('classe-selector');
 
+  // Pegamos a classe salva ou usamos 'Guerreiro' como padrão
+  let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
 
-function atualizarXP(tarefasConcluidas) {
+  // Inicializa visual
+  function atualizarVisualClasse() {
+    classeAtivaSpan.textContent = classeAtiva;
+    classeSelector.value = classeAtiva;
+    classeSelector.style.display = 'none';
+    classeAtivaSpan.style.display = 'inline';
+  }
+
+  atualizarVisualClasse();
+
+  // Clica no texto para editar
+  classeAtivaSpan.addEventListener('click', () => {
+    classeAtivaSpan.style.display = 'none';
+    classeSelector.style.display = 'inline';
+    classeSelector.focus();
+  });
+
+  // Ao mudar a classe, salva e recalcula XP
+  classeSelector.addEventListener('change', () => {
+    classeAtiva = classeSelector.value;
+    localStorage.setItem('classeAtiva', classeAtiva);
+    atualizarVisualClasse();
+    atualizarXP(tarefasConcluidas, classeAtiva); // Recalcula XP ao trocar classe
+  });
+
+  classeSelector.addEventListener('blur', () => {
+    atualizarVisualClasse();
+  });
+
+  atualizarXP(tarefasConcluidas, classeAtiva); // Recalcula XP ao carregar
+});
+
+function atualizarXP(tarefasConcluidas, classeAtiva) {
   const xpPorTarefa = 10;
-  const xpTotal = tarefasConcluidas.length * xpPorTarefa;
+  let xpTotal = 0;
+
+  tarefasConcluidas.forEach(tarefa => {
+    let xpBase = xpPorTarefa;
+
+    const tags = tarefa.tags || [];
+    const bonusCategorias = classesJogador[classeAtiva]?.bonusCategorias || [];
+
+    const temBonus = tags.some(tag => bonusCategorias.includes(tag));
+
+    if (temBonus) {
+      xpBase += xpBase * classesJogador[classeAtiva].bonusXP;
+    }
+
+    xpTotal += xpBase;
+  });
+
   const nivel = Math.floor(xpTotal / 100) + 1;
   const xpAtual = xpTotal % 100;
   const porcentagem = Math.min(100, (xpAtual / 100) * 100);
@@ -183,10 +289,24 @@ function atualizarXP(tarefasConcluidas) {
   const xpInfo = document.querySelector('.xp-info');
   if (!xpInfo) return;
 
-  xpInfo.querySelector('strong').textContent = `Nível ${nivel}`;
+  xpInfo.querySelector('strong').textContent = `Nível ${nivel} (${classeAtiva})`;
   xpInfo.querySelector('.xp-fill').style.width = `${porcentagem}%`;
-  xpInfo.querySelector('span').textContent = `XP: ${xpAtual} / 100`;
+  xpInfo.querySelector('span').textContent = `XP: ${Math.floor(xpAtual)} / 100`;
+
+  const corPorClasse = {
+    'Guerreiro': '#FF5733',
+    'Mago': '#33FF57',
+    'Ladino': '#3357FF',
+    'Bardo': '#FF33A1',
+    'Bruxo': '#FF8C33'
+  };
+
+  xpInfo.querySelector('.xp-fill').style.backgroundColor = corPorClasse[classeAtiva] || '#ccc';
 }
+
+
+
+
 
 function limparCards() {
   document.querySelector('.purple-card').innerHTML = '<span class="card-title">TAREFAS EXPIRADAS</span>';
@@ -330,16 +450,11 @@ export async function ajustarRecurrentes(tarefas) {
   const tarefasColecao = collection(db, "usuarios", usuario.uid, "tarefas");
   const hoje = new Date();
 
-  // para não disparar múltiplas criações por task, iteramos uma a uma
   for (const t of tarefas) {
-    if (t.tipo !== 'periodico'            // só periódicas
-        || t.finalizada                   // já finalizadas
-        || t.dataLimite >= hoje           // ainda não expirou
-    ) {
+    if (t.tipo !== 'periodico' || t.finalizada || t.dataLimite >= hoje) {
       continue;
     }
 
-    // calcula apenas UMA vez o próximo prazo
     const next = new Date(t.dataLimite);
     switch (t.frequencia) {
       case 'diario':  next.setDate(next.getDate() + 1); break;
@@ -351,24 +466,27 @@ export async function ajustarRecurrentes(tarefas) {
         }
     }
 
-    // 1) cria a nova tarefa na coleção
     const novaTarefa = {
       descricao: t.descricao,
       tipo: t.tipo,
       frequencia: t.frequencia,
       dataLimite: Timestamp.fromDate(next),
-      finalizada: false
+      finalizada: false,
+      tags: Array.isArray(t.tags) ? [...t.tags] : []
     };
+
     if (t.padraoPersonalizado != null) {
       novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
     }
+
     await addDoc(tarefasColecao, novaTarefa);
 
-    // 2) marca a antiga como finalizada (para não recriar de novo)
     const refAntigo = doc(db, "usuarios", usuario.uid, "tarefas", t.id);
     await updateDoc(refAntigo, { finalizada: true });
   }
 }
+
+
 
 export async function processarTarefaPeriodicaAoMarcar(t) {
   const usuario = auth.currentUser;
@@ -404,7 +522,8 @@ export async function processarTarefaPeriodicaAoMarcar(t) {
     tipo: t.tipo,
     frequencia: t.frequencia,
     dataLimite: Timestamp.fromDate(next),
-    finalizada: false
+    finalizada: false,
+    tags: Array.isArray(t.tags) ? [...t.tags] : []
   };
   if (t.padraoPersonalizado != null) {
     novaTarefa.padraoPersonalizado = t.padraoPersonalizado;

@@ -898,25 +898,52 @@ body.ios-pwa .bottom-nav {
   padding: 1rem;
   margin: .5rem 0;
   cursor: pointer;
-  background-color: #381e47;
+  background-color: #222; /* Fundo padrão escuro */
   transition: 
     background-color .3s ease,
     box-shadow .3s ease,
     transform .2s ease;
 }
 
-/* Paleta suave por tipo */
+/* Fundo e borda para cada tipo, cores vivas e distintas */
 .task-rect[data-tipo="periodico"] {
-  border-color: #a3d5ff;
-  background-color: #8f68a5;
+  background-color: #2a3f6b; /* Azul escuro */
+  border-color: #5390d9;     /* Azul claro */
+  color: #cfe3ff;            /* Texto claro */
 }
+
 .task-rect[data-tipo="nao-periodico"] {
-  border-color: #ffd8a3;
-  background-color: #8f68a5;
+  background-color: #6b3f2a; /* Marrom escuro */
+  border-color: #d99453;     /* Marrom claro */
+  color: #ffe6c9;            /* Texto claro */
 }
+
 .task-rect[data-tipo="personalizado"] {
-  border-color: #d5ffa3;
-  background-color: #8f68a5;
+  background-color: #3f6b2a; /* Verde escuro */
+  border-color: #94d953;     /* Verde claro */
+  color: #e6ffcf;            /* Texto claro */
+}
+
+/* Hover com fundo claro e texto escuro */
+.task-rect:hover {
+  background-color: #f0f0f0;
+  color: #222;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+/* Paleta suave por tipo */
+.task-rect[data-tipo="periodico"] .tipo-badge {
+  background-color: #4fc3f7;
+  color: #0d47a1;
+}
+.task-rect[data-tipo="nao-periodico"] .tipo-badge {
+  background-color: #ffa726;
+  color: #4e2600;
+}
+.task-rect[data-tipo="personalizado"] .tipo-badge {
+  background-color: #66bb6a;
+  color: #1b5e20;
 }
 
 .task-rect:hover { /* Cor quando o mouse passa por cima */
@@ -940,25 +967,41 @@ body.ios-pwa .bottom-nav {
   pointer-events: none;
 }
 
-/* Cores do badge conforme tipo */
-.task-rect[data-tipo="periodico"] .tipo-badge {
-  background-color: #66b3ff;
-  color: #084c8d;
-}
-.task-rect[data-tipo="nao-periodico"] .tipo-badge {
-  background-color: #ffb366;
-  color: #8d4908;
-}
-.task-rect[data-tipo="personalizado"] .tipo-badge {
-  background-color: #8dba08;
-  color: #3e4f00;
-}
-
 /* Mostrar badge no hover */
 .task-rect:hover .tipo-badge {
   opacity: 1;
   transform: translateY(0);
 }
+
+.tag-list-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.tag {
+  padding: 0.3rem 0.6rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Nível 1: Tipo principal */
+.tag-nivel-1 {
+  background-color: #e0f7fa;
+  border: 1px solid #00acc1;
+  color: #006064;
+}
+
+/* Nível 2: Subtipo */
+.tag-nivel-2 {
+  background-color: #fff3e0;
+  border: 1px solid #ffb74d;
+  color: #e65100;
+}
+
 
 
 #tipo-tarefa {
@@ -1110,4 +1153,9 @@ body.ios-pwa .bottom-nav {
 
 .grupo-tipo-lista li small {
   color: #666;
+}
+
+#classe-selector {
+  margin-top: 0.5rem;
+  font-size: 1rem;
 }

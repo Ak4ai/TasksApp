@@ -10,6 +10,7 @@ const filaDeMensagens = [];
 
 
 document.addEventListener('DOMContentLoaded', () => {
+  
     // const mensagemDeBoasVindas = "Bem-vindo ao sistema!";
     // mostrarMensagem(mensagemDeBoasVindas);
 
@@ -23,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
 
 
 function mostrarMensagem(mensagem) {
@@ -122,13 +124,17 @@ async function adicionarTarefa(descricao, dataLimite) {
   // 1) Coleta valores do DOM
   const tipo = document.getElementById('tipo-tarefa').value;
   const dataLimiteDate = new Date(dataLimite);
-
+  const tagPrincipal = document.getElementById("tagPrincipal").value;
+  const tagSecundaria = document.getElementById("tagSecundaria").value;
+  const tags = [tagPrincipal];
+  if (tagSecundaria) tags.push(tagSecundaria);
   // 2) Monta o objeto base
   const novaTarefa = {
     descricao,
     dataLimite: Timestamp.fromDate(dataLimiteDate),
     finalizada: false,
-    tipo
+    tipo,
+    tags 
   };
 
   // 3) Adiciona campos específicos
@@ -172,12 +178,8 @@ async function adicionarTarefa(descricao, dataLimite) {
 
 
 
-// Abrir e fechar modal
-document.querySelectorAll('.criar-button').forEach(botao => {
-  botao.addEventListener('click', () => {
-    document.getElementById('modal-criar-tarefa').style.display = 'flex';
-  });
-});
+
+
 
   
   document.getElementById('fechar-modal').addEventListener('click', () => {
@@ -310,6 +312,39 @@ function atualizarVisibilidadeAppBody() {
   }
 }
 
+// Abrir e fechar modal ao clicar em "Criar Tarefa"
+document.querySelectorAll('.criar-button').forEach(botao => {
+  botao.addEventListener('click', () => {
+    const modal = document.getElementById('modal-criar-tarefa');
+    const selectTipo = document.getElementById('tipo-tarefa');
+
+    // Detectar a aba ativa corretamente pela classe 'active'
+    const abaAtiva = document.querySelector('.tab-content.active');
+    let tipo = 'personalizado'; // padrão
+
+    if (abaAtiva) {
+      switch (abaAtiva.id) {
+        case 'tab-tasks':
+          tipo = 'periodico';
+          break;
+        case 'tab-tasks-nao-periodicas':
+          tipo = 'nao-periodico';
+          break;
+        case 'tab-tasks-personalizadas':
+          tipo = 'personalizado';
+          break;
+      }
+    }
+
+    console.log("Tipo detectado:", tipo);
+    selectTipo.value = tipo;
+
+    // Mostrar modal
+    modal.style.display = 'block';
+  });
+});
+
+
 
   
 
@@ -366,14 +401,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2) Quando o select muda, ajusta imediatamente
   tipoSel.addEventListener('change', ajustarWrappers);
 
-  // Corrigido: aplicar a função para cada botão com a classe 'criar-button'
   botoesAbrirModal.forEach(botao => {
-    botao.addEventListener('click', () => {
-      tipoSel.value = 'periodico';  // ou valor padrão
-      ajustarWrappers();            // ajustar visibilidade de elementos
-      modalCriar.style.display = 'flex'; // mostrar modal
+  botao.addEventListener('click', () => {
+    // Detectar aba ativa
+    let tipo = 'personalizado'; // default
+    if (document.getElementById('tab-tasks').style.display !== 'none') {
+      tipo = 'periodico';
+    } else if (document.getElementById('tab-tasks-nao-periodicas').style.display !== 'none') {
+      tipo = 'nao-periodico';
+    } else if (document.getElementById('tab-tasks-personalizadas').style.display !== 'none') {
+      tipo = 'personalizado';
+    }
+
+    tipoSel.value = tipo;
+    ajustarWrappers();
+    modalCriar.style.display = 'flex';
     });
   });
+
 
   // 4) Ao fechar o modal (X), apenas esconde
   btnFechar.addEventListener('click', () => {

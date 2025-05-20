@@ -43,6 +43,22 @@
     <div class="modal-content">
       <span class="close-button" id="fechar-modal">&times;</span>
       <h2>Nova Tarefa</h2>
+      <div id="tag-selector">
+        <label>Tags:</label>
+        <select id="tagPrincipal">
+          <option value="">-- Categoria Principal --</option>
+          <option value="Físico">Físico</option>
+          <option value="Intelecto">Intelecto</option>
+          <option value="Social">Social</option>
+          <option value="Criativo">Criativo</option>
+          <option value="Espiritual">Espiritual</option>
+        </select>
+
+        <select id="tagSecundaria" disabled>
+          <option value="">-- Subcategoria --</option>
+        </select>
+      </div>
+
       <div id="frequencia-wrapper" style="display:none">
         <label>Frequência:</label>
         <select id="frequenciaSelecao">
@@ -110,17 +126,31 @@
     <div class="tabs">
       <!-- Aba Home -->
       <div id="tab-home" class="tab-content active">
-      <!-- QUADRADO PERSONAGEM -->
-      <div class="character-box">
-        <img src="PERSONAGEM.jpeg" alt="Personagem" />
-        <div class="xp-info">
-          <strong>Nível 1</strong>
-          <div class="xp-bar">
-            <div class="xp-fill" style="width: 20%;"></div>
+        <!-- QUADRADO PERSONAGEM -->
+        <div class="character-box">
+          <img src="PERSONAGEM.jpeg" alt="Personagem" />
+          <div class="xp-info">
+            <strong>Nível 1</strong>
+            <div class="xp-bar">
+              <div class="xp-fill" style="width: 20%;"></div>
+            </div>
+            <span>XP: 0 / 100</span>
           </div>
-          <span>XP: 0 / 100</span>
+
+          <div class="classe-info">
+            Classe: <span id="classe-ativa" style="cursor:pointer; text-decoration: underline;"></span>
+          </div>
+
+          <select id="classe-selector" style="display:none;">
+            <option value="Guerreiro">Guerreiro</option>
+            <option value="Mago">Mago</option>
+            <option value="Ladino">Ladino</option>
+            <option value="Bardo">Bardo</option>
+            <option value="Bruxo">Bruxo</option>
+          </select>
         </div>
-      </div>    </div>
+   
+      </div>
 
       <!-- Aba Tarefas Periódicas -->
       <div id="tab-tasks" class="tab-content">
