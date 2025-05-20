@@ -69,9 +69,26 @@
       </div>
       
       <div id="padrao-wrapper" style="display:none">
-        <label>Padrão personalizado:</label>
-        <input id="padraoPersonalizado" type="text" placeholder="Ex: 2025-05-10,2025-05-15,2025-06-01"/>
+        <label>Repetição personalizada:</label>
+        <select id="modoPersonalizado">
+          <option value="datas">Datas específicas</option>
+          <option value="frequencia">A cada X dias</option>
+          <option value="unico">Evento único</option>
+        </select>
+
+        <div id="bloco-datas" class="sub-bloco-personalizado">
+          <label>Datas (YYYY-MM-DD separadas por vírgula):</label>
+          <input id="padraoPersonalizado" type="text" placeholder="Ex: 2025-05-10,2025-06-01"/>
+        </div>
+
+        <div id="bloco-frequencia" class="sub-bloco-personalizado" style="display:none">
+          <label>Repetir a cada:</label>
+          <input id="diasFrequencia" type="number" min="1" placeholder="Ex: 3" /> dias
+        </div>
+
+        <!-- nenhum campo necessário para "unico" -->
       </div>
+
       <input type="text" id="descricao" placeholder="Descrição da tarefa" />
       <input type="datetime-local" id="dataLimite" />
 
@@ -83,6 +100,15 @@
         <option value="nao-periodico">Importante Não Periódico</option>
         <option value="personalizado">Personalizado</option>
       </select>
+      <!-- Visível apenas para tarefas do tipo personalizado -->
+      <div id="personalizadoExtras" style="display: none;">
+        <!-- Checkbox para permitir conclusão -->
+        <label><input type="checkbox" id="permitirConclusao"> Permitir conclusão (em vez de expirar)</label>
+        <label>Tags adicionais (separadas por vírgula):</label>
+        <input id="tagsPersonalizadas" type="text" placeholder="ex: leitura, lazer"/>
+
+      </div>
+
       
       <button id="botao-criar-tarefa">Criar tarefa</button>
     </div>
@@ -194,7 +220,10 @@
           <h3>Configurações do Usuário</h3>
           <button id="logout-button">Logout</button>
           <button id="clear-cache-button">Limpar Cache</button>
+          <button id="delete-all-tasks-button" style="color: red;">Excluir Todas as Tarefas</button>
+
         </div>
+        
         <script>
           document.getElementById('clear-cache-button').addEventListener('click', () => {
             if (confirm('Tem certeza que deseja limpar o cache, LocalStorage e recarregar a página?')) {
@@ -214,6 +243,7 @@
               location.reload(true);
             }
           });
+          
         </script>
       </div>
     </div>

@@ -32,8 +32,10 @@ function renderizarTarefa(t) {
   div.setAttribute('data-id', t.id);
   div.setAttribute('data-tipo', t.tipo || 'personalizado');
 
+  const isConcluivel = t.tipo !== 'personalizado' || t.permitirConclusao;
+
   div.innerHTML = `
-    <input type="checkbox" class="checkbox-tarefa" title="Marcar como feita" ${t.finalizada ? 'checked' : ''}>
+    ${isConcluivel ? `<input type="checkbox" class="checkbox-tarefa" title="Marcar como feita" ${t.finalizada ? 'checked' : ''}>` : ''}
     <strong>${t.descricao}</strong><br>
     <small>Até: ${t.dataLimite.toLocaleString('pt-BR')}</small>
     <span class="tipo-badge">
@@ -47,31 +49,29 @@ function renderizarTarefa(t) {
 
   // Adiciona visualização de tags se existirem
   if (t.tags && t.tags.length) {
-  const wrapper = document.createElement("div");
-  wrapper.className = "tag-list-wrapper";
+    const wrapper = document.createElement("div");
+    wrapper.className = "tag-list-wrapper";
 
-  t.tags.forEach((tag, index) => {
-    const tagElem = document.createElement("span");
-    tagElem.classList.add("tag", `tag-nivel-${index + 1}`);
-    tagElem.textContent = tag;
-    wrapper.appendChild(tagElem);
-  });
+    t.tags.forEach((tag, index) => {
+      const tagElem = document.createElement("span");
+      tagElem.classList.add("tag", `tag-nivel-${index + 1}`);
+      tagElem.textContent = tag;
+      wrapper.appendChild(tagElem);
+    });
 
-  div.appendChild(wrapper);
-}
-
+    div.appendChild(wrapper);
+  }
 
   // Verifica se existe anexo no localStorage
   const anexoRaw = localStorage.getItem(`anexos_${t.id}`);
   if (anexoRaw) {
     const anexo = JSON.parse(anexoRaw);
 
-    // Cria link de visualização/download
     const link = document.createElement('a');
     link.href = anexo.base64;
     link.download = anexo.nome;
     link.textContent = `📎 ${anexo.nome}`;
-    link.target = '_blank'; // abre em nova aba para visualização
+    link.target = '_blank';
     link.style.display = 'block';
     link.style.marginTop = '4px';
     link.style.color = '#007BFF';
@@ -80,33 +80,34 @@ function renderizarTarefa(t) {
     div.appendChild(link);
   }
 
+  // Só adiciona o listener do checkbox se ele existir
   const checkbox = div.querySelector('.checkbox-tarefa');
-  checkbox.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    const usuario = auth.currentUser;
+  if (checkbox) {
+    checkbox.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const usuario = auth.currentUser;
 
-    // 1) marca no Firestore
-    await updateDoc(
-      doc(db, "usuarios", usuario.uid, "tarefas", t.id),
-      { finalizada: checkbox.checked }
-    );
+      await updateDoc(
+        doc(db, "usuarios", usuario.uid, "tarefas", t.id),
+        { finalizada: checkbox.checked }
+      );
 
-    // 2) se período e marcado, cria próxima instância
-    if (t.tipo === 'periodico' && checkbox.checked) {
-      await processarTarefaPeriodicaAoMarcar({
-        ...t,
-        finalizada: true
-      });
-    }
+      if (t.tipo === 'periodico' && checkbox.checked) {
+        await processarTarefaPeriodicaAoMarcar({
+          ...t,
+          finalizada: true
+        });
+      }
 
-    // 3) atualiza UI / XP etc.
-    carregarTarefas();
-  });
+      carregarTarefas();
+    });
+  }
 
   div.addEventListener('click', () => abrirModalDetalhe(t));
 
   return div;
 }
+
 
 
 document.getElementById("tagPrincipal").addEventListener("change", (e) => {
@@ -155,9 +156,12 @@ async function carregarTarefas() {
       finalizada: data.finalizada || false,
       frequencia: data.frequencia,
       padraoPersonalizado: data.padraoPersonalizado,
+      modoPersonalizado: data.modoPersonalizado, // ← ADICIONE ISTO
+      permitirConclusao: data.permitirConclusao || false, // ← E ISTO
       tags: data.tags || []
     });
   });
+
 
   await ajustarRecurrentes(tarefas);
 
@@ -365,11 +369,8 @@ function abrirModalDetalhe(tarefa) {
   
     document.getElementById('editar-descricao').value = tarefa.descricao;
     document.getElementById('editar-dataLimite').value = tarefa.dataLimite.toISOString().slice(0,16);
-    document.getElementById('tipo-tarefa').value = {
-      'periodico': 'Importante Periódico',
-      'nao-periodico': 'Não Periódico',
-      'personalizado': 'Personalizado'
-    }[tarefa.tipo];
+    document.getElementById('tipo-tarefa').value = tarefa.tipo;
+
 
     document.getElementById('salvar-edicao').onclick = async () => {
         const novaDesc = document.getElementById('editar-descricao').value;
@@ -451,10 +452,26 @@ export async function ajustarRecurrentes(tarefas) {
   const hoje = new Date();
 
   for (const t of tarefas) {
-    if (t.tipo !== 'periodico' || t.finalizada || t.dataLimite >= hoje) {
+    console.log(`Tarefa: ${t.descricao} | finalizada: ${t.finalizada} | dataLimite: ${t.dataLimite.toISOString()} | tipo: ${t.tipo}`);
+    // Permitir recriar:
+    // - Tarefas que não foram finalizadas e já passaram da data limite (expiradas)
+    // - OU tarefas personalizadas que foram finalizadas e usam modo frequência
+    if (
+      (!t.finalizada && t.dataLimite < hoje) ||
+      (t.tipo === 'personalizado' && t.finalizada && t.modoPersonalizado === 'frequencia')
+    ) {
+      // Continua o processamento
+    } else {
+      continue; // Ignora os outros casos
+    }
+    // Ignora outros tipos que não sejam periodico ou personalizado com frequência
+    if (t.tipo === 'personalizado') {
+      if (t.modoPersonalizado !== 'frequencia' || !t.frequencia) continue;
+    } else if (t.tipo !== 'periodico') {
       continue;
     }
 
+    // Calcula próxima data conforme frequência
     const next = new Date(t.dataLimite);
     switch (t.frequencia) {
       case 'diario':  next.setDate(next.getDate() + 1); break;
@@ -463,6 +480,8 @@ export async function ajustarRecurrentes(tarefas) {
       default:
         if (typeof t.frequencia === 'number') {
           next.setDate(next.getDate() + t.frequencia);
+        } else {
+          continue; // Frequência inválida
         }
     }
 
@@ -472,19 +491,31 @@ export async function ajustarRecurrentes(tarefas) {
       frequencia: t.frequencia,
       dataLimite: Timestamp.fromDate(next),
       finalizada: false,
-      tags: Array.isArray(t.tags) ? [...t.tags] : []
+      tags: Array.isArray(t.tags) ? [...t.tags] : [],
     };
 
-    if (t.padraoPersonalizado != null) {
+    if (t.padraoPersonalizado) {
       novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
+    }
+
+    if (t.permitirConclusao != null) {
+      novaTarefa.permitirConclusao = t.permitirConclusao;
+    }
+
+    if (t.modoPersonalizado) {
+      novaTarefa.modoPersonalizado = t.modoPersonalizado;
     }
 
     await addDoc(tarefasColecao, novaTarefa);
 
     const refAntigo = doc(db, "usuarios", usuario.uid, "tarefas", t.id);
     await updateDoc(refAntigo, { finalizada: true });
+    
   }
 }
+
+
+
 
 
 
@@ -663,3 +694,19 @@ function mostrarTarefasOrganizadas(criterio) {
 
 
 
+document.getElementById('tipo-tarefa').addEventListener('change', (e) => {
+  const extras = document.getElementById('personalizadoExtras');
+  extras.style.display = e.target.value === 'personalizado' ? 'block' : 'none';
+});
+document.getElementById('modoPersonalizado').addEventListener('change', (e) => {
+  const modo = e.target.value;
+  document.querySelectorAll('.sub-bloco-personalizado').forEach(bloco => {
+    bloco.style.display = 'none';
+  });
+
+  if (modo === 'datas') {
+    document.getElementById('bloco-datas').style.display = 'block';
+  } else if (modo === 'frequencia') {
+    document.getElementById('bloco-frequencia').style.display = 'block';
+  }
+});

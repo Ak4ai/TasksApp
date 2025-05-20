@@ -1,6 +1,6 @@
 import { auth } from './auth.js';
 import { db } from './firebase-config.js';
-import { collection, addDoc, getDocs, Timestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { collection, addDoc, getDocs, Timestamp, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 // script.js
 import { carregarTarefas } from './tarefas.js';
 
@@ -8,6 +8,25 @@ import { carregarTarefas } from './tarefas.js';
 // Variável para armazenar a fila de mensagens
 const filaDeMensagens = [];
 
+document.getElementById('delete-all-tasks-button').addEventListener('click', async () => {
+          const confirmacao = confirm("⚠️ Tem certeza que deseja excluir TODAS as suas tarefas? Esta ação não pode ser desfeita.");
+          if (!confirmacao) return;
+
+          const usuario = auth.currentUser;
+          if (!usuario) {
+            alert("Usuário não autenticado.");
+            return;
+          }
+
+          const tarefasRef = collection(db, "usuarios", usuario.uid, "tarefas");
+          const snapshot = await getDocs(tarefasRef);
+
+          const promises = snapshot.docs.map(docSnap => deleteDoc(docSnap.ref));
+          await Promise.all(promises);
+
+          alert("Todas as tarefas foram excluídas com sucesso.");
+          location.reload();
+        });
 
 document.addEventListener('DOMContentLoaded', () => {
   
@@ -144,10 +163,31 @@ async function adicionarTarefa(descricao, dataLimite) {
   }
 
   if (tipo === 'personalizado') {
-    const padrao = document.getElementById('padraoPersonalizado').value;
-    // Exemplo: "2025-05-10,2025-05-15,2025-06-01"
-    novaTarefa.padraoPersonalizado = padrao;
+    const modo = document.getElementById('modoPersonalizado').value;
+    const permitirConclusao = document.getElementById('permitirConclusao').checked;
+    const tagsPersonalizadas = document.getElementById('tagsPersonalizadas').value
+      .split(',')
+      .map(t => t.trim())
+      .filter(t => t.length > 0);
+
+    novaTarefa.modoPersonalizado = modo;
+    novaTarefa.permitirConclusao = permitirConclusao;
+    novaTarefa.tags = [...novaTarefa.tags, ...tagsPersonalizadas];
+
+    if (modo === 'datas') {
+      const padrao = document.getElementById('padraoPersonalizado').value;
+      novaTarefa.padraoPersonalizado = padrao; // CSV de datas
+    }
+
+    if (modo === 'frequencia') {
+      const dias = parseInt(document.getElementById('diasFrequencia').value);
+      novaTarefa.frequencia = dias; // Ex: repetir a cada X dias
+    }
+
+    // modo 'unico' não adiciona mais nada
   }
+
+
 
   // 4) Grava no Firestore
   const tarefasRef = collection(db, "usuarios", usuario.uid, "tarefas");
