@@ -89,8 +89,10 @@
         <!-- nenhum campo necessário para "unico" -->
       </div>
 
-      <input type="text" id="nomeTarefa" placeholder="Ex: Caminhada matinal">
-      <textarea id="descricaoTarefa" placeholder="Anotações (opcional)"></textarea>
+      <label for="nomeTarefa">Nome da Tarefa:</label>
+      <input type="text" id="nomeTarefa" placeholder="Ex: Estudar matemática" required />
+      <label for="descricaoTarefa">Anotações (opcional):</label>
+      <textarea id="descricaoTarefa" placeholder="Ex: Revisar capítulos 1 e 2"></textarea>
 
       <input type="datetime-local" id="dataLimite" required>
 

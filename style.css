@@ -1202,3 +1202,13 @@ body.ios-pwa .bottom-nav {
   font-weight: bold;
   color: #f5e6d6;
 }
+
+#modal-criar-tarefa label {
+  margin-bottom: 6px;
+  margin-top: 5px; /* Espaço acima de todos os labels */
+  display: block;
+}
+
+#modal-criar-tarefa label:first-child {
+  margin-top: 0; /* Remove o espaço do primeiro label do modal */
+}
