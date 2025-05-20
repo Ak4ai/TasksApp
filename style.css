@@ -493,6 +493,21 @@ textarea {
   overflow-y: auto; /* Adiciona barra de rolagem vertical quando necessário */
 }
 
+#descricaoTarefa, textarea#descricaoTarefa {
+  width: 100%;
+  min-height: 50px;
+  max-width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  padding: 8px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background: #231f1f;
+  color: #faf0e6;
+  margin-bottom: 10px;
+}
+
 /* Estilo quando a área de texto está em foco */
 textarea:focus {
   border: 1px solid rgb(255, 255, 255);
@@ -875,12 +890,19 @@ body.ios-pwa .bottom-nav {
 
 .modal-content button {
   width: 100%;
-  padding: 10px;
+  padding: 10px 0;
   background-color: #3b82f6;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  font-size: 1.0rem;   /* Aumenta o tamanho da fonte */
+  font-weight: bold;
+  text-align: center;
+  line-height: 1.2;
+  min-height: 40px;    /* Garante altura mínima confortável para mobile */
+  box-sizing: border-box;
+  margin-top: 10px;
 }
 
 .close-button {
@@ -1158,4 +1180,25 @@ body.ios-pwa .bottom-nav {
 #classe-selector {
   margin-top: 0.5rem;
   font-size: 1rem;
+}
+
+.anotacao {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  display: block;
+  max-width: 100%;
+  white-space: normal; /* <-- Corrige o "enter" extra */
+}
+
+.titulo-tarefa {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Espaço entre checkbox e nome */
+  margin-bottom: 4px;
+}
+
+.titulo-tarefa strong {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #f5e6d6;
 }

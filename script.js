@@ -33,14 +33,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // const mensagemDeBoasVindas = "Bem-vindo ao sistema!";
     // mostrarMensagem(mensagemDeBoasVindas);
 
-    document.getElementById('botao-criar-tarefa').addEventListener('click', () => {
-        const desc = document.getElementById('descricao').value;
+    document.getElementById('botao-criar-tarefa').addEventListener('click', async () => {
+        const nome = document.getElementById('nomeTarefa').value.trim();
+        const desc = document.getElementById('descricaoTarefa').value.trim();
         const dataLimite = document.getElementById('dataLimite').value;
-        if (desc && dataLimite) {
-            adicionarTarefa(desc, dataLimite).then(() => {
-                document.getElementById('modal-criar-tarefa').style.display = 'none';
-            });
+        if (!nome) {
+          alert('Por favor, informe o nome da tarefa.');
+          return;
         }
+
+        if (!dataLimite) {
+          alert('Por favor, informe a data limite.');
+          return;
+        }
+
+        // cria a tarefa e só depois recarrega a lista
+        await adicionarTarefa(nome, descricao, dataLimite);
+
+        // fecha o modal só quando já tivermos atualizado a UI
+        document.getElementById('modal-criar-tarefa').style.display = 'none';
     });
 });
 
@@ -136,7 +147,7 @@ function fileToBase64(file) {
 
 
 
-async function adicionarTarefa(descricao, dataLimite) {
+async function adicionarTarefa(nome, descricao, dataLimite) {
   const usuario = auth.currentUser;
   if (!usuario) return;
 
@@ -149,6 +160,7 @@ async function adicionarTarefa(descricao, dataLimite) {
   if (tagSecundaria) tags.push(tagSecundaria);
   // 2) Monta o objeto base
   const novaTarefa = {
+    nome,
     descricao,
     dataLimite: Timestamp.fromDate(dataLimiteDate),
     finalizada: false,
@@ -213,7 +225,7 @@ async function adicionarTarefa(descricao, dataLimite) {
 
 
   // 5) Recarrega a UI
-  carregarTarefas();
+  await carregarTarefas();
 }
 
 
@@ -467,10 +479,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 5) Ao criar a tarefa, garantir que wrappers estejam ajustados
   btnCriarTarefa.addEventListener('click', () => {
-    ajustarWrappers();
-    // aqui você chama sua função adicionarTarefa(...)
-    // ex: adicionarTarefa(descricaoInput.value, dataLimiteInput.value);
-  });
+  ajustarWrappers();
+
+  const nome       = document.getElementById('nomeTarefa').value.trim();
+  const descricao  = document.getElementById('descricaoTarefa').value.trim();
+  const dataLimite = document.getElementById('dataLimite').value;
+
+  if (!nome) {
+    alert('Por favor, informe o nome da tarefa.');
+    return;
+  }
+
+  adicionarTarefa(nome, descricao, dataLimite)
+    .then(() => modalCriar.style.display = 'none');
+});
+
     let startX = 0;
     let isAtLeftEdge = false;
     const indicator = document.getElementById('pull-up-indicator');

@@ -89,8 +89,10 @@
         <!-- nenhum campo necessário para "unico" -->
       </div>
 
-      <input type="text" id="descricao" placeholder="Descrição da tarefa" />
-      <input type="datetime-local" id="dataLimite" />
+      <input type="text" id="nomeTarefa" placeholder="Ex: Caminhada matinal">
+      <textarea id="descricaoTarefa" placeholder="Anotações (opcional)"></textarea>
+
+      <input type="datetime-local" id="dataLimite" required>
 
       <label for="anexoArquivo">Anexo (opcional):</label>
       <input type="file" id="anexoArquivo" />
@@ -117,7 +119,10 @@
     <div class="modal-content">
       <span id="fechar-modal-editar" class="close-button">&times;</span>
       <h2>Editar Tarefa</h2>
-      <input type="text" id="editar-descricao" placeholder="Descrição da tarefa" />
+      <label for="editar-nome">Nome:</label>
+      <input id="editar-nome" type="text">
+      <label for="editar-descricao">Descrição:</label>
+      <input id="editar-descricao" type="text">
       <input type="datetime-local" id="editar-dataLimite" />
       <button id="salvar-edicao">Salvar</button>
       <button id="excluir-tarefa" class="danger">Excluir</button>
@@ -263,9 +268,9 @@
   <div class="bottom-nav">
     <button class="nav-button" data-tab="tab-home">🏠</button>
     <div class="bottom-nav-separator">
-      <button class="nav-button" data-tab="tab-tasks">📋</button>
-      <button class="nav-button" data-tab="tab-tasks-nao-periodicas">📋</button>
-      <button class="nav-button" data-tab="tab-tasks-personalizadas">📋</button>
+      <button class="nav-button" data-tab="tab-tasks">📅</button>
+      <button class="nav-button" data-tab="tab-tasks-nao-periodicas">⏳</button>
+      <button class="nav-button" data-tab="tab-tasks-personalizadas">✏️</button>
     </div>
     <button class="nav-button" data-tab="tab-settings">⚙️</button>
   </div>

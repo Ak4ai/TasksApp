@@ -35,16 +35,19 @@ function renderizarTarefa(t) {
   const isConcluivel = t.tipo !== 'personalizado' || t.permitirConclusao;
 
   div.innerHTML = `
+  <div class="titulo-tarefa">
     ${isConcluivel ? `<input type="checkbox" class="checkbox-tarefa" title="Marcar como feita" ${t.finalizada ? 'checked' : ''}>` : ''}
-    <strong>${t.descricao}</strong><br>
-    <small>Até: ${t.dataLimite.toLocaleString('pt-BR')}</small>
-    <span class="tipo-badge">
-      ${{
-        periodico: 'Importante Periódico',
-        'nao-periodico': 'Importante Não-Periódico',
-        personalizado: 'Personalizado'
-      }[t.tipo || 'personalizado']}
-    </span>
+    <strong>${t.nome}</strong>
+  </div>
+  <small class="anotacao">${(t.descricao || '').trim()}</small>
+  <small>Até: ${t.dataLimite.toLocaleString('pt-BR')}</small>
+  <span class="tipo-badge">
+    ${{
+      periodico: 'Importante Periódico',
+      'nao-periodico': 'Importante Não-Periódico',
+      personalizado: 'Personalizado'
+    }[t.tipo || 'personalizado']}
+  </span>
   `;
 
   // Adiciona visualização de tags se existirem
@@ -130,6 +133,7 @@ document.getElementById("tagPrincipal").addEventListener("change", (e) => {
 });
 
 async function carregarTarefas() {
+  console.log("carregarTarefas foi chamado");
   if (carregandoTarefas) return;
   carregandoTarefas = true;
 
@@ -150,7 +154,8 @@ async function carregarTarefas() {
     const data = docSnap.data();
     tarefas.push({
       id: docSnap.id,
-      descricao: data.descricao,
+      nome: data.nome || data.descricao,
+      descricao: data.descricao || '',
       dataLimite: data.dataLimite.toDate(),
       tipo: data.tipo || 'personalizado',
       finalizada: data.finalizada || false,
@@ -200,7 +205,7 @@ async function carregarTarefas() {
     const data = t.dataLimite.toLocaleString('pt-BR');
     allExpiredLists.forEach(container => {
       const li = document.createElement('li');
-      li.innerHTML = `<strong>${t.descricao}</strong> - Vencida em: ${data}`;
+      li.innerHTML = `<strong>${t.nome}</strong> - Vencida em: ${data}`;
       container.appendChild(li);
     });
   });
@@ -328,17 +333,17 @@ function adicionarNaCard(tarefa, cardClass) {
         minute: '2-digit'
     });
 
-    p.textContent = `${tarefa.descricao} - até ${dataFormatada} às ${horaFormatada}`;
+    p.innerHTML   = `<strong>${tarefa.nome}</strong> – até ${dataFormatada} às ${horaFormatada}`;
     p.setAttribute('data-id', tarefa.id);
 
     card.appendChild(p);
   adicionarIconeDeExcluir(p, tarefa);
 }
 
-async function atualizarTarefaNoFirestore(id, descricao, dataLimite) {
+async function atualizarTarefaNoFirestore(id, nome, descricao, dataLimite) {
     const usuario = auth.currentUser;
     const refDoc = doc(db, "usuarios", usuario.uid, "tarefas", id);
-    await updateDoc(refDoc, { descricao, dataLimite });
+    await updateDoc(refDoc, { nome, descricao, dataLimite });
 }
 
 async function excluirTarefaDoFirestore(id) {
@@ -367,15 +372,17 @@ function abrirModalDetalhe(tarefa) {
     const modal = document.getElementById('modal-tarefa');
     modal.style.display = 'flex';
   
+    document.getElementById('editar-nome').value = tarefa.nome;
     document.getElementById('editar-descricao').value = tarefa.descricao;
     document.getElementById('editar-dataLimite').value = tarefa.dataLimite.toISOString().slice(0,16);
     document.getElementById('tipo-tarefa').value = tarefa.tipo;
 
 
     document.getElementById('salvar-edicao').onclick = async () => {
-        const novaDesc = document.getElementById('editar-descricao').value;
+        const novaNome = document.getElementById('editar-nome').value.trim();
+        const novaDesc = document.getElementById('editar-descricao').value.trim();
         const novaData = new Date(document.getElementById('editar-dataLimite').value);
-        await atualizarTarefaNoFirestore(tarefa.id, novaDesc, novaData);
+        await atualizarTarefaNoFirestore(tarefa.id, novaNome, novaDesc, novaData);
         modal.style.display = 'none';
         carregarTarefas();
     };
@@ -486,6 +493,7 @@ export async function ajustarRecurrentes(tarefas) {
     }
 
     const novaTarefa = {
+      nome: t.nome,
       descricao: t.descricao,
       tipo: t.tipo,
       frequencia: t.frequencia,
@@ -549,6 +557,7 @@ export async function processarTarefaPeriodicaAoMarcar(t) {
   // 1) cria a nova tarefa com a próxima data
   const tarefasColecao = collection(db, "usuarios", usuario.uid, "tarefas");
   const novaTarefa = {
+    nome: t.nome,
     descricao: t.descricao,
     tipo: t.tipo,
     frequencia: t.frequencia,
