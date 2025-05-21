@@ -85,9 +85,6 @@ function personagemFalaAleatoriamente(classeAtiva) {
 
 
 
-
-
-
 function renderizarTarefa(t) {
   const div = document.createElement('div');
   div.classList.add('task-rect');
@@ -149,12 +146,68 @@ function renderizarTarefa(t) {
     const link = document.createElement('a');
     link.href = anexo.base64;
     link.download = anexo.nome;
-    link.textContent = `📎 ${anexo.nome}`;
+    link.innerHTML = `<span class="icon-clip" aria-hidden="true" style="display:inline-flex;vertical-align:middle;">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" style="display:block" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7 13.5L13.5 7C14.3284 6.17157 15.6716 6.17157 16.5 7C17.3284 7.82843 17.3284 9.17157 16.5 10L10 16.5C8.067 18.433 4.933 18.433 3 16.5C1.067 14.567 1.067 11.433 3 9.5L9.5 3C10.3284 2.17157 11.6716 2.17157 12.5 3C13.3284 3.82843 13.3284 5.17157 12.5 6L6 12.5" stroke="#7ecbff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span> ${anexo.nome}`;
+    link.className = 'anexo-link';
     link.target = '_blank';
-    link.style.display = 'block';
-    link.style.marginTop = '4px';
-    link.style.color = '#007BFF';
-    link.style.textDecoration = 'underline';
+
+    // Impede que o clique no link abra o modal
+    link.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const nome = anexo.nome.toLowerCase();
+
+      // Modal para imagens
+      if (nome.match(/\.(png|jpg|jpeg|gif)$/)) {
+        abrirModalVisualizacaoAnexo(`<img src="${anexo.base64}" alt="${anexo.nome}" />`);
+        e.preventDefault();
+        return;
+      }
+      // Modal para texto
+      if (nome.endsWith('.txt')) {
+        // Carrega o texto do base64
+        const base64Data = anexo.base64.split(',')[1];
+        const decoded = atob(base64Data);
+        abrirModalVisualizacaoAnexo(`<pre>${decoded.replace(/[<>&]/g, c => ({
+          '<':'&lt;','>':'&gt;','&':'&amp;'
+        })[c])}</pre>`);
+        e.preventDefault();
+        return;
+      }
+      // PDF: exibe no modal usando iframe
+      if (nome.endsWith('.pdf')) {
+        abrirModalVisualizacaoAnexo(`
+          <iframe src="${anexo.base64}" style="width:80vw; height:70vh; border:none; background:#222;"></iframe>
+        `);
+        e.preventDefault();
+        return;
+      }
+      // Outros tipos: força download
+      e.preventDefault();
+      let mime = '';
+      const match = anexo.base64.match(/^data:(.*?);base64,/);
+      if (match) mime = match[1];
+      const base64Data = anexo.base64.split(',')[1];
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: mime || 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+
+      const tempLink = document.createElement('a');
+      tempLink.href = url;
+      tempLink.download = anexo.nome;
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      document.body.removeChild(tempLink);
+      URL.revokeObjectURL(url);
+    });
+
     div.appendChild(link);
   }
 
@@ -184,7 +237,8 @@ function renderizarTarefa(t) {
         personagemFalaAleatoriamente(classeAtiva);
       }
 
-      carregarTarefas();
+      // Aguarde todo o processamento antes de recarregar
+      await carregarTarefas();
     });
   }
 
@@ -329,7 +383,8 @@ async function carregarTarefas() {
       modoPersonalizado: data.modoPersonalizado,
       permitirConclusao: data.permitirConclusao || false,
       tags: data.tags || [],
-      fixada: data.fixada || false
+      fixada: data.fixada || false,
+      repetida: data.repetida || false // <-- ADICIONE ESTA LINHA
     });
   });
 
@@ -343,7 +398,7 @@ async function carregarTarefas() {
 
   Object.values(containers).forEach(c => c.innerHTML = '');
 
-  const tarefasFuturas = tarefas.filter(t => !t.finalizada && t.dataLimite >= agora);
+  const tarefasFuturas = tarefas.filter(t => !t.finalizada && t.dataLimite >= agora && !t.repetida);
   const tarefasExpiradas = tarefas.filter(t => !t.finalizada && t.dataLimite < agora);
   const tarefasConcluidas = tarefas.filter(t => t.finalizada);
 
@@ -909,7 +964,8 @@ export async function processarTarefaPeriodicaAoMarcar(t) {
     frequencia: t.frequencia,
     dataLimite: Timestamp.fromDate(next),
     finalizada: false,
-    tags: Array.isArray(t.tags) ? [...t.tags] : []
+    tags: Array.isArray(t.tags) ? [...t.tags] : [],
+    repetida: true,
   };
   if (t.padraoPersonalizado != null) {
     novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
@@ -1067,3 +1123,14 @@ document.getElementById('modoPersonalizado').addEventListener('change', (e) => {
 });
 
 
+function abrirModalVisualizacaoAnexo(html) {
+  const modal = document.getElementById('modal-visualizacao-anexo');
+  const conteudo = document.getElementById('conteudo-anexo');
+  conteudo.innerHTML = html;
+  modal.style.display = 'flex';
+}
+
+document.getElementById('fechar-modal-anexo').onclick = function() {
+  document.getElementById('modal-visualizacao-anexo').style.display = 'none';
+  document.getElementById('conteudo-anexo').innerHTML = '';
+};

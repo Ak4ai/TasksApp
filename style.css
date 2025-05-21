@@ -1328,8 +1328,70 @@ body.ios-pwa .bottom-nav {
   font-size: 1rem;
   color: #faf0e6;
 }
+
 #fixarNaHomeEditar {
   width: 29px;
   height: 29px;
   cursor: pointer;
+}
+
+#modal-visualizacao-anexo.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#modal-visualizacao-anexo .modal-content img {
+  max-width: 80vw;
+  max-height: 60vh;
+  display: block;
+  margin: 0 auto;
+}
+#modal-visualizacao-anexo .modal-content pre {
+  background: #181818;
+  color: #faf0e6;
+  padding: 16px;
+  border-radius: 8px;
+  max-width: 80vw;
+  max-height: 60vh;
+  overflow: auto;
+  font-size: 1rem;
+}
+
+#modal-visualizacao-anexo .modal-content iframe {
+  width: 80vw;
+  height: 70vh;
+  background: #222;
+  border: none;
+  display: block;
+  margin: 0 auto;
+}
+
+.anexo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #3d2b1f;
+  color: #7ecbff;
+  padding: 6px 14px;
+  border-radius: 18px;
+  font-weight: 500;
+  text-decoration: none;
+  margin-top: 8px;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  font-size: 1rem;
+  pointer-events: auto;
+}
+.anexo-link:hover {
+  background: #7ecbff;
+  color: #3d2b1f;
+  text-decoration: underline;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.anexo-link .icon-clip svg {
+  display: block;
 }
