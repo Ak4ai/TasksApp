@@ -29,7 +29,13 @@ document.getElementById('delete-all-tasks-button').addEventListener('click', asy
         });
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('botao-criar-tarefa').addEventListener('click', async () => {
+  const botao = document.getElementById('botao-criar-tarefa');
+
+  // ✅ Remove listeners duplicados antes de adicionar
+  const novoBotao = botao.cloneNode(true);
+  botao.parentNode.replaceChild(novoBotao, botao);
+
+  novoBotao.addEventListener('click', async () => {
     const nome = document.getElementById('nomeTarefa').value.trim();
     let desc = document.getElementById('descricaoTarefa').value.trim();
     const dataLimite = document.getElementById('dataLimite').value;
@@ -44,21 +50,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Se não houver descrição, usa "vazio"
-    if (!desc) {
-      desc = "vazio";
-    }
-
-    // cria a tarefa
     await adicionarTarefa(nome, desc, dataLimite);
-
-    // ✅ mostra popup de sucesso
     mostrarPopup(`Tarefa criada: ${nome}`, 4000);
-
-    // fecha o modal
     document.getElementById('modal-criar-tarefa').style.display = 'none';
   });
 });
+
 
 
 
@@ -147,6 +144,8 @@ async function adicionarTarefa(nome, descricao, dataLimite) {
   const dataLimiteDate = new Date(dataLimite);
   const tagPrincipal = document.getElementById("tagPrincipal").value;
   const tagSecundaria = document.getElementById("tagSecundaria").value;
+  const fixada = document.getElementById('fixarNaHome').checked;
+
   const tags = [tagPrincipal];
   if (tagSecundaria) tags.push(tagSecundaria);
   // 2) Monta o objeto base
@@ -156,7 +155,8 @@ async function adicionarTarefa(nome, descricao, dataLimite) {
     dataLimite: Timestamp.fromDate(dataLimiteDate),
     finalizada: false,
     tipo,
-    tags 
+    tags,
+    fixada 
   };
 
   // 3) Adiciona campos específicos
@@ -503,18 +503,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // 5) Ao criar a tarefa, garantir que wrappers estejam ajustados
   btnCriarTarefa.addEventListener('click', () => {
   ajustarWrappers();
-
-  const nome       = document.getElementById('nomeTarefa').value.trim();
-  const descricao  = document.getElementById('descricaoTarefa').value.trim();
-  const dataLimite = document.getElementById('dataLimite').value;
-
-  if (!nome) {
-    alert('Por favor, informe o nome da tarefa.');
-    return;
-  }
-
-  adicionarTarefa(nome, descricao, dataLimite)
-    .then(() => modalCriar.style.display = 'none');
 });
 
     let startX = 0;

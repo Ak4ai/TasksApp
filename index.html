@@ -112,6 +112,7 @@
         <option value="nao-periodico">Importante Não Periódico</option>
         <option value="personalizado">Personalizado</option>
       </select>
+      <label><input type="checkbox" id="fixarNaHome"> Fixar na Home</label>
       <!-- Visível apenas para tarefas do tipo personalizado -->
       <div id="personalizadoExtras" style="display: none;">
         <!-- Checkbox para permitir conclusão -->
@@ -190,22 +191,31 @@
       </div>
        <!-- Aba Home -->
       <div id="tab-home" class="tab-content active">
-  <h3 style="text-align: center; margin-bottom: 20px;">Progresso de Tarefas</h3>
+        <div class="home-layout">
+          <!-- Coluna da esquerda: Tarefas Fixadas -->
+          <div id="tarefas-fixadas" class="card green-card">
+            <span class="card-title">Tarefas Fixadas</span>
+            <div class="tasks-container"></div>
+          </div>
 
-  <div class="grafico-grid">
-    <div class="grafico-card">
-      <canvas id="graficoDia"></canvas>
-    </div>
+          <!-- Coluna da direita: Gráficos -->
+          <div class="grafico-coluna">
+            <h3 style="text-align: center; margin-bottom: 20px;">Progresso de Tarefas</h3>
+            <div class="grafico-grid">
+              <div class="grafico-card">
+                <canvas id="graficoDia"></canvas>
+              </div>
+              <div class="grafico-card">
+                <canvas id="graficoSemana"></canvas>
+              </div>
+              <div class="grafico-card">
+                <canvas id="graficoMes"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <div class="grafico-card">
-      <canvas id="graficoSemana"></canvas>
-    </div>
-
-    <div class="grafico-card">
-      <canvas id="graficoMes"></canvas>
-    </div>
-  </div>
-</div>
 
 
       <!-- Aba Tarefas Periódicas -->

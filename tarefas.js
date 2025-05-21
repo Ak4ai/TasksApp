@@ -329,7 +329,8 @@ async function carregarTarefas() {
       padraoPersonalizado: data.padraoPersonalizado,
       modoPersonalizado: data.modoPersonalizado,
       permitirConclusao: data.permitirConclusao || false,
-      tags: data.tags || []
+      tags: data.tags || [],
+      fixada: data.fixada || false
     });
   });
 
@@ -349,10 +350,25 @@ async function carregarTarefas() {
 
   tarefas.sort((a, b) => a.dataLimite - b.dataLimite);
 
-  tarefasFuturas.forEach(t => {
+  const tarefasFixadas = tarefas.filter(t => t.fixada && !t.finalizada);
+  const idsFixadas = new Set(tarefasFixadas.map(t => t.id));
+
+  const containerFixadas = document.querySelector('#tarefas-fixadas .tasks-container');
+  containerFixadas.innerHTML = '';
+  tarefasFixadas.forEach(t => {
     const div = renderizarTarefa(t);
-    containers[t.tipo].appendChild(div);
+    containerFixadas.appendChild(div);
   });
+
+  // Renderiza futuras que não estão fixadas (para evitar duplicação)
+  tarefasFuturas
+    .filter(t => !idsFixadas.has(t.id))
+    .forEach(t => {
+      const div = renderizarTarefa(t);
+      containers[t.tipo].appendChild(div);
+    });
+
+
 
   tarefasExpiradas.forEach(t => adicionarNaCard(t, 'purple-card'));
   tarefasConcluidas.forEach(t => adicionarNaCard(t, 'blue-card'));
@@ -827,6 +843,7 @@ export async function ajustarRecurrentes(tarefas) {
       console.log(`⚠️ Já existe tarefa futura para '${t.descricao}' em ${dataProxima.toISOString()}`);
       continue;
     }
+    
 
     const novaTarefa = {
       nome: t.nome,
