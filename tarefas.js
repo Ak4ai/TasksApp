@@ -1,6 +1,6 @@
 import { auth } from './auth.js';
 import { db } from './firebase-config.js';
-import { collection, getDocs, getDoc, doc, updateDoc, deleteDoc,Timestamp, addDoc } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { collection, query, where, getDocs, getDoc, doc, updateDoc, deleteDoc,Timestamp, addDoc } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 export { carregarTarefas, tempoMaisRecente, atualizarDataAtual };
 
 let carregandoTarefas = false;
@@ -55,15 +55,29 @@ function renderizarTarefa(t) {
     const wrapper = document.createElement("div");
     wrapper.className = "tag-list-wrapper";
 
+    // Cria uma lista com todas as tags padrão, já em lowercase
+    const tagsPadrao = Object.values(subTagsPorCategoria)
+      .flat()
+      .map(tag => tag.toLowerCase());
+
     t.tags.forEach((tag, index) => {
       const tagElem = document.createElement("span");
-      tagElem.classList.add("tag", `tag-nivel-${index + 1}`);
+      tagElem.classList.add("tag");
+
+      // Verifica se é personalizada comparando em lowercase
+      if (!tagsPadrao.includes(tag.toLowerCase())) {
+        tagElem.classList.add("tag-personalizada");
+      } else {
+        tagElem.classList.add(`tag-nivel-${index + 1}`);
+      }
+
       tagElem.textContent = tag;
       wrapper.appendChild(tagElem);
     });
 
     div.appendChild(wrapper);
   }
+
 
   // Verifica se existe anexo no localStorage
   const anexoRaw = localStorage.getItem(`anexos_${t.id}`);
@@ -452,6 +466,17 @@ function atualizarDataAtual() {
 }
 
 
+async function existeTarefaRepetida(tarefasColecao, descricao, dataProxima) {
+  const q = query(
+    tarefasColecao,
+    where("descricao", "==", descricao),
+    where("repetida", "==", true),
+    where("dataLimite", "==", Timestamp.fromDate(dataProxima))
+  );
+  const snap = await getDocs(q);
+  return !snap.empty;
+}
+
 export async function ajustarRecurrentes(tarefas) {
   const usuario = auth.currentUser;
   if (!usuario) return;
@@ -459,7 +484,6 @@ export async function ajustarRecurrentes(tarefas) {
   const tarefasColecao = collection(db, "usuarios", usuario.uid, "tarefas");
 
   for (const t of tarefas) {
-    // ❌ Evita criar tarefas com base em outras já marcadas como repetidas
     if (t.repetida) {
       console.log(`⛔ Ignorado: tarefa repetida '${t.descricao}'`);
       continue;
@@ -501,12 +525,11 @@ export async function ajustarRecurrentes(tarefas) {
           continue;
         }
       } else {
-        continue; // modo inválido
+        continue;
       }
-    }
 
     // PERIÓDICAS
-    else if (t.tipo === 'periodico') {
+    } else if (t.tipo === 'periodico') {
       const proxima = new Date(dataLimiteAnterior);
       switch (t.frequencia) {
         case 'diario': proxima.setDate(proxima.getDate() + 1); break;
@@ -524,15 +547,22 @@ export async function ajustarRecurrentes(tarefas) {
       continue;
     }
 
-    // ✅ Criar nova tarefa com campo 'repetida: true'
+    // ❗ Verifica duplicidade antes de criar
+    const jaExiste = await existeTarefaRepetida(tarefasColecao, t.descricao, dataProxima);
+    if (jaExiste) {
+      console.log(`⚠️ Já existe tarefa futura para '${t.descricao}' em ${dataProxima.toISOString()}`);
+      continue;
+    }
+
     const novaTarefa = {
       nome: t.nome,
       descricao: t.descricao,
       tipo: t.tipo,
       dataLimite: Timestamp.fromDate(dataProxima),
       finalizada: false,
-      repetida: true, // 🔒 Bloqueia a geração de novas tarefas baseadas nela
+      repetida: true,
       tags: Array.isArray(t.tags) ? [...t.tags] : [],
+      tarefaOriginal: t.id,
     };
 
     if (t.frequencia != null) novaTarefa.frequencia = t.frequencia;
@@ -543,7 +573,6 @@ export async function ajustarRecurrentes(tarefas) {
     await addDoc(tarefasColecao, novaTarefa);
     console.log(`✅ Nova tarefa criada: ${t.descricao} para ${dataProxima.toLocaleString('pt-BR')}`);
 
-    // Finaliza tarefa anterior
     const refAntigo = doc(db, "usuarios", usuario.uid, "tarefas", t.id);
     await updateDoc(refAntigo, { finalizada: true });
   }
