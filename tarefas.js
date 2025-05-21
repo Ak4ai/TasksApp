@@ -216,8 +216,90 @@ document.getElementById("tagPrincipal").addEventListener("change", (e) => {
   }
 });
 
+// Funções auxiliares para cálculo das datas de início dos períodos
+function getInicioDoDia(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function getInicioDaSemana(date) {
+  const diaSemana = date.getDay(); // 0 (domingo) a 6 (sábado)
+  const diff = date.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1); // ajustar para segunda-feira
+  return new Date(date.getFullYear(), date.getMonth(), diff);
+}
+
+function getInicioDoMes(date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function getFimDoDia(data = new Date()) {
+  const fim = new Date(data);
+  fim.setHours(23, 59, 59, 999);
+  return fim;
+}
+
+function getFimDaSemana(data = new Date()) {
+  const fim = new Date(data);
+  const dia = fim.getDay(); // 0 (Dom) a 6 (Sáb)
+  const diasAteDomingo = 6 - dia;
+  fim.setDate(fim.getDate() + diasAteDomingo);
+  fim.setHours(23, 59, 59, 999);
+  return fim;
+}
+
+function getFimDoMes(data = new Date()) {
+  const fim = new Date(data.getFullYear(), data.getMonth() + 1, 0); // último dia do mês
+  fim.setHours(23, 59, 59, 999);
+  return fim;
+}
+
+
+// Filtra tarefas entre as datas inicio e fim
+function filtrarTarefasPorPeriodo(tarefas, inicio, fim) {
+  return tarefas.filter(t => {
+    const data = t.dataLimite;
+    return data >= inicio && data <= fim;
+  });
+}
+
+// Calcula % de tarefas concluídas em um período
+function calcularPercentualConcluidas(tarefas, inicioPeriodo, fimPeriodo = new Date()) {
+  const tarefasNoPeriodo = filtrarTarefasPorPeriodo(tarefas, inicioPeriodo, fimPeriodo);
+  if (tarefasNoPeriodo.length === 0) return 0; // <- já garante 0% concluído
+  const concluidas = tarefasNoPeriodo.filter(t => t.finalizada).length;
+  return (concluidas / tarefasNoPeriodo.length) * 100;
+}
+
+
+// Função para criar gráfico de pizza (Chart.js)
+function criarGraficoPizza(ctx, percentual, titulo) {
+  const tarefasPresentes = percentual > 0 || percentual < 100; // mesmo 0% ou 100% deve aparecer
+
+  return new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: ['Concluídas', 'Pendentes'],
+      datasets: [{
+        data: tarefasPresentes ? [percentual, 100 - percentual] : [0, 100],
+        backgroundColor: ['#4caf50', '#ccc']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' },
+        title: {
+          display: true,
+          text: titulo
+        }
+      }
+    }
+  });
+}
+
+
+let graficoDia, graficoSemana, graficoMes;
+
 async function carregarTarefas() {
-  console.log("carregarTarefas foi chamado");
   if (carregandoTarefas) return;
   carregandoTarefas = true;
 
@@ -245,12 +327,11 @@ async function carregarTarefas() {
       finalizada: data.finalizada || false,
       frequencia: data.frequencia,
       padraoPersonalizado: data.padraoPersonalizado,
-      modoPersonalizado: data.modoPersonalizado, // ← ADICIONE ISTO
-      permitirConclusao: data.permitirConclusao || false, // ← E ISTO
+      modoPersonalizado: data.modoPersonalizado,
+      permitirConclusao: data.permitirConclusao || false,
       tags: data.tags || []
     });
   });
-
 
   await ajustarRecurrentes(tarefas);
 
@@ -260,62 +341,76 @@ async function carregarTarefas() {
     'personalizado': document.querySelector('#tarefas-personalizado .tasks-container'),
   };
 
-  // LIMPAR CONTAINERS (antes de popular)
   Object.values(containers).forEach(c => c.innerHTML = '');
 
-  // SEPARAR TAREFAS
-  tarefasFuturas    = tarefas.filter(t => !t.finalizada && t.dataLimite >= agora);
-  tarefasExpiradas  = tarefas.filter(t => !t.finalizada && t.dataLimite <  agora);
-  tarefasConcluidas = tarefas.filter(t =>  t.finalizada);
+  const tarefasFuturas = tarefas.filter(t => !t.finalizada && t.dataLimite >= agora);
+  const tarefasExpiradas = tarefas.filter(t => !t.finalizada && t.dataLimite < agora);
+  const tarefasConcluidas = tarefas.filter(t => t.finalizada);
 
-  // ORDENAR POR DATA
   tarefas.sort((a, b) => a.dataLimite - b.dataLimite);
 
-  // RENDERIZAR FUTURAS NAS RESPECTIVAS ABAS
   tarefasFuturas.forEach(t => {
     const div = renderizarTarefa(t);
     containers[t.tipo].appendChild(div);
   });
 
-  // 1) Continua populando os cards que você já tinha
   tarefasExpiradas.forEach(t => adicionarNaCard(t, 'purple-card'));
   tarefasConcluidas.forEach(t => adicionarNaCard(t, 'blue-card'));
 
-  // 2) AQUI VEM A PARTE NOVA: popular TODOS os containers de "expired-tasks" e "completed-tasks"
-  
-  // Seleciona **todos** os containers de tarefas expiradas
   const allExpiredLists = document.querySelectorAll('.expired-tasks');
   tarefasExpiradas.forEach(t => {
-    const data = t.dataLimite.toLocaleString('pt-BR');
+    const dataStr = t.dataLimite.toLocaleString('pt-BR');
     allExpiredLists.forEach(container => {
       const li = document.createElement('li');
-      li.innerHTML = `<strong>${t.nome}</strong> - Vencida em: ${data}`;
+      li.innerHTML = `<strong>${t.nome}</strong> - Vencida em: ${dataStr}`;
       container.appendChild(li);
     });
   });
 
-  // Seleciona **todos** os containers de tarefas caídas
   const allCompletedLists = document.querySelectorAll('.completed-tasks');
   tarefasConcluidas.forEach(t => {
-    const data = t.dataLimite.toLocaleString('pt-BR');
+    const dataStr = t.dataLimite.toLocaleString('pt-BR');
     allCompletedLists.forEach(container => {
       const li = document.createElement('li');
-      li.innerHTML = `<strong>${t.descricao}</strong> - Concluída até: ${data}`;
+      li.innerHTML = `<strong>${t.descricao}</strong> - Concluída até: ${dataStr}`;
       container.appendChild(li);
     });
   });
 
-  // ATUALIZA XP
   const classeAtual = localStorage.getItem('classeAtiva') || 'Guerreiro';
   atualizarXP(tarefasConcluidas, classeAtual);
 
-
-  // ATUALIZA PRÓXIMA TAREFA
   tempoMaisRecente = tarefasFuturas.length ? tarefasFuturas[0].dataLimite : null;
   atualizarContadorProximaTarefa();
 
   carregandoTarefas = false;
+
+  // Cálculo percentuais
+  const inicioDia = getInicioDoDia(agora);
+  const fimDia = getFimDoDia(agora);
+  const inicioSemana = getInicioDaSemana(agora);
+  const fimSemana = getFimDaSemana(agora);
+  const inicioMes = getInicioDoMes(agora);
+  const fimMes = getFimDoMes(agora);
+
+  const percentualDia = calcularPercentualConcluidas(tarefas, inicioDia, fimDia);
+  const percentualSemana = calcularPercentualConcluidas(tarefas, inicioSemana, fimSemana);
+  const percentualMes = calcularPercentualConcluidas(tarefas, inicioMes, fimMes);
+
+  // Criar/atualizar gráficos
+  const ctxDia = document.getElementById('graficoDia').getContext('2d');
+  const ctxSemana = document.getElementById('graficoSemana').getContext('2d');
+  const ctxMes = document.getElementById('graficoMes').getContext('2d');
+
+  if (graficoDia) graficoDia.destroy();
+  if (graficoSemana) graficoSemana.destroy();
+  if (graficoMes) graficoMes.destroy();
+
+  graficoDia = criarGraficoPizza(ctxDia, percentualDia, 'Tarefas Concluídas Hoje');
+  graficoSemana = criarGraficoPizza(ctxSemana, percentualSemana, 'Tarefas Concluídas Esta Semana');
+  graficoMes = criarGraficoPizza(ctxMes, percentualMes, 'Tarefas Concluídas Este Mês');
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
   const classeAtivaSpan = document.getElementById('classe-ativa');
@@ -956,3 +1051,5 @@ document.getElementById('modoPersonalizado').addEventListener('change', (e) => {
     document.getElementById('bloco-frequencia').style.display = 'block';
   }
 });
+
+
