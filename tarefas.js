@@ -455,72 +455,101 @@ function atualizarDataAtual() {
 export async function ajustarRecurrentes(tarefas) {
   const usuario = auth.currentUser;
   if (!usuario) return;
+
   const tarefasColecao = collection(db, "usuarios", usuario.uid, "tarefas");
-  const hoje = new Date();
 
   for (const t of tarefas) {
-    console.log(`Tarefa: ${t.descricao} | finalizada: ${t.finalizada} | dataLimite: ${t.dataLimite.toISOString()} | tipo: ${t.tipo}`);
-    // Permitir recriar:
-    // - Tarefas que não foram finalizadas e já passaram da data limite (expiradas)
-    // - OU tarefas personalizadas que foram finalizadas e usam modo frequência
-    if (
-      (!t.finalizada && t.dataLimite < hoje) ||
-      (t.tipo === 'personalizado' && t.finalizada && t.modoPersonalizado === 'frequencia')
-    ) {
-      // Continua o processamento
-    } else {
-      continue; // Ignora os outros casos
-    }
-    // Ignora outros tipos que não sejam periodico ou personalizado com frequência
-    if (t.tipo === 'personalizado') {
-      if (t.modoPersonalizado !== 'frequencia' || !t.frequencia) continue;
-    } else if (t.tipo !== 'periodico') {
+    // ❌ Evita criar tarefas com base em outras já marcadas como repetidas
+    if (t.repetida) {
+      console.log(`⛔ Ignorado: tarefa repetida '${t.descricao}'`);
       continue;
     }
 
-    // Calcula próxima data conforme frequência
-    const next = new Date(t.dataLimite);
-    switch (t.frequencia) {
-      case 'diario':  next.setDate(next.getDate() + 1); break;
-      case 'semanal': next.setDate(next.getDate() + 7); break;
-      case 'mensal':  next.setMonth(next.getMonth() + 1); break;
-      default:
-        if (typeof t.frequencia === 'number') {
-          next.setDate(next.getDate() + t.frequencia);
-        } else {
-          continue; // Frequência inválida
+    let dataProxima = null;
+    const dataLimiteAnterior = t.dataLimite.toDate ? t.dataLimite.toDate() : new Date(t.dataLimite);
+    const hoje = new Date();
+
+    console.log(`🔍 Avaliando: ${t.descricao} | Finalizada: ${t.finalizada} | Data: ${dataLimiteAnterior.toISOString()} | Tipo: ${t.tipo}`);
+
+    const podeRecriar =
+      (!t.finalizada && dataLimiteAnterior < hoje) ||
+      (t.tipo === 'personalizado' && t.finalizada && ['frequencia', 'datas'].includes(t.modoPersonalizado));
+
+    if (!podeRecriar) continue;
+
+    // PERSONALIZADAS
+    if (t.tipo === 'personalizado') {
+      if (t.modoPersonalizado === 'frequencia') {
+        if (!t.frequencia) continue;
+        const proxima = new Date(dataLimiteAnterior);
+        proxima.setDate(proxima.getDate() + t.frequencia);
+        dataProxima = proxima;
+
+      } else if (t.modoPersonalizado === 'datas') {
+        if (!t.padraoPersonalizado) continue;
+
+        const datas = t.padraoPersonalizado
+          .split(',')
+          .map(str => new Date(str.trim()))
+          .filter(d => !isNaN(d))
+          .sort((a, b) => a - b);
+
+        dataProxima = datas.find(d => d > dataLimiteAnterior);
+
+        if (!dataProxima) {
+          console.log(`🔁 Nenhuma data futura para '${t.descricao}'`);
+          continue;
         }
+      } else {
+        continue; // modo inválido
+      }
     }
 
+    // PERIÓDICAS
+    else if (t.tipo === 'periodico') {
+      const proxima = new Date(dataLimiteAnterior);
+      switch (t.frequencia) {
+        case 'diario': proxima.setDate(proxima.getDate() + 1); break;
+        case 'semanal': proxima.setDate(proxima.getDate() + 7); break;
+        case 'mensal': proxima.setMonth(proxima.getMonth() + 1); break;
+        default:
+          if (typeof t.frequencia === 'number') {
+            proxima.setDate(proxima.getDate() + t.frequencia);
+          } else {
+            continue;
+          }
+      }
+      dataProxima = proxima;
+    } else {
+      continue;
+    }
+
+    // ✅ Criar nova tarefa com campo 'repetida: true'
     const novaTarefa = {
       nome: t.nome,
       descricao: t.descricao,
       tipo: t.tipo,
-      frequencia: t.frequencia,
-      dataLimite: Timestamp.fromDate(next),
+      dataLimite: Timestamp.fromDate(dataProxima),
       finalizada: false,
+      repetida: true, // 🔒 Bloqueia a geração de novas tarefas baseadas nela
       tags: Array.isArray(t.tags) ? [...t.tags] : [],
     };
 
-    if (t.padraoPersonalizado) {
-      novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
-    }
-
-    if (t.permitirConclusao != null) {
-      novaTarefa.permitirConclusao = t.permitirConclusao;
-    }
-
-    if (t.modoPersonalizado) {
-      novaTarefa.modoPersonalizado = t.modoPersonalizado;
-    }
+    if (t.frequencia != null) novaTarefa.frequencia = t.frequencia;
+    if (t.modoPersonalizado) novaTarefa.modoPersonalizado = t.modoPersonalizado;
+    if (t.padraoPersonalizado) novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
+    if (t.permitirConclusao != null) novaTarefa.permitirConclusao = t.permitirConclusao;
 
     await addDoc(tarefasColecao, novaTarefa);
+    console.log(`✅ Nova tarefa criada: ${t.descricao} para ${dataProxima.toLocaleString('pt-BR')}`);
 
+    // Finaliza tarefa anterior
     const refAntigo = doc(db, "usuarios", usuario.uid, "tarefas", t.id);
     await updateDoc(refAntigo, { finalizada: true });
-    
   }
 }
+
+
 
 
 

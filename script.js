@@ -364,37 +364,49 @@ function atualizarVisibilidadeAppBody() {
   }
 }
 
-// Abrir e fechar modal ao clicar em "Criar Tarefa"
 document.querySelectorAll('.criar-button').forEach(botao => {
   botao.addEventListener('click', () => {
     const modal = document.getElementById('modal-criar-tarefa');
     const selectTipo = document.getElementById('tipo-tarefa');
+    const extras = document.getElementById('personalizadoExtras');
 
-    // Detectar a aba ativa corretamente pela classe 'active'
     const abaAtiva = document.querySelector('.tab-content.active');
-    let tipo = 'personalizado'; // padrão
+    let tipoDetectado = 'personalizado';
 
     if (abaAtiva) {
       switch (abaAtiva.id) {
         case 'tab-tasks':
-          tipo = 'periodico';
+          tipoDetectado = 'periodico';
           break;
         case 'tab-tasks-nao-periodicas':
-          tipo = 'nao-periodico';
+          tipoDetectado = 'nao-periodico';
           break;
         case 'tab-tasks-personalizadas':
-          tipo = 'personalizado';
+          tipoDetectado = 'personalizado';
           break;
       }
     }
+    
+    setTimeout(() => {
+      if (selectTipo) {
+        selectTipo.value = tipoDetectado;
+        ajustarWrappers();
+        // Mostra o modal
+        modal.style.display = 'block';
 
-    console.log("Tipo detectado:", tipo);
-    selectTipo.value = tipo;
-
-    // Mostrar modal
-    modal.style.display = 'block';
+        // Atualiza o valor do select
+        selectTipo.value = tipoDetectado;
+        
+        // Exibe ou esconde os campos extras
+        extras.style.display = tipoDetectado === 'personalizado' ? 'block' : 'none';
+      } else {
+        console.warn("Elemento #tipo-tarefa não encontrado.");
+      }
+    }, 100);
   });
 });
+
+
 
 
 
@@ -419,6 +431,24 @@ document.querySelectorAll('.criar-button').forEach(botao => {
 
 
 
+  
+
+  function ajustarWrappers() {
+    const tipoSel = document.getElementById('tipo-tarefa');
+    const freqWrap = document.getElementById('frequencia-wrapper');
+    const padraoWrap = document.getElementById('padrao-wrapper');
+    const tipo = tipoSel.value;
+    if (tipo === 'periodico') {
+      freqWrap.style.display   = 'block';
+      padraoWrap.style.display = 'none';
+    } else if (tipo === 'personalizado') {
+      freqWrap.style.display   = 'none';
+      padraoWrap.style.display = 'block';
+    } else { // nao-periodico
+      freqWrap.style.display   = 'none';
+      padraoWrap.style.display = 'none';
+    }
+  }
 
 
 
