@@ -237,8 +237,7 @@ function renderizarTarefa(t) {
         personagemFalaAleatoriamente(classeAtiva);
       }
 
-      // Aguarde todo o processamento antes de recarregar
-      await carregarTarefas();
+      carregarTarefas();
     });
   }
 
@@ -384,7 +383,6 @@ async function carregarTarefas() {
       permitirConclusao: data.permitirConclusao || false,
       tags: data.tags || [],
       fixada: data.fixada || false,
-      repetida: data.repetida || false // <-- ADICIONE ESTA LINHA
     });
   });
 
@@ -398,7 +396,7 @@ async function carregarTarefas() {
 
   Object.values(containers).forEach(c => c.innerHTML = '');
 
-  const tarefasFuturas = tarefas.filter(t => !t.finalizada && t.dataLimite >= agora && !t.repetida);
+  const tarefasFuturas = tarefas.filter(t => !t.finalizada && t.dataLimite >= agora);
   const tarefasExpiradas = tarefas.filter(t => !t.finalizada && t.dataLimite < agora);
   const tarefasConcluidas = tarefas.filter(t => t.finalizada);
 
@@ -964,8 +962,7 @@ export async function processarTarefaPeriodicaAoMarcar(t) {
     frequencia: t.frequencia,
     dataLimite: Timestamp.fromDate(next),
     finalizada: false,
-    tags: Array.isArray(t.tags) ? [...t.tags] : [],
-    repetida: true,
+    tags: Array.isArray(t.tags) ? [...t.tags] : []
   };
   if (t.padraoPersonalizado != null) {
     novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
