@@ -155,7 +155,6 @@ function renderizarTarefa(t) {
     link.style.marginTop = '4px';
     link.style.color = '#007BFF';
     link.style.textDecoration = 'underline';
-
     div.appendChild(link);
   }
 
@@ -361,13 +360,10 @@ async function carregarTarefas() {
   });
 
   // Renderiza futuras que não estão fixadas (para evitar duplicação)
-  tarefasFuturas
-    .filter(t => !idsFixadas.has(t.id))
-    .forEach(t => {
-      const div = renderizarTarefa(t);
-      containers[t.tipo].appendChild(div);
-    });
-
+  tarefasFuturas.forEach(t => {
+    const div = renderizarTarefa(t);
+    containers[t.tipo].appendChild(div);
+  });
 
 
   tarefasExpiradas.forEach(t => adicionarNaCard(t, 'purple-card'));
@@ -618,10 +614,10 @@ function adicionarNaCard(tarefa, cardClass) {
   adicionarIconeDeExcluir(p, tarefa);
 }
 
-async function atualizarTarefaNoFirestore(id, nome, descricao, dataLimite) {
+async function atualizarTarefaNoFirestore(id, nome, descricao, dataLimite, fixada) {
     const usuario = auth.currentUser;
     const refDoc = doc(db, "usuarios", usuario.uid, "tarefas", id);
-    await updateDoc(refDoc, { nome, descricao, dataLimite });
+    await updateDoc(refDoc, { nome, descricao, dataLimite, fixada });
 }
 
 async function excluirTarefaDoFirestore(id) {
@@ -663,13 +659,14 @@ function abrirModalDetalhe(tarefa) {
     document.getElementById('editar-descricao').value = tarefa.descricao;
     document.getElementById('editar-dataLimite').value = tarefa.dataLimite.toISOString().slice(0,16);
     document.getElementById('tipo-tarefa').value = tarefa.tipo;
-
+    document.getElementById('fixarNaHomeEditar').checked = tarefa.fixada === true;
 
     document.getElementById('salvar-edicao').onclick = async () => {
         const novaNome = document.getElementById('editar-nome').value.trim();
         const novaDesc = document.getElementById('editar-descricao').value.trim();
         const novaData = new Date(document.getElementById('editar-dataLimite').value);
-        await atualizarTarefaNoFirestore(tarefa.id, novaNome, novaDesc, novaData);
+        const fixarNaHome = document.getElementById('fixarNaHomeEditar').checked;
+        await atualizarTarefaNoFirestore(tarefa.id, novaNome, novaDesc, novaData, fixarNaHome);
         modal.style.display = 'none';
         carregarTarefas();
     };

@@ -112,7 +112,10 @@
         <option value="nao-periodico">Importante Não Periódico</option>
         <option value="personalizado">Personalizado</option>
       </select>
-      <label><input type="checkbox" id="fixarNaHome"> Fixar na Home</label>
+      <label for="fixarNaHome" style="display: flex; align-items: center; gap: 7px;">
+        <input type="checkbox" id="fixarNaHome">
+        Fixar na Home
+      </label>
       <!-- Visível apenas para tarefas do tipo personalizado -->
       <div id="personalizadoExtras" style="display: none;">
         <!-- Checkbox para permitir conclusão -->
@@ -135,6 +138,10 @@
       <label for="editar-descricao">Descrição:</label>
       <input id="editar-descricao" type="text">
       <input type="datetime-local" id="editar-dataLimite" />
+      <label for="fixarNaHomeEditar" class="fixar-label">
+      <input type="checkbox" id="fixarNaHomeEditar">
+      Fixar na Home
+      </label>
       <button id="salvar-edicao">Salvar</button>
       <button id="excluir-tarefa" class="danger">Excluir</button>
     </div>

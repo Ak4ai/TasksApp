@@ -1314,4 +1314,22 @@ body.ios-pwa .bottom-nav {
   }
 }
 
+#fixarNaHome {
+  width: 29px;
+  height: 29px;
+  cursor: pointer;
+}
 
+.fixar-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+  font-size: 1rem;
+  color: #faf0e6;
+}
+#fixarNaHomeEditar {
+  width: 29px;
+  height: 29px;
+  cursor: pointer;
+}
