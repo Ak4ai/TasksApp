@@ -171,6 +171,7 @@ function renderizarTarefa(t) {
         { finalizada: checkbox.checked }
       );
 
+      // Processa tarefa periódica se for o caso
       if (t.tipo === 'periodico' && checkbox.checked) {
         await processarTarefaPeriodicaAoMarcar({
           ...t,
@@ -178,9 +179,16 @@ function renderizarTarefa(t) {
         });
       }
 
+      // ✅ Personagem fala ao concluir a tarefa
+      if (checkbox.checked) {
+        let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
+        personagemFalaAleatoriamente(classeAtiva);
+      }
+
       carregarTarefas();
     });
   }
+
 
   div.addEventListener('click', () => abrirModalDetalhe(t));
 
@@ -313,6 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const classeAtivaSpan = document.getElementById('classe-ativa');
   const classeSelector = document.getElementById('classe-selector');
   const personagemImg = document.querySelector('.character-box img');
+  
 
   // Classe salva ou padrão
   let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
@@ -353,8 +362,84 @@ document.addEventListener('DOMContentLoaded', () => {
   atualizarXP(tarefasConcluidas, classeAtiva); // Inicializa XP
 });
 
+// Função para salvar o XP atual (lido da interface) no Firestore
+async function salvarXPNoFirestore(classeAtiva) {
+  const xpInfo = document.querySelector('.xp-info');
+  if (!xpInfo) return;
 
-function atualizarXP(tarefasConcluidas, classeAtiva) {
+  // Pega o texto do XP: "XP: X / 100"
+  const xpTexto = xpInfo.querySelector('span')?.textContent || 'XP: 0 / 100';
+  const xpAtual = parseInt(xpTexto.match(/XP: (\d+)/)?.[1] || '0', 10);
+
+  // Calcula xp total acumulado baseado no nível e xp atual na barra
+  const nivelTexto = xpInfo.querySelector('strong')?.textContent || 'Nível 1';
+  const nivel = parseInt(nivelTexto.match(/Nível (\d+)/)?.[1] || '1', 10);
+
+  // xp total = (nivel - 1) * 100 + xpAtual
+  const xpTotal = (nivel - 1) * 100 + xpAtual;
+
+  const usuario = auth.currentUser;
+  if (!usuario) {
+    alert('Usuário não autenticado!');
+    return;
+  }
+
+  const usuarioRef = doc(db, "usuarios", usuario.uid);
+
+  await updateDoc(usuarioRef, {
+    xpAcumulado: xpTotal
+  });
+
+  mostrarPopup(`XP salvo no Firestore: ${xpTotal}`, 3000);
+}
+
+// Função para resetar XP no Firestore e atualizar a UI
+async function resetarXP(classeAtiva) {
+  const usuario = auth.currentUser;
+  if (!usuario) {
+    alert('Usuário não autenticado!');
+    return;
+  }
+
+  const usuarioRef = doc(db, "usuarios", usuario.uid);
+
+  await updateDoc(usuarioRef, {
+    xpAcumulado: 0
+  });
+
+  atualizarXP(0, classeAtiva);
+  mostrarPopup('XP resetado para zero.', 3000);
+}
+
+// Cria os botões e adiciona dentro do container da personagem
+function criarBotoesXP(classeAtiva) {
+  const container = document.querySelector('.character-box');
+  if (!container) return;
+
+  // Verifica se já existe para não duplicar
+  if (container.querySelector('#btn-salvar-xp')) return;
+
+  const btnSalvar = document.createElement('button');
+  btnSalvar.id = 'btn-salvar-xp';
+  btnSalvar.textContent = 'Salvar XP no Firestore';
+  btnSalvar.style.marginRight = '10px';
+  btnSalvar.addEventListener('click', () => salvarXPNoFirestore(classeAtiva));
+
+  const btnReset = document.createElement('button');
+  btnReset.id = 'btn-reset-xp';
+  btnReset.textContent = 'Resetar XP';
+  btnReset.addEventListener('click', () => resetarXP(classeAtiva));
+
+  const divBotoes = document.createElement('div');
+  divBotoes.style.marginTop = '10px';
+  divBotoes.appendChild(btnSalvar);
+  divBotoes.appendChild(btnReset);
+
+  container.appendChild(divBotoes);
+}
+
+
+ async function atualizarXP(tarefasConcluidas, classeAtiva) {
   const xpPorTarefa = 10;
   let xpTotal = 0;
 
@@ -666,6 +751,7 @@ export async function ajustarRecurrentes(tarefas) {
 
     await addDoc(tarefasColecao, novaTarefa);
     mostrarPopup(`Nova tarefa criada: ${t.descricao} para ${dataProxima.toLocaleDateString('pt-BR')}`);
+    personagemFalaAleatoriamente
     const refAntigo = doc(db, "usuarios", usuario.uid, "tarefas", t.id);
     await updateDoc(refAntigo, { finalizada: true });
   }
