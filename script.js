@@ -182,6 +182,8 @@ async function adicionarTarefa(nome, descricao, dataLimite) {
       novaTarefa.padraoPersonalizado = padrao; // CSV de datas
     }
 
+
+
     if (modo === 'frequencia') {
       const dias = parseInt(document.getElementById('diasFrequencia').value);
       novaTarefa.frequencia = dias; // Ex: repetir a cada X dias

@@ -23,6 +23,68 @@ const classesJogador = {
   "Bardo": { bonusCategorias: ["Criativo"], bonusXP: 0.5 },    // +50% XP em tarefas Criativo
   "Bruxo": { bonusCategorias: ["Espiritual"], bonusXP: 0.5 }   // +50% XP em tarefas Espiritual
 };
+const avataresPorClasse = {
+  Guerreiro: "img/guerreiro.jpg",
+  Mago: "img/mago.jpeg",
+  Ladino: "img/ladino.jpg",
+  Bardo: "img/bardo.jpg",
+  Bruxo: "img/bruxo.jpg",
+};
+const frasesPorClasse = {
+  Guerreiro: [
+    "Hora de batalhar!",
+    "Sem dor, sem glória.",
+    "Mais uma tarefa, mais próximo da vitória!"
+  ],
+  Mago: [
+    "O conhecimento é poder!",
+    "As estrelas me guiam nesta missão.",
+    "Uma tarefa por vez... como conjurar feitiços!"
+  ],
+  Ladino: [
+    "Discrição é tudo.",
+    "Completei antes que você notasse.",
+    "Silencioso, mas eficiente."
+  ],
+  Bardo: [
+    "Cada tarefa é uma nova canção!",
+    "Vamos tornar isso épico!",
+    "Deixe-me narrar sua glória!"
+  ],
+  Bruxo: [
+    "O pacto exige progresso.",
+    "Tarefa feita, energia recuperada.",
+    "As sombras aprovam sua dedicação."
+  ],
+};
+
+function mostrarPopupPersonagem(frase, classe) {
+  const popup = document.getElementById('popup-personagem');
+  const texto = document.getElementById('popup-personagem-text');
+  const imagem = document.getElementById('popup-personagem-img');
+
+  texto.innerHTML = `<em>${frase}</em>`;
+  imagem.src = avataresPorClasse[classe] || "default.png";
+
+  popup.classList.remove('hide');
+  popup.classList.add('show');
+
+  setTimeout(() => {
+    popup.classList.remove('show');
+    popup.classList.add('hide');
+  }, 4000); // 4 segundos visível
+}
+
+function personagemFalaAleatoriamente(classeAtiva) {
+  const frases = frasesPorClasse[classeAtiva];
+  if (!frases) return;
+
+  const frase = frases[Math.floor(Math.random() * frases.length)];
+  mostrarPopupPersonagem(frase, classeAtiva);
+}
+
+
+
 
 
 
@@ -224,7 +286,7 @@ async function carregarTarefas() {
     });
   });
 
-  // Seleciona **todos** os containers de tarefas concluídas
+  // Seleciona **todos** os containers de tarefas caídas
   const allCompletedLists = document.querySelectorAll('.completed-tasks');
   tarefasConcluidas.forEach(t => {
     const data = t.dataLimite.toLocaleString('pt-BR');
@@ -250,28 +312,32 @@ async function carregarTarefas() {
 document.addEventListener('DOMContentLoaded', () => {
   const classeAtivaSpan = document.getElementById('classe-ativa');
   const classeSelector = document.getElementById('classe-selector');
+  const personagemImg = document.querySelector('.character-box img');
 
-  // Pegamos a classe salva ou usamos 'Guerreiro' como padrão
+  // Classe salva ou padrão
   let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
 
-  // Inicializa visual
+  // Atualiza UI com a classe e imagem
   function atualizarVisualClasse() {
     classeAtivaSpan.textContent = classeAtiva;
     classeSelector.value = classeAtiva;
     classeSelector.style.display = 'none';
     classeAtivaSpan.style.display = 'inline';
+
+    // Atualiza imagem do personagem
+    personagemImg.src = avataresPorClasse[classeAtiva] || "default.png";
   }
 
   atualizarVisualClasse();
 
-  // Clica no texto para editar
+  // Ativa edição ao clicar no nome da classe
   classeAtivaSpan.addEventListener('click', () => {
     classeAtivaSpan.style.display = 'none';
     classeSelector.style.display = 'inline';
     classeSelector.focus();
   });
 
-  // Ao mudar a classe, salva e recalcula XP
+  // Quando a classe mudar
   classeSelector.addEventListener('change', () => {
     classeAtiva = classeSelector.value;
     localStorage.setItem('classeAtiva', classeAtiva);
@@ -279,12 +345,14 @@ document.addEventListener('DOMContentLoaded', () => {
     atualizarXP(tarefasConcluidas, classeAtiva); // Recalcula XP ao trocar classe
   });
 
+  // Fecha seletor ao perder o foco
   classeSelector.addEventListener('blur', () => {
     atualizarVisualClasse();
   });
-
-  atualizarXP(tarefasConcluidas, classeAtiva); // Recalcula XP ao carregar
+  personagemFalaAleatoriamente(classeAtiva); // Fala aleatória ao carregar
+  atualizarXP(tarefasConcluidas, classeAtiva); // Inicializa XP
 });
+
 
 function atualizarXP(tarefasConcluidas, classeAtiva) {
   const xpPorTarefa = 10;
