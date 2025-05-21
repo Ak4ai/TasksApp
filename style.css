@@ -747,35 +747,36 @@ textarea:focus {
 
 #popup-alert {
   position: fixed;
-  top: -100px;             /* Inicia fora da tela (acima) */
+  top: -100px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: rgba(37, 50, 64, 0.568); /* Opacidade ajustada para 80% */
+  background-color: rgba(37, 50, 64, 0.75); /* Ajuste da opacidade */
   border: 1px solid #999999;
   border-radius: 0.5rem;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
-  transition: all ease 0.5s;
+  transition: top 0.5s ease, opacity 0.5s ease, box-shadow 0.3s ease;
   color: #c9c9da;
-  box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.3);
+  box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.5);
   padding: 10px;
   padding-left: 20px;
   padding-right: 20px;
   opacity: 0;
   z-index: 1100;
-  transition: top 0.5s ease, opacity 0.5s ease;
 }
 
 /* Classe para mostrar o popup */
 #popup-alert.show {
-  top: 10px;               /* Desce até 20px do topo */
+  top: 10px;  /* Desce até 10px do topo */
   opacity: 1;
+  box-shadow: 2px 2px 15px rgba(255, 255, 255, 0.8); /* Suaviza o sombreamento */
 }
 
 /* Classe para esconder o popup (fade out) */
 #popup-alert.hide {
   opacity: 0;
 }
+
 
 body.ios-pwa {
   padding-top: calc(env(safe-area-inset-top, 10px) + 50px);

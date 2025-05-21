@@ -2,7 +2,7 @@ import { auth } from './auth.js';
 import { db } from './firebase-config.js';
 import { collection, addDoc, getDocs, Timestamp, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 // script.js
-import { carregarTarefas } from './tarefas.js';
+import { carregarTarefas,mostrarPopup } from './tarefas.js';
 
 
 // Variável para armazenar a fila de mensagens
@@ -29,31 +29,37 @@ document.getElementById('delete-all-tasks-button').addEventListener('click', asy
         });
 
 document.addEventListener('DOMContentLoaded', () => {
-  
-    // const mensagemDeBoasVindas = "Bem-vindo ao sistema!";
-    // mostrarMensagem(mensagemDeBoasVindas);
+  document.getElementById('botao-criar-tarefa').addEventListener('click', async () => {
+    const nome = document.getElementById('nomeTarefa').value.trim();
+    let desc = document.getElementById('descricaoTarefa').value.trim();
+    const dataLimite = document.getElementById('dataLimite').value;
 
-    document.getElementById('botao-criar-tarefa').addEventListener('click', async () => {
-        const nome = document.getElementById('nomeTarefa').value.trim();
-        const desc = document.getElementById('descricaoTarefa').value.trim();
-        const dataLimite = document.getElementById('dataLimite').value;
-        if (!nome) {
-          alert('Por favor, informe o nome da tarefa.');
-          return;
-        }
+    if (!nome) {
+      alert('Por favor, informe o nome da tarefa.');
+      return;
+    }
 
-        if (!dataLimite) {
-          alert('Por favor, informe a data limite.');
-          return;
-        }
+    if (!dataLimite) {
+      alert('Por favor, informe a data limite.');
+      return;
+    }
 
-        // cria a tarefa e só depois recarrega a lista
-        await adicionarTarefa(nome, descricao, dataLimite);
+    // Se não houver descrição, usa "vazio"
+    if (!desc) {
+      desc = "vazio";
+    }
 
-        // fecha o modal só quando já tivermos atualizado a UI
-        document.getElementById('modal-criar-tarefa').style.display = 'none';
-    });
+    // cria a tarefa
+    await adicionarTarefa(nome, desc, dataLimite);
+
+    // ✅ mostra popup de sucesso
+    mostrarPopup(`Tarefa criada: ${nome}`, 4000);
+
+    // fecha o modal
+    document.getElementById('modal-criar-tarefa').style.display = 'none';
+  });
 });
+
 
 
 
@@ -112,22 +118,7 @@ function esconderBlurBackground() {
     blurBackground.style.display = 'none';
 }
 
-function mostrarPopup(mensagem, duracao = 2000) {
-    const popup = document.getElementById('popup-alert');
-    const text = document.getElementById('popup-alert-text');
-    
-    text.textContent = "🎲 " + mensagem + " 🎲";
-    
-    // Remove classes antigas e adiciona a classe 'show' para disparar o fade in e o slide
-    popup.classList.remove('hide');
-    popup.classList.add('show');
-    
-    // Após 'duracao' milissegundos, inicia o fade out
-    setTimeout(() => {
-      popup.classList.remove('show');
-      popup.classList.add('hide');
-    }, duracao);
-}
+
 
 function isIOSDevice() {
     const ua = navigator.userAgent.toLowerCase();

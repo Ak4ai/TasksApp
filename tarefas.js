@@ -371,16 +371,25 @@ function adicionarIconeDeExcluir(pElem, tarefa) {
   btn.textContent = '🗑';
   btn.title = 'Excluir permanentemente';
   btn.style.marginLeft = '8px';
+
   btn.addEventListener('click', async (e) => {
     e.stopPropagation();
+
     // Remove do Firestore
     await excluirTarefaDoFirestore(tarefa.id);
-    // Remove apenas do DOM, **não** de tarefasConcluidas nem tarefasExpiradas
+
+    // Remove do DOM
     pElem.remove();
-    // NÃO chama atualizarXP() — assim o XP não cai
+
+    // ✅ Mostra popup
+    mostrarPopup(`Tarefa excluída: ${tarefa.descricao}`, 4000);
+
+    // NÃO chama atualizarXP()
   });
+
   pElem.appendChild(btn);
 }
+
 
 function abrirModalDetalhe(tarefa) {
     const modal = document.getElementById('modal-tarefa');
@@ -463,6 +472,23 @@ function atualizarDataAtual() {
     const agora = new Date();
     const opcoes = { weekday: 'long', day: 'numeric', month: 'numeric', year: 'numeric' };
     span.textContent = '📅 ' + agora.toLocaleDateString('pt-BR', opcoes).replace(/^\w/, c=>c.toUpperCase());
+}
+
+export function mostrarPopup(mensagem, duracao = 4000) {  // Aumentando o tempo para 4 segundos por padrão
+    const popup = document.getElementById('popup-alert');
+    const text = document.getElementById('popup-alert-text');
+    
+    text.textContent = "🎲 " + mensagem + " 🎲";
+    
+    // Remove classes antigas e adiciona a classe 'show' para disparar o fade in e o slide
+    popup.classList.remove('hide');
+    popup.classList.add('show');
+    
+    // Após 'duracao' milissegundos, inicia o fade out
+    setTimeout(() => {
+      popup.classList.remove('show');
+      popup.classList.add('hide');
+    }, duracao);
 }
 
 
@@ -571,8 +597,7 @@ export async function ajustarRecurrentes(tarefas) {
     if (t.permitirConclusao != null) novaTarefa.permitirConclusao = t.permitirConclusao;
 
     await addDoc(tarefasColecao, novaTarefa);
-    console.log(`✅ Nova tarefa criada: ${t.descricao} para ${dataProxima.toLocaleString('pt-BR')}`);
-
+    mostrarPopup(`Nova tarefa criada: ${t.descricao} para ${dataProxima.toLocaleDateString('pt-BR')}`);
     const refAntigo = doc(db, "usuarios", usuario.uid, "tarefas", t.id);
     await updateDoc(refAntigo, { finalizada: true });
   }
