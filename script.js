@@ -425,6 +425,16 @@ document.querySelectorAll('.criar-button').forEach(botao => {
   });
 });
 
+  // Mostra o hash do commit no rótulo
+  window.addEventListener('DOMContentLoaded', () => {
+    const label = document.getElementById('git-version-label');
+    if (window.GIT_COMMIT_HASH) {
+      label.textContent = 'Versão: ' + window.GIT_COMMIT_HASH;
+    } else {
+      label.textContent = 'Versão: desconhecida';
+    }
+  });
+
 
 
 
