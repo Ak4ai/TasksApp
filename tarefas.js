@@ -800,7 +800,7 @@ function abrirModalDetalhe(tarefa) {
   
       // Atualizar próxima tarefa (se houver)
       if (tarefasFuturas.length === 0) {
-        span.textContent = '⏰ Sem tarefas futuras';
+        span.textContent = '⏰ 0:00:00';
         tempoMaisRecente = null;
         return;
       }
