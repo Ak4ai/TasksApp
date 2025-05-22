@@ -1,1 +1,1 @@
-window.GIT_COMMIT_MSG = '44';
+window.GIT_COMMIT_MSG = '45';
