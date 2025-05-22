@@ -123,14 +123,14 @@ body {
 .bottom-nav-separator.active {
   background-color: #3835356c;
   padding: 3px;
-  border: 3px solid #aca4c0;
+  border: 3px solid #6b6b6b;
   border-radius: 15px;
 }
 
-.bottom-nav-separator.active {
-  background-color: #3835356c;
+.bottom-nav-separator {
+  background-color: #30303037;
   padding: 3px;
-  border: 3px solid #313131;
+  border: 3px solid #31313143;
   border-radius: 15px;
 }
 
