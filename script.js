@@ -2,7 +2,7 @@ import { auth } from './auth.js';
 import { db } from './firebase-config.js';
 import { collection, addDoc, getDocs, Timestamp, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 // script.js
-import { carregarTarefas,mostrarPopup } from './tarefas.js';
+import { carregarTarefas,mostrarPopup,carregarInventario } from './tarefas.js';
 
 
 // Variável para armazenar a fila de mensagens
@@ -255,6 +255,9 @@ async function adicionarTarefa(nome, descricao, dataLimite) {
   
         if (alvo === 'tab-tasks') {
           carregarTarefas();
+        }
+        if (alvo === 'tab-inventario') {
+          carregarInventario();
         }
 
         

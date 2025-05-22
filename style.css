@@ -1395,3 +1395,25 @@ body.ios-pwa .bottom-nav {
 .anexo-link .icon-clip svg {
   display: block;
 }
+
+.inventario-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+}
+
+.item-card-inventario {
+  width: 120px;
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  text-align: center;
+  background: #f5f5f5;
+  cursor: pointer;
+}
+
+.item-card-inventario.ativo {
+  border-color: green;
+  background: #d7ffd7;
+}

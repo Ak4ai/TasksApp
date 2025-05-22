@@ -1246,3 +1246,59 @@ async function atualizarInventarioUI() {
   // Aqui pode atualizar o HTML para mostrar os itens comprados, se quiser
 }
 
+async function ativarItem(item) {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+
+  const usuarioRef = doc(db, "usuarios", usuario.uid);
+  await updateDoc(usuarioRef, { itemAtivo: item });
+
+  mostrarPopup(`Item "${item}" ativado!`, 2000);
+  carregarInventario();
+}
+
+
+export async function carregarInventario() {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+
+  const usuarioRef = doc(db, "usuarios", usuario.uid);
+  const snap = await getDoc(usuarioRef);
+  const dados = snap.data();
+
+  const inventario = dados.inventario || [];
+  const itemAtivo = dados.itemAtivo || null;
+
+  const grid = document.getElementById("inventario-grid");
+  grid.innerHTML = ""; // limpa antes
+
+  inventario.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "item-card";
+
+    const img = document.createElement("img");
+    img.src = `img/${item}.png`;
+    img.alt = item;
+    img.classList.add("item-imagem");
+
+    const nome = document.createElement("span");
+    nome.className = "item-nome";
+    nome.textContent = item;
+
+    const btn = document.createElement("button");
+    btn.className = "btn-comprar";
+    if (item === itemAtivo) {
+      btn.textContent = "Ativo";
+      btn.disabled = true;
+    } else {
+      btn.textContent = "Ativar";
+      btn.onclick = () => ativarItem(item);
+    }
+
+    card.appendChild(img);
+    card.appendChild(nome);
+    card.appendChild(btn);
+    grid.appendChild(card);
+  });
+}
+
