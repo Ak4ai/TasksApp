@@ -168,41 +168,42 @@
 
  <!-- BARRA SUPERIOR -->
  <div class="top-info-bar">
-  <span class="user-name">👤</span>
-  <span class="current-day">📅</span>
-  <span class="next-event">⏰</span>
+  <span class="class-name icons-info">👤</span>
+  <span class="current-day icons-info">📅</span>
+  <span class="next-event icons-info">⏰</span>
+  <span class="moedas-info icons-info">🪙 0 moedas</span>
  </div>
   
   <!-- CONTEÚDO PRINCIPAL -->
   <div class="main-content">
     
-    
+    <!-- QUADRADO PERSONAGEM --> 
+    <!-- ...existing code... -->
+    <div class="top-info-character">
+      <div class="character-box">
+        <img src="" alt="Personagem" />
+        <div class="xp-info">
+          <strong>Nível 1</strong>
+          <div class="xp-bar">
+            <div class="xp-fill" style="width: 20%;"></div>
+          </div>
+          <span>XP: 0 / 100</span>
+        </div>
+        <div class="classe-info">
+          Classe: <span id="classe-ativa" style="cursor:pointer; text-decoration: underline;"></span>
+        </div>
+        <select id="classe-selector" style="display:none;">
+          <option value="Guerreiro">Guerreiro</option>
+          <option value="Mago">Mago</option>
+          <option value="Ladino">Ladino</option>
+          <option value="Bardo">Bardo</option>
+          <option value="Bruxo">Bruxo</option>
+        </select>
+      </div>
+    </div>
     <!-- TABS -->
     <div class="tabs">
-      <!-- QUADRADO PERSONAGEM --> 
-      <div class="character-box">
-          <img src="" alt="Personagem" />
-          <div class="xp-info">
-            <strong>Nível 1</strong>
-            <div class="xp-bar">
-              <div class="xp-fill" style="width: 20%;"></div>
-            </div>
-            <span>XP: 0 / 100</span>
-          </div>
-
-          <div class="classe-info">
-            Classe: <span id="classe-ativa" style="cursor:pointer; text-decoration: underline;"></span>
-          </div>
-
-          <select id="classe-selector" style="display:none;">
-            <option value="Guerreiro">Guerreiro</option>
-            <option value="Mago">Mago</option>
-            <option value="Ladino">Ladino</option>
-            <option value="Bardo">Bardo</option>
-            <option value="Bruxo">Bruxo</option>
-          </select>
-      </div>
-       <!-- Aba Home -->
+      <!-- Aba Home -->
       <div id="tab-home" class="tab-content active">
         <div class="home-layout">
           <!-- Coluna da esquerda: Tarefas Fixadas -->
@@ -210,7 +211,6 @@
             <span class="card-title">Tarefas Fixadas</span>
             <div class="tasks-container"></div>
           </div>
-
           <!-- Coluna da direita: Gráficos -->
           <div class="grafico-coluna">
             <h3 style="text-align: center; margin-bottom: 20px;">Progresso de Tarefas</h3>
@@ -228,7 +228,7 @@
           </div>
         </div>
       </div>
-
+    <!-- ...existing code... -->
 
 
       <!-- Aba Tarefas Periódicas -->
@@ -342,18 +342,21 @@
 
 
     </div>
-
-    <div id="app-body">
-      <button id="toggleCardsBtn" style="margin-bottom: 10px;">
-        Ocultar Tarefas
-      </button>
-      <div class="card purple-card">
-        <span class="card-title">TAREFAS EXPIRADAS</span>
-        <div class="expired-tasks"></div>
-      </div>
-      <div class="card blue-card">
-        <span class="card-title">TAREFAS CONCLUÍDAS</span>
-        <div class="completed-tasks"></div>
+    <div id="app-header">
+      <div id="app-body">
+        <div id="appbody-container">
+          <button id="toggleCardsBtn" style="margin-bottom: 10px;">
+            Ocultar Tarefas
+          </button>
+          <div class="card purple-card">
+            <span class="card-title">TAREFAS EXPIRADAS</span>
+            <div class="expired-tasks"></div>
+          </div>
+          <div class="card blue-card">
+            <span class="card-title">TAREFAS CONCLUÍDAS</span>
+            <div class="completed-tasks"></div>
+          </div>
+        </div>
       </div>
     </div>
     <script>

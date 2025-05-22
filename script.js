@@ -260,6 +260,18 @@ async function adicionarTarefa(nome, descricao, dataLimite) {
           carregarInventario();
         }
 
+        // Atualiza as classes do body para as cores dos cards
+        document.body.classList.remove(
+          'tab-home-active',
+          'tab-tasks-active',
+          'tab-tasks-nao-periodicas-active',
+          'tab-tasks-personalizadas-active'
+        );
+        if (alvo === 'tab-home') document.body.classList.add('tab-home-active');
+        if (alvo === 'tab-tasks') document.body.classList.add('tab-tasks-active');
+        if (alvo === 'tab-tasks-nao-periodicas') document.body.classList.add('tab-tasks-nao-periodicas-active');
+        if (alvo === 'tab-tasks-personalizadas') document.body.classList.add('tab-tasks-personalizadas-active');
+
         
 
         // ⬇️ ATUALIZA VISIBILIDADE DO APP BODY
@@ -269,6 +281,7 @@ async function adicionarTarefa(nome, descricao, dataLimite) {
   
     // Inicializa na home
     document.querySelector('.nav-button[data-tab="tab-home"]').click();
+    carregarTarefas();
   });
   
   let touchStartX = 0;
@@ -321,11 +334,21 @@ function handleSwipe() {
     activeTab.classList.remove('tab-exit');
     nextTab.classList.remove('tab-enter');
 
-    
+    // ATUALIZA AS CLASSES DO BODY PARA AS CORES DOS CARDS
+    document.body.classList.remove(
+      'tab-home-active',
+      'tab-tasks-active',
+      'tab-tasks-nao-periodicas-active',
+      'tab-tasks-personalizadas-active'
+    );
+    if (nextTabId === 'tab-home') document.body.classList.add('tab-home-active');
+    if (nextTabId === 'tab-tasks') document.body.classList.add('tab-tasks-active');
+    if (nextTabId === 'tab-tasks-nao-periodicas') document.body.classList.add('tab-tasks-nao-periodicas-active');
+    if (nextTabId === 'tab-tasks-personalizadas') document.body.classList.add('tab-tasks-personalizadas-active');
 
     // ⬇️ ATUALIZA VISIBILIDADE DO APP BODY
     atualizarVisibilidadeAppBody();
-  }, 250); // deve ser igual ao tempo da animação CSS
+  }, 250);
 
   // Desativa hover momentaneamente
   navButtons.forEach(btn => {
@@ -388,7 +411,7 @@ document.querySelectorAll('.criar-button').forEach(botao => {
         selectTipo.value = tipoDetectado;
         ajustarWrappers();
         // Mostra o modal
-        modal.style.display = 'block';
+        modal.style.display = 'flex';
 
         // Atualiza o valor do select
         selectTipo.value = tipoDetectado;
@@ -568,5 +591,5 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 });
-  
+
 

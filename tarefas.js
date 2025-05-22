@@ -1,6 +1,6 @@
 import { auth } from './auth.js';
 import { db } from './firebase-config.js';
-import { collection, query, where, getDocs, getDoc, doc, updateDoc, deleteDoc,Timestamp, addDoc, increment,arrayUnion } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { collection, query, where, getDocs, getDoc, doc, updateDoc, deleteDoc,Timestamp, addDoc, increment,arrayUnion, setDoc } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 export { carregarTarefas, tempoMaisRecente, atualizarDataAtual };
 
 let carregandoTarefas = false;
@@ -399,9 +399,10 @@ async function carregarTarefas() {
 
   Object.values(containers).forEach(c => c.innerHTML = '');
 
-  const tarefasFuturas = tarefas.filter(t => !t.finalizada && t.dataLimite >= agora);
-  const tarefasExpiradas = tarefas.filter(t => !t.finalizada && t.dataLimite < agora);
-  const tarefasConcluidas = tarefas.filter(t => t.finalizada);
+    // ...dentro de carregarTarefas()...
+  tarefasFuturas = tarefas.filter(t => !t.finalizada && t.dataLimite >= agora);
+  tarefasExpiradas = tarefas.filter(t => !t.finalizada && t.dataLimite < agora);
+  tarefasConcluidas = tarefas.filter(t => t.finalizada);
   tarefas.sort((a, b) => a.dataLimite - b.dataLimite);
 
   const tarefasFixadas = tarefas.filter(t => t.fixada && !t.finalizada);
@@ -616,7 +617,6 @@ async function atualizarXP(tarefasConcluidas, classeAtiva) {
 
   const usuarioRef = doc(db, "usuarios", usuario.uid);
   const usuarioSnap = await getDoc(usuarioRef);
-  const dados = usuarioSnap.data();
 
   const xpPorTarefa = 10;
   let xpTotal = 0;
@@ -640,11 +640,18 @@ async function atualizarXP(tarefasConcluidas, classeAtiva) {
   const xpAtual = xpTotal % 100;
   const porcentagem = Math.min(100, (xpAtual / 100) * 100);
 
-  // Atualiza no Firestore
-  await updateDoc(usuarioRef, {
-    nivel: nivel,
-    xp: xpAtual
-  });
+  // Atualiza ou cria o documento do usuário
+  if (usuarioSnap.exists()) {
+    await updateDoc(usuarioRef, {
+      nivel: nivel,
+      xp: xpAtual
+    });
+  } else {
+    await setDoc(usuarioRef, {
+      nivel: nivel,
+      xp: xpAtual
+    });
+  }
 
   const xpInfo = document.querySelector('.xp-info');
   if (!xpInfo) return;
@@ -663,13 +670,14 @@ async function atualizarXP(tarefasConcluidas, classeAtiva) {
 
   xpInfo.querySelector('.xp-fill').style.backgroundColor = corPorClasse[classeAtiva] || '#ccc';
 
+  // ATUALIZA O LEVEL NA BARRA SUPERIOR
+  const classNameSpan = document.querySelector('.class-name');
+  if (classNameSpan) {
+    classNameSpan.textContent = `👤 ${Math.floor(xpAtual)} / 100`;
+  }
+
   return nivel;
 }
-
-
-
-
-
 
 function limparCards() {
   document.querySelector('.purple-card').innerHTML = '<span class="card-title">TAREFAS EXPIRADAS</span>';
@@ -804,15 +812,16 @@ function abrirModalDetalhe(tarefa) {
       const horas = Math.floor(diff / (1000 * 60 * 60));
       const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const segundos = Math.floor((diff % (1000 * 60)) / 1000);
-      span.textContent = `⏰ Próx. em ${horas}h ${minutos}m ${segundos}s`;
+      span.textContent = `⏰ ${horas}:${minutos}:${segundos}`;
     }, 1000);
 }
 
 function atualizarDataAtual() {
-    const span = document.querySelector('.current-day');
-    const agora = new Date();
-    const opcoes = { weekday: 'long', day: 'numeric', month: 'numeric', year: 'numeric' };
-    span.textContent = '📅 ' + agora.toLocaleDateString('pt-BR', opcoes).replace(/^\w/, c=>c.toUpperCase());
+  const span = document.querySelector('.current-day');
+  const agora = new Date();
+  const dia = String(agora.getDate()).padStart(2, '0');
+  const mes = String(agora.getMonth() + 1).padStart(2, '0');
+  span.textContent = `📅 ${dia}/${mes}`;
 }
 
 export function mostrarPopup(mensagem, duracao = 4000) {  // Aumentando o tempo para 4 segundos por padrão
@@ -1122,10 +1131,6 @@ function mostrarTarefasOrganizadas(criterio) {
   listaContainer.innerHTML = html || '<em>Nenhuma tarefa futura.</em>';
 }
 
-
-
-
-
 document.getElementById('tipo-tarefa').addEventListener('change', (e) => {
   const extras = document.getElementById('personalizadoExtras');
   extras.style.display = e.target.value === 'personalizado' ? 'block' : 'none';
@@ -1167,13 +1172,10 @@ async function atualizarMoedas() {
   const usuarioSnap = await getDoc(usuarioRef);
   const moedas = usuarioSnap.exists() ? usuarioSnap.data().moedas || 0 : 0;
 
-  let moedasSpan = document.querySelector(".moedas-info");
-  if (!moedasSpan) {
-    moedasSpan = document.createElement("span");
-    moedasSpan.className = "moedas-info";
-    document.querySelector(".top-info-bar").appendChild(moedasSpan);
+  const moedasSpan = document.querySelector(".moedas-info");
+  if (moedasSpan) {
+    moedasSpan.innerText = `🪙 ${moedas}`;
   }
-  moedasSpan.innerText = `🪙 ${moedas} moedas`;
 }
 
 // 🧠 Atualize moedas ao concluir tarefa com base no nível do usuário
@@ -1187,8 +1189,9 @@ async function concluirTarefaComMoedas(tarefaId) {
   // Pegue nível do usuário (ou XP e calcule)
   const usuarioRef = doc(db, "usuarios", usuario.uid);
   const usuarioSnap = await getDoc(usuarioRef);
-  const dados = usuarioSnap.data();
-  const nivel = dados.nivel || 1; // supondo que você tenha isso salvo
+  const dados = usuarioSnap.exists() ? usuarioSnap.data() : null;
+  const nivel = dados && typeof dados.nivel === "number" ? dados.nivel : 1; // valor padrão
+
   const ganho = 5 + nivel * 2; // fórmula de moedas
 
   await updateDoc(usuarioRef, {

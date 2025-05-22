@@ -18,7 +18,7 @@ setPersistence(auth, browserLocalPersistence).then(() => {
   
       if (user) {
           loginContainer.style.display = 'none';
-          document.querySelector('.user-name').textContent = `👤 ${user.displayName}`;
+          //document.querySelector('.user-name').textContent = `👤 ${user.displayName}`;
           console.log("Usuário logado:", user);
   
           if (!jaCarregouTarefas) {
@@ -42,8 +42,9 @@ function loginComGoogle() {
       document.getElementById('login-container').style.display = 'none';
 
       // Atualiza a interface com o nome do usuário
-      document.querySelector('.user-name').textContent = `👤 ${user.displayName}`;
+      //document.querySelector('.user-name').textContent = `👤 ${user.displayName}`;
       console.log("Login bem-sucedido:", user);
+      carregarTarefas();
     })
     .catch((error) => {
       console.error("Erro ao logar:", error);
