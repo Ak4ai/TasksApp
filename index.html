@@ -271,10 +271,11 @@
         <!-- Exemplo: botão de logout, tema, etc. -->
         <div class="settings-container">
           <h3>Configurações do Usuário</h3>
-          <button id="logout-button">Logout</button>
-          <button id="clear-cache-button">Limpar Cache</button>
-          <button id="delete-all-tasks-button" style="color: red;">Excluir Todas as Tarefas</button>
-
+          <div id="config-buttosn-container">
+            <button id="logout-button">Logout</button>
+            <button id="clear-cache-button">Limpar Cache</button>
+            <button id="delete-all-tasks-button" style="color: red;">Excluir Todas as Tarefas</button>
+          </div>
         </div>
         
         <script>
@@ -346,13 +347,13 @@
       <div id="app-body">
         <div id="appbody-container">
           <button id="toggleCardsBtn" style="margin-bottom: 10px;">
-            Ocultar Tarefas
+            Mostrar Tarefas Expiradas/Concluídas
           </button>
-          <div class="card purple-card">
+          <div class="card purple-card" style="display:none;">
             <span class="card-title">TAREFAS EXPIRADAS</span>
             <div class="expired-tasks"></div>
           </div>
-          <div class="card blue-card">
+          <div class="card blue-card" style="display:none;">
             <span class="card-title">TAREFAS CONCLUÍDAS</span>
             <div class="completed-tasks"></div>
           </div>

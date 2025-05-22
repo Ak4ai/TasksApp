@@ -10,6 +10,7 @@ html, body {
   padding: 0;
   height: 100%;    
   background-color: #121318; /* Cor de fundo */
+  color: white;
   overflow: hidden; /* Evita o scroll horizontal */
   font-family: 'DIN Next Rounded', Arial, sans-serif;
 }
@@ -36,7 +37,15 @@ body {
   display: none;
 }
 
-
+.loja-grid {
+    display: flex
+;
+    flex-direction: column;
+    align-content: stretch;
+    align-items: stretch;
+    flex-wrap: wrap;
+    justify-content: center;
+}
 
 .app {
   gap: 25px;
@@ -54,7 +63,7 @@ body {
   align-items: center;
   gap: 20px;
   padding: 1rem;
-  margin: 10px;
+  /* margin: 10px; */
 }
 
 #tarefas-periodico,
@@ -118,10 +127,10 @@ body {
   border-radius: 15px;
 }
 
-.bottom-nav-separator {
-  background-color: #38353517;
+.bottom-nav-separator.active {
+  background-color: #3835356c;
   padding: 3px;
-  border: 3px solid #aca4c016;
+  border: 3px solid #313131;
   border-radius: 15px;
 }
 
@@ -285,7 +294,12 @@ select:focus option:checked {
 
 /* style.css */
 .tab-content { display: none; padding: 1rem; }
-.tab-content.active { display: block; }
+.tab-content.active { 
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    align-items: center;
+  }
 
 h1,h2,h3{
   color: #ccc;
@@ -294,17 +308,7 @@ h1,h2,h3{
   justify-content: center;
 }
 
-#tab-settings > div {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 5px;
-  padding: 10px;
-  background-color: #27243e80;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
+#tab-settings > div {display: flex;flex-direction: column;align-items: center;background-color: #1f1f1f;color: white;padding: 10px 1rem;border-radius: 10px;border: 1px solid #343434;margin: 10px 0;box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);justify-content: center;align-content: center;flex-wrap: wrap;width: 90%;}
 
 .nav-button {
   background: none; border: none; font-size: 1.5rem;
@@ -325,13 +329,14 @@ h1,h2,h3{
   cursor: pointer;
   transition: transform 0.2s ease, border-color 0.2s ease;
   user-select: none;
+  margin: 5px;
 }
 
 /* hover e active iguais */
 
 .nav-button.active {
   transform: scale(1.2);
-  border-color: #aca4c0;
+  border-color: #595959;
 }
 
 
@@ -1358,8 +1363,7 @@ body.ios-pwa .bottom-nav {
 
 /* Coluna de gráficos */
 .grafico-coluna {
-  flex: 1 1 280px;
-  min-width: 280px;
+  flex: 1 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1374,17 +1378,15 @@ body.ios-pwa .bottom-nav {
   align-content: stretch;
   align-items: center;
   justify-content: center;
-  width: 100vw;
 }
 
 /* Estilo padrão dos gráficos */
 .grafico-card {
   background-color: #1e1e2f;
-  /* padding: 10px; */
+  padding: 10px;
   border-radius: 12px;
   text-align: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  width: 25vw;
   aspect-ratio: 1;
 }
 
@@ -1398,7 +1400,7 @@ body.ios-pwa .bottom-nav {
   .grafico-card {
     background-color: #1f1f1f;
     border: 1px solid #343434;
-    /* padding: 10px; */
+    padding: 1rem;
     border-radius: 12px;
     text-align: center;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
@@ -1517,4 +1519,9 @@ body.ios-pwa .bottom-nav {
 
 div#app-header {width: 100%;}
 
-div#appbody-container {width: 100%;display: flex;flex-direction: column;align-items: stretch;justify-content: center;align-content: center;flex-wrap: nowrap;border-radius: 10px;border: 1px solid #343434;background-color: #1f1f1f;}
+div#appbody-container {width: 90%;display: flex;flex-direction: column;align-items: stretch;justify-content: center;align-content: center;flex-wrap: nowrap;border-radius: 10px;border: 1px solid #343434;background-color: #1f1f1f;padding: 1rem;}
+
+div#config-buttosn-container {
+    display: flex;
+    flex-direction: column;
+}
