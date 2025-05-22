@@ -1,6 +1,6 @@
 import { auth } from './auth.js';
 import { db } from './firebase-config.js';
-import { collection, query, where, getDocs, getDoc, doc, updateDoc, deleteDoc,Timestamp, addDoc } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { collection, query, where, getDocs, getDoc, doc, updateDoc, deleteDoc,Timestamp, addDoc, increment,arrayUnion } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 export { carregarTarefas, tempoMaisRecente, atualizarDataAtual };
 
 let carregandoTarefas = false;
@@ -16,6 +16,7 @@ const subTagsPorCategoria = {
   "Criativo": ["Desenho", "Escrita", "Música", "Fotografia"],
   "Espiritual": ["Meditação", "Yoga", "Orações"]
 };
+
 const classesJogador = {
   "Guerreiro": { bonusCategorias: ["Físico"], bonusXP: 0.5 },        // +50% XP em tarefas Físicas
   "Mago": { bonusCategorias: ["Intelecto"], bonusXP: 0.5 }, // +50% XP em tarefas Intelecto
@@ -23,6 +24,7 @@ const classesJogador = {
   "Bardo": { bonusCategorias: ["Criativo"], bonusXP: 0.5 },    // +50% XP em tarefas Criativo
   "Bruxo": { bonusCategorias: ["Espiritual"], bonusXP: 0.5 }   // +50% XP em tarefas Espiritual
 };
+
 const avataresPorClasse = {
   Guerreiro: "img/guerreiro.jpg",
   Mago: "img/mago.jpeg",
@@ -55,7 +57,7 @@ const frasesPorClasse = {
     "O pacto exige progresso.",
     "Tarefa feita, energia recuperada.",
     "As sombras aprovam sua dedicação."
-  ],
+  ]
 };
 
 function mostrarPopupPersonagem(frase, classe) {
@@ -86,6 +88,7 @@ function personagemFalaAleatoriamente(classeAtiva) {
 
 
 function renderizarTarefa(t) {
+  atualizarMoedas();
   const div = document.createElement('div');
   div.classList.add('task-rect');
   div.setAttribute('data-id', t.id);
@@ -399,7 +402,6 @@ async function carregarTarefas() {
   const tarefasFuturas = tarefas.filter(t => !t.finalizada && t.dataLimite >= agora);
   const tarefasExpiradas = tarefas.filter(t => !t.finalizada && t.dataLimite < agora);
   const tarefasConcluidas = tarefas.filter(t => t.finalizada);
-
   tarefas.sort((a, b) => a.dataLimite - b.dataLimite);
 
   const tarefasFixadas = tarefas.filter(t => t.fixada && !t.finalizada);
@@ -413,11 +415,20 @@ async function carregarTarefas() {
   });
 
   // Renderiza futuras que não estão fixadas (para evitar duplicação)
-  tarefasFuturas.forEach(t => {
-    const div = renderizarTarefa(t);
-    containers[t.tipo].appendChild(div);
-  });
+    tarefasFuturas.forEach(t => {
+      const div = renderizarTarefa(t);
+      containers[t.tipo].appendChild(div);
+    });
+  const tarefasJaPremiadas = JSON.parse(localStorage.getItem('tarefasPremiadas')) || [];
 
+    for (const t of tarefasConcluidas) {
+      if (!tarefasJaPremiadas.includes(t.id)) {
+        await concluirTarefaComMoedas(t.id);
+        tarefasJaPremiadas.push(t.id);
+      }
+    }
+
+    localStorage.setItem('tarefasPremiadas', JSON.stringify(tarefasJaPremiadas));
 
   tarefasExpiradas.forEach(t => adicionarNaCard(t, 'purple-card'));
   tarefasConcluidas.forEach(t => adicionarNaCard(t, 'blue-card'));
@@ -599,7 +610,14 @@ function criarBotoesXP(classeAtiva) {
 }
 
 
- async function atualizarXP(tarefasConcluidas, classeAtiva) {
+async function atualizarXP(tarefasConcluidas, classeAtiva) {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+
+  const usuarioRef = doc(db, "usuarios", usuario.uid);
+  const usuarioSnap = await getDoc(usuarioRef);
+  const dados = usuarioSnap.data();
+
   const xpPorTarefa = 10;
   let xpTotal = 0;
 
@@ -622,6 +640,12 @@ function criarBotoesXP(classeAtiva) {
   const xpAtual = xpTotal % 100;
   const porcentagem = Math.min(100, (xpAtual / 100) * 100);
 
+  // Atualiza no Firestore
+  await updateDoc(usuarioRef, {
+    nivel: nivel,
+    xp: xpAtual
+  });
+
   const xpInfo = document.querySelector('.xp-info');
   if (!xpInfo) return;
 
@@ -638,7 +662,10 @@ function criarBotoesXP(classeAtiva) {
   };
 
   xpInfo.querySelector('.xp-fill').style.backgroundColor = corPorClasse[classeAtiva] || '#ccc';
+
+  return nivel;
 }
+
 
 
 
@@ -832,9 +859,6 @@ export async function ajustarRecurrentes(tarefas) {
     let dataProxima = null;
     const dataLimiteAnterior = t.dataLimite.toDate ? t.dataLimite.toDate() : new Date(t.dataLimite);
     const hoje = new Date();
-
-    console.log(`🔍 Avaliando: ${t.descricao} | Finalizada: ${t.finalizada} | Data: ${dataLimiteAnterior.toISOString()} | Tipo: ${t.tipo}`);
-
     const podeRecriar =
       (!t.finalizada && dataLimiteAnterior < hoje) ||
       (t.tipo === 'personalizado' && t.finalizada && ['frequencia', 'datas'].includes(t.modoPersonalizado));
@@ -1131,3 +1155,94 @@ document.getElementById('fechar-modal-anexo').onclick = function() {
   document.getElementById('modal-visualizacao-anexo').style.display = 'none';
   document.getElementById('conteudo-anexo').innerHTML = '';
 };
+
+// Adicione o seguinte código JS ao seu app principal
+
+// 🔁 Exibir moedas na top bar
+async function atualizarMoedas() {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+
+  const usuarioRef = doc(db, "usuarios", usuario.uid);
+  const usuarioSnap = await getDoc(usuarioRef);
+  const moedas = usuarioSnap.exists() ? usuarioSnap.data().moedas || 0 : 0;
+
+  let moedasSpan = document.querySelector(".moedas-info");
+  if (!moedasSpan) {
+    moedasSpan = document.createElement("span");
+    moedasSpan.className = "moedas-info";
+    document.querySelector(".top-info-bar").appendChild(moedasSpan);
+  }
+  moedasSpan.innerText = `🪙 ${moedas} moedas`;
+}
+
+// 🧠 Atualize moedas ao concluir tarefa com base no nível do usuário
+async function concluirTarefaComMoedas(tarefaId) {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+
+  const tarefaRef = doc(db, "usuarios", usuario.uid, "tarefas", tarefaId);
+  await updateDoc(tarefaRef, { finalizada: true });
+
+  // Pegue nível do usuário (ou XP e calcule)
+  const usuarioRef = doc(db, "usuarios", usuario.uid);
+  const usuarioSnap = await getDoc(usuarioRef);
+  const dados = usuarioSnap.data();
+  const nivel = dados.nivel || 1; // supondo que você tenha isso salvo
+  const ganho = 5 + nivel * 2; // fórmula de moedas
+
+  await updateDoc(usuarioRef, {
+    moedas: increment(ganho)
+  });
+
+  mostrarPopup(`Tarefa concluída! Você ganhou ${ganho} moedas.`, 3000);
+  atualizarMoedas();
+}
+
+window.comprarItem = async function comprarItem(itemId, preco) {
+  const usuario = auth.currentUser;
+  if (!usuario) {
+    alert("Você precisa estar logado para comprar itens.");
+    return;
+  }
+
+  const usuarioRef = doc(db, "usuarios", usuario.uid);
+  const usuarioSnap = await getDoc(usuarioRef);
+  if (!usuarioSnap.exists()) {
+    alert("Dados do usuário não encontrados.");
+    return;
+  }
+
+  const dados = usuarioSnap.data();
+  const moedasAtuais = dados.moedas || 0;
+
+  if (moedasAtuais < preco) {
+    alert("Você não tem moedas suficientes para comprar este item.");
+    return;
+  }
+
+  // Atualiza as moedas
+  await updateDoc(usuarioRef, {
+    moedas: increment(-preco),
+    // Adiciona o item ao inventário, por exemplo:
+    inventario: arrayUnion(itemId)
+  });
+
+  mostrarPopup(`Item comprado com sucesso: ${itemId}`);
+  atualizarInventarioUI();
+  atualizarMoedas();
+}
+
+async function atualizarInventarioUI() {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+
+  const usuarioRef = doc(db, "usuarios", usuario.uid);
+  const usuarioSnap = await getDoc(usuarioRef);
+  if (!usuarioSnap.exists()) return;
+
+  const inventario = usuarioSnap.data().inventario || [];
+  console.log("Inventário do usuário:", inventario);
+  // Aqui pode atualizar o HTML para mostrar os itens comprados, se quiser
+}
+
