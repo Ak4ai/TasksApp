@@ -424,19 +424,22 @@ document.querySelectorAll('.criar-button').forEach(botao => {
     }, 100);
   });
 });
-
-  // ...existing code...
   
   window.addEventListener('DOMContentLoaded', () => {
     const label = document.getElementById('git-version-label');
-    if (window.APP_VERSION && window.APP_VERSION.hash && window.APP_VERSION.date) {
+    if (
+      window.APP_VERSION &&
+      window.APP_VERSION.hash &&
+      window.APP_VERSION.date &&
+      window.APP_VERSION.msg
+    ) {
+      label.textContent = `Versão: ${window.APP_VERSION.hash} (${window.APP_VERSION.date}) — ${window.APP_VERSION.msg}`;
+    } else if (window.APP_VERSION && window.APP_VERSION.hash && window.APP_VERSION.date) {
       label.textContent = `Versão: ${window.APP_VERSION.hash} (${window.APP_VERSION.date})`;
     } else {
       label.textContent = 'Versão: desconhecida';
     }
   });
-  
-  // ...existing code...
 
 
 
