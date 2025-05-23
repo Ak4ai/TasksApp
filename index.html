@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#121318" />
+  <meta name="background-color" content="#121318" />
+  <meta name="color-scheme" content="light" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>R.U.N.A</title>
+
+  <link rel="icon" type="image/png" href="web-icon-192x192.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css?v=1.0.7" />
+
+  <!-- Markdown-it (usado no app) -->
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+  <!-- Firebase SDK (modular) -->
+  <script type="module" src="firebase-config.js"></script>
+  <script type="module" src="auth.js"></script>
+  
+</head>
+<body>
+  <!-- LOGIN -->
+  <div id="login-container" style="display: none;">
+    <h2>Login with Google</h2>
+    <button id="login-button">Login with Google</button>
+  </div>
+
+  <!-- BLUR & POPUPS -->
+  <div id="pull-up-indicator"></div>
+  <div id="blur-background"></div>
+  <div id="popup-alert"><span id="popup-alert-text"></span></div>  
+  <div id="custom-dialog" class="dialog-container" style="display: none;">
+    <div class="dialog-message" id="dialog-message"></div>
+    <div class="dialog-buttons">
+      <button id="dialog-ok-button">OK</button>
+    </div>
+  </div>
+  <div id="popup-personagem" class="popup-personagem hide">
+    <img id="popup-personagem-img" src="" alt="Personagem" />
+    <span id="popup-personagem-text"><em>Frase aqui...</em></span>
+  </div>
+
+
+  <!-- MODAIS -->
+  <div id="modal-criar-tarefa" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close-button" id="fechar-modal">&times;</span>
+      <h2>Nova Tarefa</h2>
+      <div id="tag-selector">
+        <label>Tags:</label>
+        <select id="tagPrincipal">
+          <option value="">-- Categoria Principal --</option>
+          <option value="Físico">Físico</option>
+          <option value="Intelecto">Intelecto</option>
+          <option value="Social">Social</option>
+          <option value="Criativo">Criativo</option>
+          <option value="Espiritual">Espiritual</option>
+        </select>
+
+        <select id="tagSecundaria" disabled>
+          <option value="">-- Subcategoria --</option>
+        </select>
+      </div>
+
+      <div id="frequencia-wrapper" style="display:none">
+        <label>Frequência:</label>
+        <select id="frequenciaSelecao">
+          <option value="diario">Diário</option>
+          <option value="semanal">Semanal</option>
+          <option value="mensal">Mensal</option>
+        </select>
+      </div>
+      
+      <div id="padrao-wrapper" style="display:none">
+        <label>Repetição personalizada:</label>
+        <select id="modoPersonalizado">
+          <option value="datas">Datas específicas</option>
+          <option value="frequencia">A cada X dias</option>
+          <option value="unico">Evento único</option>
+        </select>
+
+        <div id="bloco-datas" class="sub-bloco-personalizado">
+          <label>Datas e horários (separadas por vírgula):</label>
+          <input id="padraoPersonalizado" type="text" placeholder="Ex: 2025-05-10T14:30, 2025-06-01T08:00"/>
+        </div>
+
+        <div id="bloco-frequencia" class="sub-bloco-personalizado" style="display:none">
+          <label>Repetir a cada:</label>
+          <input id="diasFrequencia" type="number" min="1" placeholder="Ex: 3" /> dias
+        </div>
+
+        <!-- nenhum campo necessário para "unico" -->
+      </div>
+
+      <label for="nomeTarefa">Nome da Tarefa:</label>
+      <input type="text" id="nomeTarefa" placeholder="Ex: Estudar matemática" required />
+      <label for="descricaoTarefa">Anotações (opcional):</label>
+      <textarea id="descricaoTarefa" placeholder="Ex: Revisar capítulos 1 e 2"></textarea>
+
+      <input type="datetime-local" id="dataLimite" required>
+
+      <label for="anexoArquivo">Anexo (opcional):</label>
+      <input type="file" id="anexoArquivo" />
+
+      <select id="tipo-tarefa">
+        <option value="periodico">Importante Periódico</option>
+        <option value="nao-periodico">Importante Não Periódico</option>
+        <option value="personalizado">Personalizado</option>
+      </select>
+      <label for="fixarNaHome" style="display: flex; align-items: center; gap: 7px;">
+        <input type="checkbox" id="fixarNaHome">
+        Fixar na Home
+      </label>
+      <!-- Visível apenas para tarefas do tipo personalizado -->
+      <div id="personalizadoExtras" style="display: none;">
+        <!-- Checkbox para permitir conclusão -->
+        <label><input type="checkbox" id="permitirConclusao"> Permitir conclusão (em vez de expirar)</label>
+        <label>Tags adicionais (separadas por vírgula):</label>
+        <input id="tagsPersonalizadas" type="text" placeholder="ex: leitura, lazer"/>
+
+      </div>
+
+      
+      <button id="botao-criar-tarefa">Criar tarefa</button>
+    </div>
+  </div>
+  <div id="modal-tarefa" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span id="fechar-modal-editar" class="close-button">&times;</span>
+      <h2>Editar Tarefa</h2>
+      <label for="editar-nome">Nome:</label>
+      <input id="editar-nome" type="text">
+      <label for="editar-descricao">Descrição:</label>
+      <input id="editar-descricao" type="text">
+      <input type="datetime-local" id="editar-dataLimite" />
+      <label for="fixarNaHomeEditar" class="fixar-label">
+      <input type="checkbox" id="fixarNaHomeEditar">
+      Fixar na Home
+      </label>
+      <button id="salvar-edicao">Salvar</button>
+      <button id="excluir-tarefa" class="danger">Excluir</button>
+    </div>
+  </div>
+  <div id="modal-next-event" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span id="fechar-modal-next-event" class="close-button">&times;</span>
+  
+      <div class="ordenar-buttons">
+        <button id="ordenar-tipo">🔀 Por Tipo</button>
+        <button id="ordenar-tempo">⏳ Por Tempo</button>
+      </div>
+  
+      <div id="lista-tarefas-organizada"></div>
+    </div>
+  </div>
+  <!-- Modal de visualização de anexo -->
+  <div id="modal-visualizacao-anexo" class="modal" style="display:none; align-items:center; justify-content:center;">
+    <div class="modal-content" style="max-width:90vw; max-height:90vh; background:#222; color:#faf0e6; position:relative;">
+      <span id="fechar-modal-anexo" style="position:absolute; top:10px; right:20px; font-size:2rem; cursor:pointer;">&times;</span>
+      <div id="conteudo-anexo" style="margin-top:40px; max-height:70vh; overflow:auto;"></div>
+    </div>
+  </div>
+
+ <!-- BARRA SUPERIOR -->
+ <div class="top-info-bar">
+  <span class="class-name icons-info">👤</span>
+  <span class="current-day icons-info">📅</span>
+  <span class="next-event icons-info">⏰</span>
+  <span class="moedas-info icons-info">🪙 0 moedas</span>
+ </div>
+  
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div class="main-content">
+    
+    <!-- QUADRADO PERSONAGEM --> 
+    <!-- ...existing code... -->
+    <div class="top-info-character">
+      <div class="character-box">
+        <img src="" alt="Personagem" />
+        <div class="xp-info">
+          <strong>Nível 1</strong>
+          <div class="xp-bar">
+            <div class="xp-fill" style="width: 20%;"></div>
+          </div>
+          <span>XP: 0 / 100</span>
+        </div>
+        <div class="classe-info">
+          Classe: <span id="classe-ativa" style="cursor:pointer; text-decoration: underline;"></span>
+        </div>
+        <select id="classe-selector" style="display:none;">
+          <option value="Guerreiro">Guerreiro</option>
+          <option value="Mago">Mago</option>
+          <option value="Ladino">Ladino</option>
+          <option value="Bardo">Bardo</option>
+          <option value="Bruxo">Bruxo</option>
+        </select>
+      </div>
+    </div>
+    <!-- TABS -->
+    <div class="tabs">
+      <!-- Aba Home -->
+      <div id="tab-home" class="tab-content active">
+        <div class="home-layout">
+          <!-- Coluna da esquerda: Tarefas Fixadas -->
+          <div id="tarefas-fixadas" class="card green-card">
+            <span class="card-title">Tarefas Fixadas</span>
+            <div class="tasks-container"></div>
+          </div>
+          <!-- Coluna da direita: Gráficos -->
+          <div class="grafico-coluna">
+            <h3 style="text-align: center; margin-bottom: 20px;">Progresso de Tarefas</h3>
+            <div class="grafico-grid">
+              <div class="grafico-card">
+                <canvas id="graficoDia"></canvas>
+              </div>
+              <div class="grafico-card">
+                <canvas id="graficoSemana"></canvas>
+              </div>
+              <div class="grafico-card">
+                <canvas id="graficoMes"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <!-- ...existing code... -->
+
+
+      <!-- Aba Tarefas Periódicas -->
+      <div id="tab-tasks" class="tab-content">
+        <div class="app">
+          <div id="tarefas-periodico" class="task-group">
+            <h2>Periódicas</h2>
+            <div class="tasks-container"></div>
+          </div>   
+          <button class="criar-button">Criar Tarefa</button>
+        </div>
+      </div>
+
+      <!-- Aba Tarefas Nao Periodicas-->
+      <div id="tab-tasks-nao-periodicas" class="tab-content">
+        <div class="app">
+          <div id="tarefas-nao-periodico" class="task-group">
+            <h2>Não Periódicas</h2>
+            <div class="tasks-container"></div>
+          </div>
+          <button class="criar-button">Criar Tarefa</button>
+        </div>
+      </div>
+
+      <!-- Aba Tarefas Personalizadas-->
+      <div id="tab-tasks-personalizadas" class="tab-content">
+        <div class="app">
+          <div id="tarefas-personalizado" class="task-group">
+            <h2>Personalizadas</h2>
+            <div class="tasks-container"></div>
+          </div>
+          <button class="criar-button">Criar Tarefa</button>
+        </div>
+      </div>
+
+
+      <!-- Aba Configurações -->
+      <div id="tab-settings" class="tab-content">
+        <h2>Configurações</h2>
+        <!-- Exemplo: botão de logout, tema, etc. -->
+        <div class="settings-container">
+          <h3>Configurações do Usuário</h3>
+          <div id="config-buttosn-container">
+            <button id="logout-button">Logout</button>
+            <button id="clear-cache-button">Limpar Cache</button>
+            <button id="delete-all-tasks-button" style="color: red;">Excluir Todas as Tarefas</button>
+          </div>
+          <h3>Configurações do Usuário</h3>
+          <div id="git-version-label" style="margin-bottom:10px; color:#888;">Versão: carregando...</div>
+        </div>
+        
+        <script>
+          document.getElementById('clear-cache-button').addEventListener('click', () => {
+            if (confirm('Tem certeza que deseja limpar o cache, LocalStorage e recarregar a página?')) {
+              // Limpar LocalStorage
+              localStorage.clear();
+
+              // Limpar Cache
+              if ('caches' in window) {
+                caches.keys().then(cacheNames => {
+                  cacheNames.forEach(cacheName => {
+                    caches.delete(cacheName);
+                  });
+                });
+              }
+
+              // Hard Refresh
+              location.reload(true);
+            }
+          });
+          
+        </script>
+      </div>
+      <!-- Aba Loja -->
+      <div id="tab-loja" class="tab-content">
+        <div class="loja-grid">
+          <div class="item-card">
+            <img src="img/cabelo1.png" alt="Cabelo Estiloso" class="item-imagem">
+            <span class="item-nome">Cabelo Estiloso</span>
+            <span class="item-preco">💰 50</span>
+            <button class="btn-comprar" onclick="comprarItem('cabelo1', 50)">Comprar</button>
+          </div>
+
+          <div class="item-card">
+            <img src="img/roupa1.png" alt="Roupa Elegante" class="item-imagem">
+            <span class="item-nome">Roupa Elegante</span>
+            <span class="item-preco">💰 100</span>
+            <button class="btn-comprar" onclick="comprarItem('roupa1', 100)">Comprar</button>
+          </div>
+
+          <div class="item-card">
+            <img src="img/acessorio1.png" alt="Óculos Descolado" class="item-imagem">
+            <span class="item-nome">Óculos Descolado</span>
+            <span class="item-preco">💰 75</span>
+            <button class="btn-comprar" onclick="comprarItem('oculos1', 75)">Comprar</button>
+          </div>
+
+          <div class="item-card">
+            <img src="img/arma1.png" alt="Espada Lendária" class="item-imagem">
+            <span class="item-nome">Espada Lendária</span>
+            <span class="item-preco">💰 200</span>
+            <button class="btn-comprar" onclick="comprarItem('espada1', 200)">Comprar</button>
+          </div>
+        </div>
+      </div>
+
+    <div id="tab-inventario" class="tab-content">
+      <h3 style="text-align:center;">Inventário</h3>
+      <div class="inventario-grid" id="inventario-grid">
+        <!-- Cards dos itens ativados/comprados aparecem aqui via JS -->
+      </div>
+    </div>
+
+
+
+    </div>
+    <div id="app-header">
+      <div id="app-body">
+        <div id="appbody-container">
+          <button id="toggleCardsBtn" style="margin-bottom: 10px;">
+            Mostrar Tarefas Expiradas/Concluídas
+          </button>
+          <div class="card purple-card" style="display:none;">
+            <span class="card-title">TAREFAS EXPIRADAS</span>
+            <div class="expired-tasks"></div>
+          </div>
+          <div class="card blue-card" style="display:none;">
+            <span class="card-title">TAREFAS CONCLUÍDAS</span>
+            <div class="completed-tasks"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const toggleBtn = document.getElementById('toggleCardsBtn');
+      const purpleCard = document.querySelector('.purple-card');
+      const blueCard = document.querySelector('.blue-card');
+
+      toggleBtn.addEventListener('click', () => {
+        const isHidden = purpleCard.style.display === 'none';
+
+        if (isHidden) {
+          purpleCard.style.display = 'block';
+          blueCard.style.display = 'block';
+          toggleBtn.textContent = 'Ocultar Tarefas Expiradas/Concluídas';
+        } else {
+          purpleCard.style.display = 'none';
+          blueCard.style.display = 'none';
+          toggleBtn.textContent = 'Mostrar Tarefas Expiradas/Concluídas';
+        }
+      });
+    </script>
+  </div>
+  <!-- NAVEGAÇÃO INFERIOR -->
+  <div class="bottom-nav">
+    <button class="nav-button" data-tab="tab-home">🏠</button>
+    <div class="bottom-nav-separator">
+      <button class="nav-button" data-tab="tab-tasks">📅</button>
+      <button class="nav-button" data-tab="tab-tasks-nao-periodicas">⏳</button>
+      <button class="nav-button" data-tab="tab-tasks-personalizadas">✏️</button>
+    </div>
+    <button class="nav-button" data-tab="tab-loja">🛒</button>
+    <button class="nav-button" data-tab="tab-inventario">🎒</button>
+    
+    <button class="nav-button" data-tab="tab-settings">⚙️</button>
+  </div>
+
+  <!-- Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => console.log('ServiceWorker registrado:', reg.scope))
+          .catch(err => console.error('Erro no ServiceWorker:', err));
+      });
+    }
+  </script>
+
+  <!-- SCRIPTS PRINCIPAIS -->
+  <script src="version.js"></script>
+  <script type="module" src="script.js?v=1.0.10"></script>
+</body>
+</html>
