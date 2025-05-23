@@ -21,7 +21,7 @@ jobs:
 
       - name: Create version.js file
         run: |
-          echo "window.APP_VERSION = { hash: '${{ steps.get_commit.outputs.SHA }}', date: '${{ steps.get_commit.outputs.DATE }}' };" > version.js
+          echo "window.APP_VERSION = { msg: \`${{ steps.get_commit.outputs.MSG }}\`, hash: '${{ steps.get_commit.outputs.SHA }}', date: '${{ steps.get_commit.outputs.DATE }}' };" > version.js
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
