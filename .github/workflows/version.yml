@@ -12,12 +12,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get short commit SHA
-        id: get_sha
-        run: echo "SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Get commit info
+        id: get_commit
+        run: |
+          echo "SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "DATE=$(git show -s --format=%cd --date=format:'%Y-%m-%d %H:%M:%S' HEAD)" >> $GITHUB_OUTPUT
 
       - name: Create version.js file
-        run: echo "window.APP_VERSION = \"${{ steps.get_sha.outputs.SHA }}\";" > version.js
+        run: |
+          echo "window.APP_VERSION = { hash: '${{ steps.get_commit.outputs.SHA }}', date: '${{ steps.get_commit.outputs.DATE }}' };" > version.js
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
