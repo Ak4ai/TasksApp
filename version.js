@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `52`, hash: '77e5e5c', date: '2025-05-23 00:25:43' };
+window.APP_VERSION = { msg: `calendario-home`, hash: '13c8ec5', date: '2025-05-26 20:08:49' };
