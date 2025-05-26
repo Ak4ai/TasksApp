@@ -486,7 +486,7 @@ async function carregarTarefas() {
   graficoDia = criarGraficoPizza(ctxDia, percentualDia, 'Tarefas Concluídas Hoje');
   graficoSemana = criarGraficoPizza(ctxSemana, percentualSemana, 'Tarefas Concluídas Esta Semana');
   graficoMes = criarGraficoPizza(ctxMes, percentualMes, 'Tarefas Concluídas Este Mês');
-  renderizarCalendario(tarefasFuturas);
+  renderizarCalendario(tarefas);
 }
 
 
@@ -526,40 +526,54 @@ function renderizarCalendario(tarefas, ano = calendarioAnoAtual, mes = calendari
   const ultimoDia = new Date(ano, mes + 1, 0);
   const diaSemanaInicial = primeiroDia.getDay();
 
-  const diasComTarefa = new Set(
-    tarefas
-      .filter(t => t.dataLimite.getFullYear() === ano && t.dataLimite.getMonth() === mes)
-      .map(t => t.dataLimite.getDate())
-  );
-
   for (let i = 0; i < diaSemanaInicial; i++) {
     const div = document.createElement('div');
     container.appendChild(div);
   }
+
+  const mostrarTodas = document.getElementById('mostrar-concluidas-expiradas')?.checked;
+  const agora = new Date();
 
   for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
     const div = document.createElement('div');
     div.classList.add('dia');
     div.textContent = dia;
 
-    if (diasComTarefa.has(dia)) {
+    const tarefasDoDia = tarefas.filter(t =>
+      t.dataLimite.getFullYear() === ano &&
+      t.dataLimite.getMonth() === mes &&
+      t.dataLimite.getDate() === dia
+    );
+
+    const algumaVisivel = tarefasDoDia.some(t =>
+      (!t.finalizada && t.dataLimite >= agora) || mostrarTodas
+    );
+
+    if (tarefasDoDia.length > 0 && algumaVisivel) {
       div.classList.add('com-tarefa');
       div.style.cursor = 'pointer';
 
-      div.addEventListener('click', () => {
-        const tarefasDoDia = tarefas.filter(t =>
-          t.dataLimite.getFullYear() === ano &&
-          t.dataLimite.getMonth() === mes &&
-          t.dataLimite.getDate() === dia
-        );
+      // Cor diferenciada se mostrarTodas estiver ativado
+      if (mostrarTodas) {
+        const finalizada = tarefasDoDia.some(t => t.finalizada);
+        const expirada = tarefasDoDia.some(t => !t.finalizada && t.dataLimite < agora);
 
+        if (finalizada) div.classList.add('concluida');
+        if (expirada) div.classList.add('expirada');
+      }
+
+      div.addEventListener('click', () => {
         const lista = document.getElementById('lista-tarefas-dia');
         lista.innerHTML = '';
 
-        if (tarefasDoDia.length === 0) {
+        const tarefasVisiveis = tarefasDoDia.filter(t =>
+          (!t.finalizada && t.dataLimite >= agora) || mostrarTodas
+        );
+
+        if (tarefasVisiveis.length === 0) {
           lista.innerHTML = '<li>Nenhuma tarefa neste dia.</li>';
         } else {
-          tarefasDoDia.forEach(t => {
+          tarefasVisiveis.forEach(t => {
             const li = document.createElement('li');
 
             const status = t.finalizada ? '✅ Concluída' : '⌛ Pendente';
@@ -583,7 +597,6 @@ function renderizarCalendario(tarefas, ano = calendarioAnoAtual, mes = calendari
 
             lista.appendChild(li);
           });
-
         }
 
         const modal = document.getElementById('modal-tarefas-custom');
@@ -596,6 +609,11 @@ function renderizarCalendario(tarefas, ano = calendarioAnoAtual, mes = calendari
     container.appendChild(div);
   }
 }
+
+document.getElementById('mostrar-concluidas-expiradas')?.addEventListener('change', () => {
+  renderizarCalendario(tarefasGlobais, calendarioAnoAtual, calendarioMesAtual);
+});
+
 
 document.getElementById('mes-anterior').addEventListener('click', () => {
   calendarioMesAtual--;
