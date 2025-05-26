@@ -1545,6 +1545,17 @@ div#config-buttosn-container {
   font-weight: bold;
 }
 
+.dia.concluida {
+  background-color: #c8e6c9; /* Verde claro */
+  color: #2e7d32;
+}
+
+.dia.expirada {
+  background-color: #ffcdd2; /* Vermelho claro */
+  color: #b71c1c;
+}
+
+
 #mes-anterior,
 #mes-seguinte {
   background: none;
