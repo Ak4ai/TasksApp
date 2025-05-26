@@ -486,7 +486,137 @@ async function carregarTarefas() {
   graficoDia = criarGraficoPizza(ctxDia, percentualDia, 'Tarefas Concluídas Hoje');
   graficoSemana = criarGraficoPizza(ctxSemana, percentualSemana, 'Tarefas Concluídas Esta Semana');
   graficoMes = criarGraficoPizza(ctxMes, percentualMes, 'Tarefas Concluídas Este Mês');
+  renderizarCalendario(tarefasFuturas);
 }
+
+
+
+let calendarioAnoAtual = new Date().getFullYear();
+let calendarioMesAtual = new Date().getMonth();
+let tarefasGlobais = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btnFechar = document.getElementById('fechar-modal-tarefas');
+  const modal = document.getElementById('modal-tarefas-custom');
+
+  // Fecha o modal ao clicar no botão
+  if (btnFechar && modal) {
+    btnFechar.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+  }
+
+  renderizarCalendario(tarefasGlobais, calendarioAnoAtual, calendarioMesAtual);
+});
+
+function renderizarCalendario(tarefas, ano = calendarioAnoAtual, mes = calendarioMesAtual) {
+  calendarioAnoAtual = ano;
+  calendarioMesAtual = mes;
+  tarefasGlobais = tarefas;
+
+  const container = document.getElementById('calendario-container');
+  container.innerHTML = '';
+
+  const titulo = document.getElementById('mes-ano-titulo');
+  const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  titulo.textContent = `${nomesMeses[mes]} de ${ano}`;
+
+  const primeiroDia = new Date(ano, mes, 1);
+  const ultimoDia = new Date(ano, mes + 1, 0);
+  const diaSemanaInicial = primeiroDia.getDay();
+
+  const diasComTarefa = new Set(
+    tarefas
+      .filter(t => t.dataLimite.getFullYear() === ano && t.dataLimite.getMonth() === mes)
+      .map(t => t.dataLimite.getDate())
+  );
+
+  for (let i = 0; i < diaSemanaInicial; i++) {
+    const div = document.createElement('div');
+    container.appendChild(div);
+  }
+
+  for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
+    const div = document.createElement('div');
+    div.classList.add('dia');
+    div.textContent = dia;
+
+    if (diasComTarefa.has(dia)) {
+      div.classList.add('com-tarefa');
+      div.style.cursor = 'pointer';
+
+      div.addEventListener('click', () => {
+        const tarefasDoDia = tarefas.filter(t =>
+          t.dataLimite.getFullYear() === ano &&
+          t.dataLimite.getMonth() === mes &&
+          t.dataLimite.getDate() === dia
+        );
+
+        const lista = document.getElementById('lista-tarefas-dia');
+        lista.innerHTML = '';
+
+        if (tarefasDoDia.length === 0) {
+          lista.innerHTML = '<li>Nenhuma tarefa neste dia.</li>';
+        } else {
+          tarefasDoDia.forEach(t => {
+            const li = document.createElement('li');
+
+            const status = t.finalizada ? '✅ Concluída' : '⌛ Pendente';
+            const tags = t.tags.length > 0 ? t.tags.map(tag => `#${tag}`).join(', ') : 'Nenhuma';
+            const destaque = t.fixada ? '<strong style="color: red;">📌 Fixada</strong><br>' : '';
+
+            li.innerHTML = `
+              ${destaque}
+              <strong>${t.nome}</strong><br>
+              📝 ${t.descricao}<br>
+              📅 <em>${t.dataLimite.toLocaleDateString()} às ${t.dataLimite.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</em><br>
+              🧭 Tipo: ${t.tipo}<br>
+              🔁 Frequência: ${t.frequencia || 'Não definida'}<br>
+              🏷️ Tags: ${tags}<br>
+              📌 Status: ${status}
+            `;
+
+            li.style.marginBottom = '12px';
+            li.style.borderBottom = '1px solid #ccc';
+            li.style.paddingBottom = '8px';
+
+            lista.appendChild(li);
+          });
+
+        }
+
+        const modal = document.getElementById('modal-tarefas-custom');
+        if (modal) {
+          modal.style.display = 'flex'; // mostra o modal
+        }
+      });
+    }
+
+    container.appendChild(div);
+  }
+}
+
+document.getElementById('mes-anterior').addEventListener('click', () => {
+  calendarioMesAtual--;
+  if (calendarioMesAtual < 0) {
+    calendarioMesAtual = 11;
+    calendarioAnoAtual--;
+  }
+  renderizarCalendario(tarefasGlobais, calendarioAnoAtual, calendarioMesAtual);
+});
+
+document.getElementById('mes-seguinte').addEventListener('click', () => {
+  calendarioMesAtual++;
+  if (calendarioMesAtual > 11) {
+    calendarioMesAtual = 0;
+    calendarioAnoAtual++;
+  }
+  renderizarCalendario(tarefasGlobais, calendarioAnoAtual, calendarioMesAtual);
+});
+
+
+
 
 
 document.addEventListener('DOMContentLoaded', () => {

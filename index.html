@@ -47,6 +47,14 @@
 
 
   <!-- MODAIS -->
+    <!-- Modal para exibir tarefas do dia clicado -->
+    <div id="modal-tarefas-custom" class="modal-tarefas-custom">
+      <div class="modal-content">
+        <h4>Tarefas do Dia</h4>
+        <ul id="lista-tarefas-dia"></ul>
+        <button id="fechar-modal-tarefas" class="btn-fechar">Fechar</button>
+      </div>
+    </div>
   <div id="modal-criar-tarefa" class="modal" style="display: none;">
     <div class="modal-content">
       <span class="close-button" id="fechar-modal">&times;</span>
@@ -227,6 +235,18 @@
             </div>
           </div>
         </div>
+        <div id="calendario-home" class="card">
+          <span class="card-title">Calendário de Tarefas</span>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
+            <button id="mes-anterior">&#8592;</button>
+            <h5 id="mes-ano-titulo" style="margin: 0; font-weight: bold;"></h5>
+            <button id="mes-seguinte">&#8594;</button>
+          </div>
+          <div id="calendario-container"></div>
+        </div>
+        
+
+
       </div>
     <!-- ...existing code... -->
 
@@ -395,6 +415,7 @@
     
     <button class="nav-button" data-tab="tab-settings">⚙️</button>
   </div>
+  
 
   <!-- Service Worker -->
   <script>
