@@ -1582,10 +1582,16 @@ div#config-buttosn-container {
 }
 
 .dia {
-  padding: 10px;
-  text-align: center;
+  position: relative;
   border: 1px solid #ccc;
   border-radius: 6px;
+  min-width: 36px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: background 0.2s;
 }
 
 .dia.com-tarefa {
@@ -1708,3 +1714,36 @@ div#config-buttosn-container {
 .dropdown-item:hover {
   background-color: #5f5a5a;
 }
+
+.checkbox-alinhada {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1em;
+  margin-bottom: 12px;
+}
+
+.checkbox-alinhada input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #7ecbff; /* cor da checkbox */
+}
+
+.dia.periodico {
+  background-color: #4fc3f7;
+  color: #0d47a1;
+}
+.dia.nao-periodico {
+  background-color: #ffa726;
+  color: #4e2600;
+}
+.dia.personalizado {
+  background-color: #66bb6a;
+  color: #1b5e20;
+}
+
+/* Concluídas (apagadas) */
+.dia.expirada-periodico   { background: #b0bec5 !important; color: #263238 !important; }   /* azul morto */
+.dia.expirada-nao-periodico { background: #ffe9c6 !important; color: #7c5a2a !important; } /* laranja morto */
+.dia.expirada-personalizado { background: #d0e8d0 !important; color: #355c3a !important; } /* verde morto */
+.dia.expirada { background: #ffb3b3 !important; color: #b71c1c !important; } /* vermelho apagado */

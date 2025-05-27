@@ -545,7 +545,8 @@ function renderizarCalendario(tarefas, ano = calendarioAnoAtual, mes = calendari
     const tarefasDoDia = tarefas.filter(t =>
       t.dataLimite.getFullYear() === ano &&
       t.dataLimite.getMonth() === mes &&
-      t.dataLimite.getDate() === dia
+      t.dataLimite.getDate() === dia &&
+      (mostrarTodas || !t.finalizada)
     );
 
     const algumaVisivel = tarefasDoDia.some(t =>
@@ -556,59 +557,150 @@ function renderizarCalendario(tarefas, ano = calendarioAnoAtual, mes = calendari
       div.classList.add('com-tarefa');
       div.style.cursor = 'pointer';
 
-      // Cor diferenciada se mostrarTodas estiver ativado
-      if (mostrarTodas) {
-        const finalizada = tarefasDoDia.some(t => t.finalizada);
-        const expirada = tarefasDoDia.some(t => !t.finalizada && t.dataLimite < agora);
+      // Verifica se todas estão concluídas ou expiradas
+      const todasConcluidasOuExpiradas = tarefasDoDia.every(t =>
+        t.finalizada || t.dataLimite < agora
+      );
 
-        if (finalizada) div.classList.add('concluida');
-        if (expirada) div.classList.add('expirada');
+      if (todasConcluidasOuExpiradas) {
+        // Se todas são concluídas
+        const todasConcluidas = tarefasDoDia.every(t => t.finalizada);
+        const todasExpiradas = tarefasDoDia.every(t => !t.finalizada && t.dataLimite < agora);
+
+        // Descobre os tipos presentes
+        const tiposPresentes = [];
+        if (tarefasDoDia.some(t => t.tipo === 'periodico')) tiposPresentes.push('periodico');
+        if (tarefasDoDia.some(t => t.tipo === 'nao-periodico')) tiposPresentes.push('nao-periodico');
+        if (tarefasDoDia.some(t => t.tipo === 'personalizado')) tiposPresentes.push('personalizado');
+
+        // Remove classes de tipo vivas
+        div.classList.remove('periodico', 'nao-periodico', 'personalizado');
+
+        if (todasConcluidas) {
+          // Aplica cor apagada para concluídas
+          if (tiposPresentes.length === 1) {
+            div.classList.add(`expirada-${tiposPresentes[0]}`);
+          } else if (tiposPresentes.length > 1) {
+            const coresMortas = {
+              'periodico': '#b9cfda',
+              'nao-periodico': '#ffe0b2',
+              'personalizado': '#c8e6c9'
+            };
+            const faixas = tiposPresentes.map(tipo => coresMortas[tipo]);
+            const step = 100 / faixas.length;
+            let grad = faixas.map((cor, i) =>
+              `${cor} ${i * step}% ${(i + 1) * step}%`
+            ).join(', ');
+            div.style.background = `linear-gradient(to right, ${grad})`;
+            div.style.color = '#333';
+          }
+        } else if (todasExpiradas) {
+          // Aplica vermelho para expiradas
+          div.classList.add('expirada');
+          div.style.background = '#ffb3b3';
+          div.style.color = '#b71c1c';
+        }
+      } else {
+        // Remove classe cinza se não for o caso
+        div.classList.remove('expirada-ou-concluida');
+
+        const tipos = ['periodico', 'nao-periodico', 'personalizado'];
+        const coresVivas = {
+          'periodico': '#4fc3f7',
+          'nao-periodico': '#ffa726',
+          'personalizado': '#66bb6a'
+        };
+        const coresApagadas = {
+          'periodico': '#b0bec5',
+          'nao-periodico': '#ffe9c6',
+          'personalizado': '#d0e8d0'
+        };
+
+        let gradApplied = false;
+
+        tipos.forEach(tipo => {
+          const temPendente = tarefasDoDia.some(t => t.tipo === tipo && !t.finalizada && t.dataLimite >= agora);
+          const temConcluida = tarefasDoDia.some(t => t.tipo === tipo && t.finalizada);
+
+          if (temPendente && temConcluida) {
+            div.classList.remove(tipo, `expirada-${tipo}`);
+            div.style.background = `linear-gradient(to right, ${coresVivas[tipo]} 0%, ${coresVivas[tipo]} 50%, ${coresApagadas[tipo]} 50%, ${coresApagadas[tipo]} 100%)`;
+            div.style.color = '#0d47a1';
+            gradApplied = true;
+          }
+        });
+
+        if (!gradApplied) {
+          // Lógica padrão já existente:
+          const tiposPresentes = [];
+          if (tarefasDoDia.some(t => t.tipo === 'periodico')) tiposPresentes.push('periodico');
+          if (tarefasDoDia.some(t => t.tipo === 'nao-periodico')) tiposPresentes.push('nao-periodico');
+          if (tarefasDoDia.some(t => t.tipo === 'personalizado')) tiposPresentes.push('personalizado');
+
+          if (tiposPresentes.length === 1) {
+            div.classList.add(tiposPresentes[0]);
+          } else if (tiposPresentes.length > 1) {
+            div.classList.remove('periodico', 'nao-periodico', 'personalizado');
+            // Fundo dividido em faixas verticais
+            const cores = {
+              'periodico': '#4fc3f7',
+              'nao-periodico': '#ffa726',
+              'personalizado': '#66bb6a'
+            };
+            const faixas = tiposPresentes.map(tipo => cores[tipo]);
+            const step = 100 / faixas.length;
+            let grad = faixas.map((cor, i) =>
+              `${cor} ${i * step}% ${(i + 1) * step}%`
+            ).join(', ');
+            div.style.background = `linear-gradient(to right, ${grad})`;
+            div.style.color = '#222'; // Ajuste para contraste
+          }
+        }
       }
-
-      div.addEventListener('click', () => {
-        const lista = document.getElementById('lista-tarefas-dia');
-        lista.innerHTML = '';
-
-        const tarefasVisiveis = tarefasDoDia.filter(t =>
-          (!t.finalizada && t.dataLimite >= agora) || mostrarTodas
-        );
-
-        if (tarefasVisiveis.length === 0) {
-          lista.innerHTML = '<li>Nenhuma tarefa neste dia.</li>';
-        } else {
-          tarefasVisiveis.forEach(t => {
-            const li = document.createElement('li');
-
-            const status = t.finalizada ? '✅ Concluída' : '⌛ Pendente';
-            const tags = t.tags.length > 0 ? t.tags.map(tag => `#${tag}`).join(', ') : 'Nenhuma';
-            const destaque = t.fixada ? '<strong style="color: red;">📌 Fixada</strong><br>' : '';
-
-            li.innerHTML = `
-              ${destaque}
-              <strong>${t.nome}</strong><br>
-              📝 ${t.descricao}<br>
-              📅 <em>${t.dataLimite.toLocaleDateString()} às ${t.dataLimite.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</em><br>
-              🧭 Tipo: ${t.tipo}<br>
-              🔁 Frequência: ${t.frequencia || 'Não definida'}<br>
-              🏷️ Tags: ${tags}<br>
-              📌 Status: ${status}
-            `;
-
-            li.style.marginBottom = '12px';
-            li.style.borderBottom = '1px solid #ccc';
-            li.style.paddingBottom = '8px';
-
-            lista.appendChild(li);
-          });
-        }
-
-        const modal = document.getElementById('modal-tarefas-custom');
-        if (modal) {
-          modal.style.display = 'flex'; // mostra o modal
-        }
-      });
     }
 
+    div.addEventListener('click', () => {
+      const lista = document.getElementById('lista-tarefas-dia');
+      lista.innerHTML = '';
+
+      const tarefasVisiveis = tarefasDoDia.filter(t =>
+        (!t.finalizada && t.dataLimite >= agora) || mostrarTodas
+      );
+
+      if (tarefasVisiveis.length === 0) {
+        lista.innerHTML = '<li>Nenhuma tarefa neste dia.</li>';
+      } else {
+        tarefasVisiveis.forEach(t => {
+          const li = document.createElement('li');
+
+          const status = t.finalizada ? '✅ Concluída' : '⌛ Pendente';
+          const tags = t.tags.length > 0 ? t.tags.map(tag => `#${tag}`).join(', ') : 'Nenhuma';
+          const destaque = t.fixada ? '<strong style="color: red;">📌 Fixada</strong><br>' : '';
+
+          li.innerHTML = `
+            ${destaque}
+            <strong>${t.nome}</strong><br>
+            📝 ${t.descricao}<br>
+            📅 <em>${t.dataLimite.toLocaleDateString()} às ${t.dataLimite.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</em><br>
+            🧭 Tipo: ${t.tipo}<br>
+            🔁 Frequência: ${t.frequencia || 'Não definida'}<br>
+            🏷️ Tags: ${tags}<br>
+            📌 Status: ${status}
+          `;
+
+          li.style.marginBottom = '12px';
+          li.style.borderBottom = '1px solid #ccc';
+          li.style.paddingBottom = '8px';
+
+          lista.appendChild(li);
+        });
+      }
+
+      const modal = document.getElementById('modal-tarefas-custom');
+      if (modal) {
+        modal.style.display = 'flex'; // mostra o modal
+      }
+    });
     container.appendChild(div);
   }
 }
@@ -1213,7 +1305,7 @@ function calcularTempoRestante(dataLimite) {
     }
 
     const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60));
     const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
     return `${dias} dias, ${horas} horas e ${minutos} minutos`;
