@@ -16,6 +16,9 @@ const subTagsPorCategoria = {
   "Criativo": ["Desenho", "Escrita", "Música", "Fotografia"],
   "Espiritual": ["Meditação", "Yoga", "Orações"]
 };
+const VALORES_ITENS = {
+  "hat": 50,
+};
 
 const classesJogador = {
   "Guerreiro": { bonusCategorias: ["Físico"], bonusXP: 0.5 },        // +50% XP em tarefas Físicas
@@ -1402,12 +1405,60 @@ async function ativarItem(item) {
   if (!usuario) return;
 
   const usuarioRef = doc(db, "usuarios", usuario.uid);
-  await updateDoc(usuarioRef, { itemAtivo: item });
+  const snap = await getDoc(usuarioRef);
+  const dados = snap.data();
+  let itensAtivos = dados.itensAtivos || [];
 
-  mostrarPopup(`Item "${item}" ativado!`, 2000);
-  carregarInventario();
+  if (!itensAtivos.includes(item)) {
+    itensAtivos.push(item);
+    await updateDoc(usuarioRef, { itensAtivos });
+  }
+
+  await carregarInventario(); // Recarrega a UI atualizada
 }
 
+async function desativarItem(item) {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+
+  const usuarioRef = doc(db, "usuarios", usuario.uid);
+  const snap = await getDoc(usuarioRef);
+  const dados = snap.data();
+  let itensAtivos = dados.itensAtivos || [];
+
+  itensAtivos = itensAtivos.filter(i => i !== item);
+
+  await updateDoc(usuarioRef, { itensAtivos });
+  await carregarInventario(); // Recarrega a UI atualizada
+}
+
+async function venderItem(item) {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+
+  const usuarioRef = doc(db, "usuarios", usuario.uid);
+  const snap = await getDoc(usuarioRef);
+  const dados = snap.data();
+
+  let inventario = dados.inventario || [];
+  let itensAtivos = dados.itensAtivos || [];
+  let moedas = dados.moedas || 0;
+
+  inventario = inventario.filter(i => i !== item);
+  itensAtivos = itensAtivos.filter(i => i !== item);
+
+  const valorOriginal = VALORES_ITENS[item] || 0;
+  const valorVenda = Math.floor(valorOriginal * 0.5);
+
+  await updateDoc(usuarioRef, {
+    inventario,
+    itensAtivos,
+    moedas: moedas + valorVenda
+  });
+  mostrarPopup(`Item vendido: ${item} por ${valorVenda} moedas.`);
+  atualizarMoedas();
+  await carregarInventario();
+}
 
 export async function carregarInventario() {
   const usuario = auth.currentUser;
@@ -1418,10 +1469,11 @@ export async function carregarInventario() {
   const dados = snap.data();
 
   const inventario = dados.inventario || [];
-  const itemAtivo = dados.itemAtivo || null;
+  const itensAtivos = dados.itensAtivos || [];
 
   const grid = document.getElementById("inventario-grid");
-  grid.innerHTML = ""; // limpa antes
+  if (!grid) return;
+  grid.innerHTML = "";
 
   inventario.forEach(item => {
     const card = document.createElement("div");
@@ -1436,20 +1488,71 @@ export async function carregarInventario() {
     nome.className = "item-nome";
     nome.textContent = item;
 
-    const btn = document.createElement("button");
-    btn.className = "btn-comprar";
-    if (item === itemAtivo) {
-      btn.textContent = "Ativo";
-      btn.disabled = true;
+    // Ações unificadas
+    const btnWrapper = document.createElement("div");
+    btnWrapper.className = "btn-wrapper";
+
+    const btnAcoes = document.createElement("button");
+    btnAcoes.className = "btn-acoes";
+    btnAcoes.textContent = "⚙ Ações ▾";
+
+    const dropdown = document.createElement("div");
+    dropdown.className = "dropdown-acoes";
+
+    const acaoAtivar = document.createElement("div");
+    acaoAtivar.className = "dropdown-item";
+    if (itensAtivos.includes(item)) {
+      acaoAtivar.textContent = "🔽 Desativar item";
+      acaoAtivar.onclick = () => desativarItem(item);
     } else {
-      btn.textContent = "Ativar";
-      btn.onclick = () => ativarItem(item);
+      acaoAtivar.textContent = "🔼 Ativar item";
+      acaoAtivar.onclick = () => ativarItem(item);
     }
+
+    const valorVenda = Math.floor((VALORES_ITENS[item] || 0) * 0.5);
+    const acaoVender = document.createElement("div");
+    acaoVender.className = "dropdown-item";
+    acaoVender.textContent = `💰 Vender por ${valorVenda} moedas`;
+    acaoVender.onclick = () => venderItem(item);
+
+    dropdown.appendChild(acaoAtivar);
+    dropdown.appendChild(acaoVender);
+    btnWrapper.appendChild(btnAcoes);
+    btnWrapper.appendChild(dropdown);
+
+    // Exibir/ocultar menu
+    btnAcoes.onclick = () => {
+      dropdown.classList.toggle("visivel");
+    };
 
     card.appendChild(img);
     card.appendChild(nome);
-    card.appendChild(btn);
+    card.appendChild(btnWrapper);
     grid.appendChild(card);
   });
+
+  // Renderiza itens ativos
+  const itensContainer = document.getElementById("itens-ativos-container");
+  if (!itensContainer) return;
+  itensContainer.innerHTML = "";
+
+  itensAtivos.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "item-ativo-card";
+
+    const img = document.createElement("img");
+    img.src = `img/${item}.png`;
+    img.alt = item;
+
+    const nome = document.createElement("span");
+    nome.textContent = item;
+
+    card.appendChild(img);
+    card.appendChild(nome);
+    itensContainer.appendChild(card);
+  });
 }
+
+
+
 
