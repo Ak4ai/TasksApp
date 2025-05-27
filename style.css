@@ -37,15 +37,64 @@ body {
   display: none;
 }
 
-.loja-grid {
-    display: flex
-;
-    flex-direction: column;
-    align-content: stretch;
-    align-items: stretch;
-    flex-wrap: wrap;
-    justify-content: center;
+.loja-grid, .inventario-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+  padding: 10px;
 }
+
+.item-card {
+  background: #363535;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 200px; /* altura fixa para normalizar */
+  box-sizing: border-box;
+}
+
+.item-imagem {
+  max-width: 80px;
+  max-height: 80px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.item-nome {
+  font-weight: 600;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.item-preco {
+  color: #ceec20;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.btn-comprar {
+  background-color: #00ff00;
+  border: none;
+  color: rgb(0, 0, 0);
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-comprar:hover {
+  background-color: #c2bdbd;
+}
+
 
 .app {
   gap: 25px;
@@ -1597,4 +1646,65 @@ div#config-buttosn-container {
   cursor: pointer;
 }
 
+.itens-ativos-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
 
+.item-ativo-card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 5px;
+  background: #221d1d;
+  text-align: center;
+  width: 60px;
+}
+
+.item-ativo-card img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.btn-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-top: 8px;
+}
+
+.btn-acoes {
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.dropdown-acoes {
+  display: none;
+  position: absolute;
+  background-color: rgb(17, 16, 16);
+  min-width: 180px;
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+  z-index: 1;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.dropdown-acoes.visivel {
+  display: block;
+}
+
+.dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.dropdown-item:hover {
+  background-color: #5f5a5a;
+}
