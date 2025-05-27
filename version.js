@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `gameficação e itens`, hash: '5e583a1', date: '2025-05-26 22:31:53' };
+window.APP_VERSION = { msg: `Melhoria no calendario`, hash: 'ab1f8a8', date: '2025-05-27 11:41:21' };
