@@ -30,8 +30,35 @@ self.addEventListener('install', function(event) {
         return cache.addAll([
           '/',
           '/index.html',
-          '/style.css', // Adicione todos os arquivos necessários para o offline
+          '/style.css',
           '/script.js',
+          '/tarefas.js',
+          '/auth.js',
+          '/firebase-config.js',
+          '/notifications.js',
+          '/manifest.json',
+          '/service-worker.js',
+          '/firebase-messaging-sw.js',
+          '/android-icon-192x192.png',
+          '/apple-icon-180x180.png',
+          '/web-icon-192x192.png',
+          '/mobile-icon.png',
+          // Fontes
+          '/fonts/din-next-rounded-lt-pro-medium.ttf',
+          // Imagens principais (adicione outras se necessário)
+          '/img/arco.png',
+          '/img/astronauta.png',
+          '/img/bardo.jpg',
+          '/img/bruxo.jpg',
+          '/img/cajado.png',
+          '/img/carnaval.png',
+          '/img/cartola.png',
+          '/img/coroa.png',
+          '/img/escudo.png',
+          '/img/espada.png',
+          '/img/guerreiro.jpg',
+          '/img/hat.png',
+          // ...adicione outros arquivos de img/ conforme necessário...
         ]);
       })
     );
