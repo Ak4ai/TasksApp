@@ -26,22 +26,3 @@ async function solicitarPermissaoNotificacao() {
 
 // Chame ao iniciar o app
 solicitarPermissaoNotificacao();
-
-// Recebe notificações enquanto o app está aberto
-onMessage(messaging, (payload) => {
-  console.log('Notificação recebida:', payload);
-  // Exiba um popup customizado OU tente mostrar notificação se permitido
-  if (Notification.permission === 'granted') {
-    navigator.serviceWorker.getRegistration().then(function(reg) {
-      if (reg) {
-        reg.showNotification(payload.notification.title, {
-          body: payload.notification.body,
-          icon: payload.notification.icon
-        });
-      }
-    });
-  } else {
-    // Ou exiba um popup customizado na tela
-    alert(payload.notification.title + '\n' + payload.notification.body);
-  }
-});
