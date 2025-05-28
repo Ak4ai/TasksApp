@@ -14,21 +14,14 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function(payload) {
-  // Só mostra notificação se a página NÃO estiver visível
-  if (self.clients) {
-    self.clients.matchAll({type: 'window', includeUncontrolled: true}).then(function(clientList) {
-      const isClientFocused = clientList.some(client => client.focused);
-      if (!isClientFocused) {
-        self.registration.showNotification(
-          payload.notification.title,
-          {
-            body: payload.notification.body,
-            icon: payload.notification.icon
-          }
-        );
-      }
-    });
-  }
+  // Mostra notificação mesmo com app fechado
+  self.registration.showNotification(
+    payload.notification.title,
+    {
+      body: payload.notification.body,
+      icon: payload.notification.icon
+    }
+  );
 });
 
 self.addEventListener('install', function(event) {
