@@ -29,11 +29,3 @@ onMessage(messaging, (payload) => {
     icon: payload.notification.icon
   });
 });
-
-// Notificação local de teste ao entrar na página
-if (Notification.permission === 'granted') {
-  new Notification('Notificação de Teste', {
-    body: 'Bem-vindo! Esta é uma notificação local.',
-    icon: 'android-icon-192x192.png'
-  });
-}
