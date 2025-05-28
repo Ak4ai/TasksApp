@@ -2,6 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js"; // <-- IMPORTANTE
+import { getMessaging } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-messaging.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -18,5 +19,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getFirestore(app); // <-- INICIALIZA Firestore
+const messaging = getMessaging(app);
 
-export { app, db }; // <-- Agora pode exportar com segurança
+export { app, db, messaging }; // <-- Agora pode exportar com segurança
