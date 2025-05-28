@@ -124,6 +124,10 @@ body {
     width: 90%;
 }
 
+div#calendario-home {
+    width: 90%;
+}
+
 .card {
   padding: 1rem;
   color: white;
@@ -1434,7 +1438,7 @@ body.ios-pwa .bottom-nav {
 
 /* Estilo padrão dos gráficos */
 .grafico-card {
-  background-color: #1e1e2f;
+  background-color: #1f1f1f;
   padding: 10px;
   border-radius: 12px;
   text-align: center;
@@ -1595,6 +1599,7 @@ div#config-buttosn-container {
   justify-content: center;
   font-weight: bold;
   transition: background 0.2s;
+  aspect-ratio: 1;
 }
 
 .dia.com-tarefa {
