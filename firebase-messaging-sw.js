@@ -14,14 +14,18 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function(payload) {
-  // Mostra notificação mesmo com app fechado
-  self.registration.showNotification(
-    payload.notification.title,
-    {
-      body: payload.notification.body,
-      icon: payload.notification.icon
-    }
-  );
+  console.log('[firebase-messaging-sw.js] Mensagem recebida em background:', payload);
+  if (payload && payload.notification) {
+    self.registration.showNotification(
+      payload.notification.title,
+      {
+        body: payload.notification.body,
+        icon: payload.notification.icon
+      }
+    );
+  } else {
+    console.log('Payload não possui campo notification:', payload);
+  }
 });
 
 self.addEventListener('install', function(event) {

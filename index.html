@@ -504,15 +504,15 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => console.log('ServiceWorker registrado:', reg.scope))
-          .catch(err => console.error('Erro no ServiceWorker:', err));
-      // REGISTRE O SW DO FCM TAMBÉM!
-      navigator.serviceWorker.register('/firebase-messaging-sw.js')
-        .then(reg => console.log('Firebase Messaging SW registrado:', reg.scope))
-        .catch(err => console.error('Erro no Firebase Messaging SW:', err));
-    });
-  }
+        // Remova o registro duplicado!
+        // navigator.serviceWorker.register('/service-worker.js')
+        //   .then(reg => console.log('ServiceWorker registrado:', reg.scope))
+        //   .catch(err => console.error('Erro no ServiceWorker:', err));
+        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+          .then(reg => console.log('Firebase Messaging SW registrado:', reg.scope))
+          .catch(err => console.error('Erro no Firebase Messaging SW:', err));
+      });
+    }
   </script>
 
   <!-- SCRIPTS PRINCIPAIS -->
