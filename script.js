@@ -442,32 +442,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
   function ajustarWrappers() {
     const tipoSel = document.getElementById('tipo-tarefa');
     const freqWrap = document.getElementById('frequencia-wrapper');
@@ -484,12 +458,6 @@ window.addEventListener('DOMContentLoaded', () => {
       padraoWrap.style.display = 'none';
     }
   }
-
-
-
-
-
-
 
 document.addEventListener('DOMContentLoaded', () => {
   const tipoSel           = document.getElementById('tipo-tarefa');
@@ -607,5 +575,3 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 });
-
-

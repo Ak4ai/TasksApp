@@ -16,8 +16,44 @@ const subTagsPorCategoria = {
   "Criativo": ["Desenho", "Escrita", "Música", "Fotografia"],
   "Espiritual": ["Meditação", "Yoga", "Orações"]
 };
+
+function getNomeItem(id) {
+  const NOMES_ITENS = {
+    hat: "Chapéu de Caubói",
+    viking: "Capacete Viking",
+    espada: "Espada Lendária",
+    coroa: "Coroa Brilhante",
+    oculos: "Óculos Descolado",
+    livro: "Livro de Fetiços",
+    mago: "Chapéu de Mago",
+    cajado: "Cajado Arcano",
+    cartola: "Cartola de Mágico",
+    escudo: "Escudo Resistente",
+    arco: "Arco do Élfico",
+    astronauta: "Capacete Astronauta",
+    mascara: "Máscara de Carnaval",
+    machado: "Machado de Guerra",
+    // adicione outros itens aqui
+  };
+  return NOMES_ITENS[id] || id;
+}
+
 const VALORES_ITENS = {
   "hat": 50,
+  'viking': 70,
+  'espada': 200,
+  'coroa': 150,
+  'oculos': 75,
+  'livro': 120,
+  'mago': 100,
+  'cajado': 180,
+  'cartola': 60,
+  'escudo': 120,
+  'arco': 150,
+  'astronauta': 180,
+  'mascara': 40,
+  'machado': 100
+  // adicione outros itens aqui
 };
 
 const classesJogador = {
@@ -1578,7 +1614,7 @@ export async function carregarInventario() {
 
     const nome = document.createElement("span");
     nome.className = "item-nome";
-    nome.textContent = item;
+    nome.textContent = getNomeItem(item);
 
     // Ações unificadas
     const btnWrapper = document.createElement("div");
@@ -1637,7 +1673,7 @@ export async function carregarInventario() {
     img.alt = item;
 
     const nome = document.createElement("span");
-    nome.textContent = item;
+    nome.textContent = getNomeItem(item);
 
     card.appendChild(img);
     card.appendChild(nome);
