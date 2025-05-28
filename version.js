@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `59`, hash: '6551705', date: '2025-05-28 14:45:34' };
+window.APP_VERSION = { msg: `60- Teste de Cronjob`, hash: '366209b', date: '2025-05-28 14:55:01' };
