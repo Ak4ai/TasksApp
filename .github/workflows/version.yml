@@ -23,6 +23,11 @@ jobs:
         run: |
           echo "window.APP_VERSION = { msg: \`${{ steps.get_commit.outputs.MSG }}\`, hash: '${{ steps.get_commit.outputs.SHA }}', date: '${{ steps.get_commit.outputs.DATE }}' };" > version.js
 
+      - name: Copy service workers to root
+        run: |
+          cp TasksApp/firebase-messaging-sw.js ./
+          cp TasksApp/service-worker.js ./ || true
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
