@@ -63,6 +63,7 @@ module.exports = async (req, res) => {
         notification: {
           title: notif.title,
           body: notif.body,
+          badge: notif.badge || '/badge.png' // <-- Adicione esta linha
         },
       };
 
