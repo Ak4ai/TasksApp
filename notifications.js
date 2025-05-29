@@ -1,7 +1,9 @@
 import { messaging } from './firebase-config.js';
 import { getToken, onMessage } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-messaging.js";
 import { getFirestore, doc, setDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+let pendingFcmToken = null;
 
 // Solicita permissão ao usuário
 async function solicitarPermissaoNotificacao() {
@@ -24,13 +26,13 @@ async function solicitarPermissaoNotificacao() {
       const auth = getAuth();
       const user = auth.currentUser;
       if (user) {
-        // Salva o token vinculado ao UID do usuário
-        await setDoc(doc(db, "fcmTokens", user.uid), { token });
+        // Salva o token vinculado ao UID do usuário em uma subcoleção
+        await setDoc(doc(db, `usuarios/${user.uid}/fcmTokens`, token), { token });
         console.log('Token salvo no Firestore para o usuário:', user.uid);
       } else {
-        // Se não estiver autenticado, salva por token (menos seguro)
-        await setDoc(doc(db, "fcmTokens", token), { token });
-        console.log('Token salvo no Firestore (sem usuário autenticado)');
+        // Guarda o token para salvar depois que autenticar
+        pendingFcmToken = token;
+        console.warn('Usuário não autenticado, token FCM será salvo após login.');
       }
     } else {
       console.warn('Permissão de notificação negada');
@@ -46,6 +48,17 @@ async function solicitarPermissaoNotificacao() {
 
 // Chame ao iniciar o app
 solicitarPermissaoNotificacao();
+
+// Quando o usuário autenticar, salve o token pendente (se houver)
+const auth = getAuth();
+onAuthStateChanged(auth, async (user) => {
+  if (user && pendingFcmToken) {
+    const db = getFirestore();
+    await setDoc(doc(db, `usuarios/${user.uid}/fcmTokens`, pendingFcmToken), { token: pendingFcmToken });
+    console.log('Token FCM pendente salvo após login:', user.uid);
+    pendingFcmToken = null;
+  }
+});
 
 document.getElementById('test-notification-btn').addEventListener('click', async () => {
   const db = getFirestore();

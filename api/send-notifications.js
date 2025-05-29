@@ -21,8 +21,24 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
 
-  // Busca notificações planejadas (exemplo: todas para hoje)
+  // Limpeza em massa se for por volta da meia-noite
   const now = new Date();
+  const hora = now.getHours();
+  const minutos = now.getMinutes();
+  if (hora === 0 && minutos < 10) { // Entre 00:00 e 00:09
+    const notificacoesEnviadas = await db.collection('scheduledNotifications')
+      .where('sent', '==', true)
+      .get();
+
+    if (!notificacoesEnviadas.empty) {
+      const batch = db.batch();
+      notificacoesEnviadas.docs.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+      console.log(`Limpeza diária: removidas ${notificacoesEnviadas.size} notificações enviadas.`);
+    }
+  }
+
+  // Busca notificações planejadas (exemplo: todas para hoje)
   const snapshot = await db.collection('scheduledNotifications')
     .where('scheduledAt', '<=', now)
     .where('sent', '==', false)
@@ -35,28 +51,30 @@ module.exports = async (req, res) => {
   const results = [];
   for (const doc of snapshot.docs) {
     const notif = doc.data();
-    // Busca o token FCM do usuário
-    const tokenDoc = await db.collection('fcmTokens').doc(notif.uid).get();
-    if (!tokenDoc.exists) continue;
-    const { token } = tokenDoc.data();
+    // Busca todos os tokens FCM do usuário
+    const tokensSnapshot = await db.collection(`usuarios/${notif.uid}/fcmTokens`).get();
+    if (tokensSnapshot.empty) continue;
 
-    // Monta e envia a notificação
-    const message = {
-      token,
-      notification: {
-        title: notif.title,
-        body: notif.body,
-      },
-    };
+    const tokens = tokensSnapshot.docs.map(tokenDoc => tokenDoc.data().token);
 
-    try {
-      const response = await admin.messaging().send(message);
-      results.push({ uid: notif.uid, status: 'sent', response });
-      // Marca como enviada
-      await doc.ref.update({ sent: true });
-    } catch (error) {
-      results.push({ uid: notif.uid, status: 'error', error: error.message });
+    for (const token of tokens) {
+      const message = {
+        token,
+        notification: {
+          title: notif.title,
+          body: notif.body,
+        },
+      };
+
+      try {
+        const response = await admin.messaging().send(message);
+        results.push({ uid: notif.uid, token, status: 'sent', response });
+      } catch (error) {
+        results.push({ uid: notif.uid, token, status: 'error', error: error.message });
+      }
     }
+    // Marca como enviada após tentar todos os tokens
+    await doc.ref.update({ sent: true });
   }
 
   res.status(200).json({ results });
