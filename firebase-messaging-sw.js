@@ -74,21 +74,3 @@ self.addEventListener('install', function(event) {
       })
     );
   });
-  
-  self.addEventListener('push', function(event) {
-    let data = {};
-    try {
-      data = event.data ? event.data.json() : {};
-    } catch (e) {
-      data = {};
-    }
-    const notification = data.notification || data;
-    const title = notification.title || 'Nova notificação';
-    const options = {
-      body: notification.body || '',
-      icon: notification.icon || '/web-icon-192x192.png'
-    };
-    event.waitUntil(
-      self.registration.showNotification(title, options)
-    );
-  });
