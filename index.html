@@ -89,6 +89,7 @@
           <option value="datas">Datas específicas</option>
           <option value="frequencia">A cada X dias</option>
           <option value="unico">Evento único</option>
+          <option value="semanal">Semanal</option>
         </select>
 
         <div id="bloco-datas" class="sub-bloco-personalizado">
@@ -99,6 +100,20 @@
         <div id="bloco-frequencia" class="sub-bloco-personalizado" style="display:none">
           <label>Repetir a cada:</label>
           <input id="diasFrequencia" type="number" min="1" placeholder="Ex: 3" /> dias
+        </div>
+
+        <div id="bloco-semanal" class="sub-bloco-personalizado" style="display:none">
+          <label>Repetir nos dias da semana:</label><br>
+          <label><input type="checkbox" name="diasSemana" value="0"> Domingo</label>
+          <label><input type="checkbox" name="diasSemana" value="1"> Segunda</label>
+          <label><input type="checkbox" name="diasSemana" value="2"> Terça</label>
+          <label><input type="checkbox" name="diasSemana" value="3"> Quarta</label>
+          <label><input type="checkbox" name="diasSemana" value="4"> Quinta</label>
+          <label><input type="checkbox" name="diasSemana" value="5"> Sexta</label>
+          <label><input type="checkbox" name="diasSemana" value="6"> Sábado</label>
+          <br>
+          <label>Horário:</label>
+          <input type="time" id="horaSemanal">
         </div>
 
         <!-- nenhum campo necessário para "unico" -->

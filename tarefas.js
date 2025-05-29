@@ -425,6 +425,8 @@ async function carregarTarefas() {
       permitirConclusao: data.permitirConclusao || false,
       tags: data.tags || [],
       fixada: data.fixada || false,
+      diasSemana: data.diasSemana || [],         
+      horaSemanal: data.horaSemanal || null,
     });
   });
 
@@ -1147,9 +1149,10 @@ export async function ajustarRecurrentes(tarefas) {
     let dataProxima = null;
     const dataLimiteAnterior = t.dataLimite.toDate ? t.dataLimite.toDate() : new Date(t.dataLimite);
     const hoje = new Date();
+
     const podeRecriar =
       (!t.finalizada && dataLimiteAnterior < hoje) ||
-      (t.tipo === 'personalizado' && t.finalizada && ['frequencia', 'datas'].includes(t.modoPersonalizado));
+      (t.tipo === 'personalizado' && t.finalizada && ['frequencia', 'datas', 'semanal'].includes(t.modoPersonalizado));
 
     if (!podeRecriar) continue;
 
@@ -1171,11 +1174,37 @@ export async function ajustarRecurrentes(tarefas) {
           .sort((a, b) => a - b);
 
         dataProxima = datas.find(d => d > dataLimiteAnterior);
-
         if (!dataProxima) {
           console.log(`🔁 Nenhuma data futura para '${t.descricao}'`);
           continue;
         }
+
+      } else if (t.modoPersonalizado === 'semanal') {
+        if (!Array.isArray(t.diasSemana) || !t.horaSemanal) continue;
+        const agora = new Date();
+        let menorDiferenca = Infinity;
+        let proximaData = null;
+
+        for (const dia of t.diasSemana) {
+          const candidato = new Date(agora);
+          const diff = (dia + 7 - agora.getDay()) % 7 || 7;
+          candidato.setDate(agora.getDate() + diff);
+
+          const [h, m] = t.horaSemanal.split(':').map(Number);
+          candidato.setHours(h, m, 0, 0);
+
+          if (candidato > agora && candidato - agora < menorDiferenca) {
+            menorDiferenca = candidato - agora;
+            proximaData = candidato;
+          }
+        }
+
+        if (!proximaData) {
+          console.log(`🔁 Nenhum próximo dia da semana válido para '${t.descricao}'`);
+          continue;
+        }
+
+        dataProxima = proximaData;
       } else {
         continue;
       }
@@ -1184,9 +1213,15 @@ export async function ajustarRecurrentes(tarefas) {
     } else if (t.tipo === 'periodico') {
       const proxima = new Date(dataLimiteAnterior);
       switch (t.frequencia) {
-        case 'diario': proxima.setDate(proxima.getDate() + 1); break;
-        case 'semanal': proxima.setDate(proxima.getDate() + 7); break;
-        case 'mensal': proxima.setMonth(proxima.getMonth() + 1); break;
+        case 'diario':
+          proxima.setDate(proxima.getDate() + 1);
+          break;
+        case 'semanal':
+          proxima.setDate(proxima.getDate() + 7);
+          break;
+        case 'mensal':
+          proxima.setMonth(proxima.getMonth() + 1);
+          break;
         default:
           if (typeof t.frequencia === 'number') {
             proxima.setDate(proxima.getDate() + t.frequencia);
@@ -1205,8 +1240,8 @@ export async function ajustarRecurrentes(tarefas) {
       console.log(`⚠️ Já existe tarefa futura para '${t.descricao}' em ${dataProxima.toISOString()}`);
       continue;
     }
-    
 
+    // 🔧 Cria nova tarefa com os mesmos dados
     const novaTarefa = {
       nome: t.nome,
       descricao: t.descricao,
@@ -1218,18 +1253,23 @@ export async function ajustarRecurrentes(tarefas) {
       tarefaOriginal: t.id,
     };
 
+    // Campos opcionais
     if (t.frequencia != null) novaTarefa.frequencia = t.frequencia;
     if (t.modoPersonalizado) novaTarefa.modoPersonalizado = t.modoPersonalizado;
     if (t.padraoPersonalizado) novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
     if (t.permitirConclusao != null) novaTarefa.permitirConclusao = t.permitirConclusao;
+    if (t.diasSemana) novaTarefa.diasSemana = t.diasSemana;
+    if (t.horaSemanal) novaTarefa.horaSemanal = t.horaSemanal;
 
     await addDoc(tarefasColecao, novaTarefa);
     mostrarPopup(`Nova tarefa criada: ${t.descricao} para ${dataProxima.toLocaleDateString('pt-BR')}`);
-    personagemFalaAleatoriamente
+    personagemFalaAleatoriamente();
+
     const refAntigo = doc(db, "usuarios", usuario.uid, "tarefas", t.id);
     await updateDoc(refAntigo, { finalizada: true });
   }
 }
+
 
 
 
@@ -1424,6 +1464,8 @@ document.getElementById('modoPersonalizado').addEventListener('change', (e) => {
     document.getElementById('bloco-datas').style.display = 'block';
   } else if (modo === 'frequencia') {
     document.getElementById('bloco-frequencia').style.display = 'block';
+  } else if (modo === 'semanal') {
+    document.getElementById('bloco-semanal').style.display = 'block';
   }
 });
 
