@@ -15,16 +15,15 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function(payload) {
   console.log('[firebase-messaging-sw.js] Mensagem recebida em background:', payload);
-  if (payload && payload.notification) {
+  // Só mostra manualmente se NÃO houver notification no payload
+  if (!payload.notification && payload.data) {
     self.registration.showNotification(
-      payload.notification.title,
+      payload.data.title || 'Nova notificação',
       {
-        body: payload.notification.body,
-        icon: payload.notification.icon
+        body: payload.data.body || '',
+        icon: payload.data.icon || '/web-icon-192x192.png'
       }
     );
-  } else {
-    console.log('Payload não possui campo notification:', payload);
   }
 });
 
@@ -72,5 +71,23 @@ self.addEventListener('install', function(event) {
       caches.match(event.request).then(function(response) {
         return response || fetch(event.request);
       })
+    );
+  });
+  
+  self.addEventListener('push', function(event) {
+    let data = {};
+    try {
+      data = event.data ? event.data.json() : {};
+    } catch (e) {
+      data = {};
+    }
+    const notification = data.notification || data;
+    const title = notification.title || 'Nova notificação';
+    const options = {
+      body: notification.body || '',
+      icon: notification.icon || '/web-icon-192x192.png'
+    };
+    event.waitUntil(
+      self.registration.showNotification(title, options)
     );
   });
