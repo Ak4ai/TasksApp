@@ -85,7 +85,7 @@ self.addEventListener('install', function(event) {
       const title = notification.title || 'Nova notificação';
       const options = {
         body: notification.body || '',
-        badge: notification.badge || '/android-icon-192x192.png' // badge adicionado aqui
+        badge: notification.badge || '/web-icon-192x192.png' // badge adicionado aqui
       };
       event.waitUntil(
         self.registration.showNotification(title, options)
