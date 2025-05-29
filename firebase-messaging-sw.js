@@ -28,29 +28,6 @@ messaging.onBackgroundMessage(function(payload) {
   }
 });
 
-// Garante notificação mesmo se onBackgroundMessage não funcionar (especialmente em Android/PWA)
-self.addEventListener('push', function(event) {
-  console.log('[firebase-messaging-sw.js] Evento push recebido:', event);
-  let data = {};
-  if (event.data) {
-    try {
-      data = event.data.json();
-      console.log('[firebase-messaging-sw.js] Dados do push:', data);
-    } catch (e) {
-      console.error('[firebase-messaging-sw.js] Erro ao parsear push:', e);
-    }
-  }
-  const notification = data.notification || {};
-  const title = notification.title || 'Nova notificação';
-  const options = {
-    body: notification.body || '',
-    icon: notification.icon || '/web-icon-192x192.png'
-  };
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
-});
-
 self.addEventListener('install', function(event) {
     event.waitUntil(
       caches.open('my-cache').then(function(cache) {
@@ -96,5 +73,23 @@ self.addEventListener('install', function(event) {
       caches.match(event.request).then(function(response) {
         return response || fetch(event.request);
       })
+    );
+  });
+  
+  self.addEventListener('push', function(event) {
+    let data = {};
+    try {
+      data = event.data ? event.data.json() : {};
+    } catch (e) {
+      data = {};
+    }
+    const notification = data.notification || data;
+    const title = notification.title || 'Nova notificação';
+    const options = {
+      body: notification.body || '',
+      icon: notification.icon || '/web-icon-192x192.png'
+    };
+    event.waitUntil(
+      self.registration.showNotification(title, options)
     );
   });
