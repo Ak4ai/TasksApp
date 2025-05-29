@@ -8,7 +8,12 @@ async function solicitarPermissaoNotificacao() {
   try {
     const status = await Notification.requestPermission();
     if (status === 'granted') {
-      const token = await getToken(messaging, { vapidKey: 'BGqnPKyVrK1n4mnSspDY75WGNYDEqJ4k0MBamGuMhdSMImw5q33T-ssiEWHRczZrq01XNP4xuxrKXlUkKluXyAQ' });
+      // Registra explicitamente o service worker e passa para o getToken
+      const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      const token = await getToken(messaging, {
+        vapidKey: 'BGqnPKyVrK1n4mnSspDY75WGNYDEqJ4k0MBamGuMhdSMImw5q33T-ssiEWHRczZrq01XNP4xuxrKXlUkKluXyAQ',
+        serviceWorkerRegistration: swReg
+      });
       console.log('Token FCM:', token);
       // Exibe o token na tela para depuração
       const el = document.getElementById('fcm-token');
