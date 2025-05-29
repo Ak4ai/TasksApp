@@ -13,21 +13,19 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage(function(payload) {
-  console.log('[firebase-messaging-sw.js] Mensagem recebida em background:', payload);
-  // Só mostra manualmente se NÃO houver notification no payload
-  if (!payload.notification && payload.data) {
-    self.registration.showNotification(
-      payload.data.title || 'Nova notificação',
-      {
-        body: payload.data.body || '',
-        icon: payload.data.icon || '/web-icon-192x192.png', // Ícone pequeno (canto esquerdo)
-        image: payload.data.image || undefined, // Imagem grande (central)
-        badge: '/android-icon-192x192.png' // Ícone para o badge (Android)
-      }
-    );
-  }
-});
+// messaging.onBackgroundMessage(function(payload) {
+//   console.log('[firebase-messaging-sw.js] Mensagem recebida em background:', payload);
+//   // Só mostra manualmente se NÃO houver notification no payload
+//   if (!payload.notification && payload.data) {
+//     self.registration.showNotification(
+//       payload.data.title || 'Nova notificação',
+//       {
+//         body: payload.data.body || '',
+//         icon: payload.data.icon || '/web-icon-192x192.png'
+//       }
+//     );
+//   }
+// });
 
 self.addEventListener('install', function(event) {
     event.waitUntil(
@@ -74,4 +72,22 @@ self.addEventListener('install', function(event) {
         return response || fetch(event.request);
       })
     );
+  });
+  
+  self.addEventListener('push', function(event) {
+      let data = {};
+      try {
+        data = event.data ? event.data.json() : {};
+      } catch (e) {
+        data = {};
+      }
+      const notification = data.notification || data;
+      const title = notification.title || 'Nova notificação';
+      const options = {
+        body: notification.body || '',
+        badge: notification.badge || '/android-icon-192x192.png' // badge adicionado aqui
+      };
+      event.waitUntil(
+        self.registration.showNotification(title, options)
+      );
   });
