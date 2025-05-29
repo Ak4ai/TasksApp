@@ -41,7 +41,6 @@ self.addEventListener('install', function(event) {
           '/firebase-config.js',
           '/notifications.js',
           '/manifest.json',
-          '/service-worker.js',
           '/firebase-messaging-sw.js',
           '/android-icon-192x192.png',
           '/apple-icon-180x180.png',
