@@ -576,6 +576,7 @@ textarea {
   resize: vertical; /* Permite redimensionar verticalmente */
   height: auto; /* Altura inicial */
   max-height: 550px; /* Altura máxima */
+  min-height: 42.5px;
   overflow-y: auto; /* Adiciona barra de rolagem vertical quando necessário */
 }
 
@@ -1021,19 +1022,23 @@ body.ios-pwa .bottom-nav {
 
 .modal-content button {
   width: 100%;
-  padding: 10px 0;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 8px;
+  display: flex;
+  padding: 10px;
+  color: #ccc;
+  text-align-last: center;
+  border-radius: 4px;
+  font-size: 16px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.222);
+  background-color: #252739;
+  appearance: none;
   cursor: pointer;
-  font-size: 1.0rem;   /* Aumenta o tamanho da fonte */
-  font-weight: bold;
-  text-align: center;
-  line-height: 1.2;
-  min-height: 40px;    /* Garante altura mínima confortável para mobile */
   box-sizing: border-box;
-  margin-top: 10px;
+  margin: 0;
+  margin-bottom: 10px;
+  padding: 20px;
+  justify-content: center;
+  align-items: center;
 }
 
 .close-button {
