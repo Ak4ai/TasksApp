@@ -21,7 +21,9 @@ messaging.onBackgroundMessage(function(payload) {
       payload.data.title || 'Nova notificação',
       {
         body: payload.data.body || '',
-        icon: payload.data.icon || '/web-icon-192x192.png'
+        icon: payload.data.icon || '/web-icon-192x192.png', // Ícone pequeno (canto esquerdo)
+        image: payload.data.image || undefined, // Imagem grande (central)
+        badge: '/android-icon-192x192.png' // Ícone para o badge (Android)
       }
     );
   }
@@ -71,23 +73,5 @@ self.addEventListener('install', function(event) {
       caches.match(event.request).then(function(response) {
         return response || fetch(event.request);
       })
-    );
-  });
-  
-  self.addEventListener('push', function(event) {
-    let data = {};
-    try {
-      data = event.data ? event.data.json() : {};
-    } catch (e) {
-      data = {};
-    }
-    const notification = data.notification || data;
-    const title = notification.title || 'Nova notificação';
-    const options = {
-      body: notification.body || '',
-      icon: notification.icon || '/web-icon-192x192.png'
-    };
-    event.waitUntil(
-      self.registration.showNotification(title, options)
     );
   });
