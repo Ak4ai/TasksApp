@@ -201,7 +201,6 @@ async function adicionarTarefa(nome, descricao, dataLimite) {
 
       novaTarefa.diasSemana = diasSemana; // ex: [1,3,5]
       novaTarefa.horaSemanal = horaSemanal; // ex: "09:30"
-      console.log("Tarefa semanal:", novaTarefa);
     }
 
 
@@ -216,7 +215,6 @@ async function adicionarTarefa(nome, descricao, dataLimite) {
 
 
   // Lida com o anexo (se houver)
-  console.log("input anexoArquivo existe?", document.getElementById('anexoArquivo'));
   const input = document.getElementById('anexoArquivo');
   const arquivo = input.files[0];
 
@@ -299,8 +297,14 @@ async function adicionarTarefa(nome, descricao, dataLimite) {
     document.querySelector('.nav-button[data-tab="tab-home"]').click();
     carregarTarefas();
   });
-  
-  let touchStartX = 0;
+
+document.getElementById('refresh-btn').addEventListener('click', () => {
+  mostrarPopup('Atualizando tarefas...', 2000);
+  carregarTarefas();
+});
+
+
+let touchStartX = 0;
 let touchEndX = 0;
 const minSwipeDistance = 100; // AUMENTADO para reduzir sensibilidade
 

@@ -279,7 +279,7 @@ function renderizarTarefa(t) {
         personagemFalaAleatoriamente(classeAtiva);
       }
 
-      carregarTarefas();
+      await carregarTarefas();
     });
   }
 
@@ -983,17 +983,33 @@ function adicionarNaCard(tarefa, cardClass) {
   adicionarIconeDeExcluir(p, tarefa);
 }
 
-async function atualizarTarefaNoFirestore(id, nome, descricao, dataLimite, fixada) {
-    const usuario = auth.currentUser;
-    const refDoc = doc(db, "usuarios", usuario.uid, "tarefas", id);
-    await updateDoc(refDoc, { nome, descricao, dataLimite, fixada });
+async function atualizarTarefaNoFirestore(id, dados) {
+  const usuario = auth.currentUser;
+  const refDoc = doc(db, "usuarios", usuario.uid, "tarefas", id);
+  await updateDoc(refDoc, dados);
 }
 
+
+
 async function excluirTarefaDoFirestore(id) {
-    const usuario = auth.currentUser;
-    const refDoc = doc(db, "usuarios", usuario.uid, "tarefas", id);
+  const usuario = auth.currentUser;
+  if (!usuario) {
+    console.warn("Usuário não autenticado.");
+    return;
+  }
+
+  const refDoc = doc(db, "usuarios", usuario.uid, "tarefas", id);
+  await updateDoc(doc(db, "usuarios", usuario.uid, "tarefas", id), {
+  finalizada: true
+  });
+
+  try {
     await deleteDoc(refDoc);
+  } catch (e) {
+    console.error("Erro ao excluir tarefa:", e);
+  }
 }
+
 
 function adicionarIconeDeExcluir(pElem, tarefa) {
   const btn = document.createElement('button');
@@ -1019,37 +1035,203 @@ function adicionarIconeDeExcluir(pElem, tarefa) {
   pElem.appendChild(btn);
 }
 
+function atualizarSelectSubtag(tagPrincipal, selectSubtagId) {
+  const select = document.getElementById(selectSubtagId);
+  select.innerHTML = ''; // Limpa o conteúdo atual
+
+  if (!tagPrincipal || !subTagsPorCategoria[tagPrincipal]) {
+    select.disabled = true;
+    return;
+  }
+
+  // Habilita o select
+  select.disabled = false;
+
+  // Adiciona opção vazia
+  const defaultOption = document.createElement("option");
+  defaultOption.value = '';
+  defaultOption.textContent = '-- Selecione --';
+  select.appendChild(defaultOption);
+
+  // Adiciona as subtags
+  subTagsPorCategoria[tagPrincipal].forEach(subtag => {
+    const option = document.createElement("option");
+    option.value = subtag;
+    option.textContent = subtag;
+    select.appendChild(option);
+  });
+}
+
+document.getElementById('editar-tagPrincipal').addEventListener('change', (e) => {
+  const novaPrincipal = e.target.value;
+  atualizarSelectSubtag(novaPrincipal, 'editar-tagSecundaria');
+});
+
+
+
 
 function abrirModalDetalhe(tarefa) {
-    const modal = document.getElementById('modal-tarefa');
-    modal.style.display = 'flex';
-  
-    document.getElementById('editar-nome').value = tarefa.nome;
-    document.getElementById('editar-descricao').value = tarefa.descricao;
-    document.getElementById('editar-dataLimite').value = tarefa.dataLimite.toISOString().slice(0,16);
-    document.getElementById('tipo-tarefa').value = tarefa.tipo;
-    document.getElementById('fixarNaHomeEditar').checked = tarefa.fixada === true;
+  const modal = document.getElementById('modal-tarefa');
+  modal.style.display = 'flex';
 
-    document.getElementById('salvar-edicao').onclick = async () => {
-        const novaNome = document.getElementById('editar-nome').value.trim();
-        const novaDesc = document.getElementById('editar-descricao').value.trim();
-        const novaData = new Date(document.getElementById('editar-dataLimite').value);
-        const fixarNaHome = document.getElementById('fixarNaHomeEditar').checked;
-        await atualizarTarefaNoFirestore(tarefa.id, novaNome, novaDesc, novaData, fixarNaHome);
-        modal.style.display = 'none';
-        carregarTarefas();
-    };
+  // Campos básicos
+  document.getElementById('editar-nome').value = tarefa.nome || '';
+  document.getElementById('editar-descricao').value = tarefa.descricao || '';
+  document.getElementById('editar-dataLimite').value = tarefa.dataLimite?.toISOString().slice(0, 16) || '';
+  document.getElementById('editar-tipo-tarefa').value = tarefa.tipo || 'personalizado';
+  document.getElementById('fixarNaHomeEditar').checked = tarefa.fixada === true;
 
-    document.getElementById('excluir-tarefa').onclick = async () => {
-        await excluirTarefaDoFirestore(tarefa.id);
-        modal.style.display = 'none';
-        carregarTarefas();
-    };
+  // Tags
+  const tags = tarefa.tags || [];
+  const categorias = Object.keys(subTagsPorCategoria);
+  const subtags = Object.values(subTagsPorCategoria).flat().map(tag => tag.toLowerCase());
 
-    document.getElementById('fechar-modal-editar').onclick = () => {
-        modal.style.display = 'none';
-    };
+  let tagPrincipal = tags.find(tag => categorias.includes(tag));
+  let tagSecundaria = null;
+  let tagsPersonalizadas = [];
+
+  if (tagPrincipal) {
+    const subtagsDaPrincipal = subTagsPorCategoria[tagPrincipal].map(tag => tag.toLowerCase());
+
+    tagSecundaria = tags.find(
+      tag => tag !== tagPrincipal && subtagsDaPrincipal.includes(tag.toLowerCase())
+    );
+
+    tagsPersonalizadas = tags.filter(
+      tag =>
+        tag !== tagPrincipal &&
+        tag !== tagSecundaria &&
+        !subtags.includes(tag.toLowerCase())
+    );
+  } else {
+    tagsPersonalizadas = tags;
   }
+
+  document.getElementById('editar-tagPrincipal').value = tagPrincipal || '';
+  atualizarSelectSubtag(tagPrincipal, 'editar-tagSecundaria');
+  document.getElementById('editar-tagSecundaria').value = tagSecundaria || '';
+  document.getElementById('editar-tagsPersonalizadas').value = tagsPersonalizadas.join(', ');
+
+  // Personalizado
+  document.getElementById('editar-permitirConclusao').checked = tarefa.permitirConclusao || false;
+  document.getElementById('editar-personalizadoExtras').style.display = tarefa.tipo === 'personalizado' ? 'block' : 'none';
+
+  // Tipo periódico e personalizado
+  document.getElementById('editar-frequenciaSelecao').value = tarefa.frequencia || 'diario';
+
+  // Ajusta o select do modo personalizado
+  const modoPersonalizado = tarefa.modoPersonalizado || 'frequencia';
+  document.getElementById('modoPersonalizado').value = modoPersonalizado;
+
+  // Função para mostrar os blocos certos
+  function mostrarBlocosPersonalizado(modo) {
+    document.getElementById('editar-bloco-datas').style.display = modo === 'datas' ? 'block' : 'none';
+    document.getElementById('editar-bloco-frequencia').style.display = modo === 'frequencia' ? 'block' : 'none';
+    document.getElementById('editar-bloco-semanal').style.display = modo === 'semanal' ? 'block' : 'none';
+  }
+
+  // Exibe o bloco correto conforme tipo da tarefa
+  document.getElementById('editar-frequencia-wrapper').style.display = tarefa.tipo === 'periodico' ? 'block' : 'none';
+  document.getElementById('editar-padrao-wrapper').style.display = tarefa.tipo === 'personalizado' ? 'block' : 'none';
+  document.getElementById('editar-frequenciaSelecao').dispatchEvent(new Event('change'));
+  
+  mostrarBlocosPersonalizado(modoPersonalizado);
+
+
+
+  // Escuta mudança no tipo de tarefa
+  document.getElementById('editar-tipo-tarefa').onchange = (e) => {
+    const tipo = e.target.value;
+    document.getElementById('editar-frequencia-wrapper').style.display = tipo === 'periodico' ? 'block' : 'none';
+    document.getElementById('editar-padrao-wrapper').style.display = tipo === 'personalizado' ? 'block' : 'none';
+    document.getElementById('editar-personalizadoExtras').style.display = tipo === 'personalizado' ? 'block' : 'none';
+  };
+
+
+  // Quando modo personalizado muda
+  document.getElementById('modoPersonalizado').onchange = (e) => {
+    mostrarBlocoPersonalizado(e.target.value);
+  };
+
+  // Salvar
+  document.getElementById('salvar-edicao').onclick = async () => {
+    const novoNome = document.getElementById('editar-nome').value.trim();
+    const novaDescricao = document.getElementById('editar-descricao').value.trim();
+    const novaData = new Date(document.getElementById('editar-dataLimite').value);
+    const novoTipo = document.getElementById('editar-tipo-tarefa').value;
+    const fixarNaHome = document.getElementById('fixarNaHomeEditar').checked;
+
+    const tagPrincipal = document.getElementById('editar-tagPrincipal').value;
+    const tagSecundaria = document.getElementById('editar-tagSecundaria').value;
+    const tagsExtras = document.getElementById('editar-tagsPersonalizadas').value
+      .split(',')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
+
+    const permitirConclusao = document.getElementById('editar-permitirConclusao').checked;
+    const frequencia = document.getElementById('editar-frequenciaSelecao').value;
+    const modoPersonalizado = document.getElementById('editar-modoPersonalizado').value;
+
+    const todasAsTags = [...new Set([
+      ...(tagPrincipal ? [tagPrincipal] : []),
+      ...(tagSecundaria ? [tagSecundaria] : []),
+      ...tagsExtras
+    ])];
+
+    await atualizarTarefaNoFirestore(
+      tarefa.id,
+      {
+        nome: novoNome,
+        descricao: novaDescricao,
+        dataLimite: novaData,
+        tipo: novoTipo,
+        fixada: fixarNaHome,
+        permitirConclusao,
+        frequencia,
+        modoPersonalizado,
+        tags: todasAsTags
+      }
+    );
+
+    modal.style.display = 'none';
+    mostrarPopup(`Editando tarefa: ${tarefa.nome}`, 3000);
+    await carregarTarefas();
+  };
+
+  // Excluir
+  document.getElementById('excluir-tarefa').onclick = async () => {
+    
+    await excluirTarefaDoFirestore(tarefa.id);
+    modal.style.display = 'none';
+  };
+
+  // Fechar
+  document.getElementById('fechar-modal-editar').onclick = () => {
+    modal.style.display = 'none';
+  };
+}
+
+// Função auxiliar para exibir o bloco correto
+function mostrarBlocoPersonalizado(modo) {
+  const blocos = {
+    datas: 'bloco-datas',
+    frequencia: 'bloco-frequencia',
+    semanal: 'bloco-semanal',
+    unico: null
+  };
+
+  document.querySelectorAll('.sub-bloco-personalizado').forEach(div => {
+    div.style.display = 'none';
+  });
+
+  const bloco = blocos[modo];
+  if (bloco) {
+    document.getElementById(bloco).style.display = 'block';
+  }
+}
+
+
+
 
   function atualizarContadorProximaTarefa() {
     const span = document.querySelector('.next-event');
@@ -1142,7 +1324,6 @@ export async function ajustarRecurrentes(tarefas) {
 
   for (const t of tarefas) {
     if (t.repetida) {
-      console.log(`⛔ Ignorado: tarefa repetida '${t.descricao}'`);
       continue;
     }
 
@@ -1175,37 +1356,43 @@ export async function ajustarRecurrentes(tarefas) {
 
         dataProxima = datas.find(d => d > dataLimiteAnterior);
         if (!dataProxima) {
-          console.log(`🔁 Nenhuma data futura para '${t.descricao}'`);
           continue;
         }
 
       } else if (t.modoPersonalizado === 'semanal') {
-        if (!Array.isArray(t.diasSemana) || !t.horaSemanal) continue;
-        const agora = new Date();
-        let menorDiferenca = Infinity;
-        let proximaData = null;
+  if (!Array.isArray(t.diasSemana) || !t.horaSemanal) continue;
 
-        for (const dia of t.diasSemana) {
-          const candidato = new Date(agora);
-          const diff = (dia + 7 - agora.getDay()) % 7 || 7;
-          candidato.setDate(agora.getDate() + diff);
+  // Usa dataLimiteAnterior + 1 dia para iniciar busca
+  const inicioBusca = new Date(dataLimiteAnterior);
+  inicioBusca.setDate(inicioBusca.getDate() + 1); // começa dia seguinte ao limite anterior
 
-          const [h, m] = t.horaSemanal.split(':').map(Number);
-          candidato.setHours(h, m, 0, 0);
+  const [h, m] = t.horaSemanal.split(':').map(Number);
 
-          if (candidato > agora && candidato - agora < menorDiferenca) {
-            menorDiferenca = candidato - agora;
-            proximaData = candidato;
-          }
-        }
+  let proximaData = null;
+  let menorDiferenca = Infinity;
 
-        if (!proximaData) {
-          console.log(`🔁 Nenhum próximo dia da semana válido para '${t.descricao}'`);
-          continue;
-        }
+  for (let i = 0; i < 14; i++) { // verifica até 2 semanas no futuro a partir do limite anterior
+    const dataCandidata = new Date(inicioBusca);
+    dataCandidata.setDate(inicioBusca.getDate() + i);
+    const diaSemana = dataCandidata.getDay();
 
-        dataProxima = proximaData;
-      } else {
+    if (t.diasSemana.includes(diaSemana)) {
+      dataCandidata.setHours(h, m, 0, 0);
+
+      if (dataCandidata > dataLimiteAnterior && dataCandidata - dataLimiteAnterior < menorDiferenca) {
+        menorDiferenca = dataCandidata - dataLimiteAnterior;
+        proximaData = dataCandidata;
+      }
+    }
+  }
+
+  if (!proximaData) {
+    console.warn(`⚠️ Não foi possível calcular próxima data para tarefa semanal: "${t.descricao}"`);
+    continue;
+  }
+
+  dataProxima = proximaData;
+}else {
         continue;
       }
 
@@ -1237,7 +1424,6 @@ export async function ajustarRecurrentes(tarefas) {
     // ❗ Verifica duplicidade antes de criar
     const jaExiste = await existeTarefaRepetida(tarefasColecao, t.descricao, dataProxima);
     if (jaExiste) {
-      console.log(`⚠️ Já existe tarefa futura para '${t.descricao}' em ${dataProxima.toISOString()}`);
       continue;
     }
 
@@ -1250,7 +1436,7 @@ export async function ajustarRecurrentes(tarefas) {
       finalizada: false,
       repetida: true,
       tags: Array.isArray(t.tags) ? [...t.tags] : [],
-      tarefaOriginal: t.id,
+      tarefaOriginal: t.id
     };
 
     // Campos opcionais
@@ -1264,9 +1450,11 @@ export async function ajustarRecurrentes(tarefas) {
     await addDoc(tarefasColecao, novaTarefa);
     mostrarPopup(`Nova tarefa criada: ${t.descricao} para ${dataProxima.toLocaleDateString('pt-BR')}`);
     personagemFalaAleatoriamente();
+    await carregarTarefas();
 
     const refAntigo = doc(db, "usuarios", usuario.uid, "tarefas", t.id);
     await updateDoc(refAntigo, { finalizada: true });
+    console.log(novaTarefa);
   }
 }
 
@@ -1566,7 +1754,6 @@ async function atualizarInventarioUI() {
   if (!usuarioSnap.exists()) return;
 
   const inventario = usuarioSnap.data().inventario || [];
-  console.log("Inventário do usuário:", inventario);
   // Aqui pode atualizar o HTML para mostrar os itens comprados, se quiser
 }
 

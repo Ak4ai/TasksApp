@@ -104,17 +104,20 @@
 
         <div id="bloco-semanal" class="sub-bloco-personalizado" style="display:none">
           <label>Repetir nos dias da semana:</label><br>
-          <label><input type="checkbox" name="diasSemana" value="0"> Domingo</label>
-          <label><input type="checkbox" name="diasSemana" value="1"> Segunda</label>
-          <label><input type="checkbox" name="diasSemana" value="2"> Terça</label>
-          <label><input type="checkbox" name="diasSemana" value="3"> Quarta</label>
-          <label><input type="checkbox" name="diasSemana" value="4"> Quinta</label>
-          <label><input type="checkbox" name="diasSemana" value="5"> Sexta</label>
-          <label><input type="checkbox" name="diasSemana" value="6"> Sábado</label>
+          <div class="checkbox-container">
+            <label><input type="checkbox" name="diasSemana" value="0"><span class="custom-checkbox">Domingo</span></label>
+            <label><input type="checkbox" name="diasSemana" value="1"><span class="custom-checkbox">Segunda</span></label>
+            <label><input type="checkbox" name="diasSemana" value="2"><span class="custom-checkbox">Terça</span></label>
+            <label><input type="checkbox" name="diasSemana" value="3"><span class="custom-checkbox">Quarta</span></label>
+            <label><input type="checkbox" name="diasSemana" value="4"><span class="custom-checkbox">Quinta</span></label>
+            <label><input type="checkbox" name="diasSemana" value="5"><span class="custom-checkbox">Sexta</span></label>
+            <label><input type="checkbox" name="diasSemana" value="6"><span class="custom-checkbox">Sábado</span></label>
+          </div>
           <br>
           <label>Horário:</label>
           <input type="time" id="horaSemanal">
         </div>
+
 
         <!-- nenhum campo necessário para "unico" -->
       </div>
@@ -155,19 +158,103 @@
     <div class="modal-content">
       <span id="fechar-modal-editar" class="close-button">&times;</span>
       <h2>Editar Tarefa</h2>
+
       <label for="editar-nome">Nome:</label>
       <input id="editar-nome" type="text">
+
       <label for="editar-descricao">Descrição:</label>
-      <input id="editar-descricao" type="text">
+      <textarea id="editar-descricao"></textarea>
+
+      <label for="editar-dataLimite">Data e hora limite:</label>
       <input type="datetime-local" id="editar-dataLimite" />
+
+      <label for="editar-tipo-tarefa">Tipo:</label>
+      <select id="editar-tipo-tarefa">
+        <option value="periodico">Importante Periódico</option>
+        <option value="nao-periodico">Importante Não Periódico</option>
+        <option value="personalizado">Personalizado</option>
+      </select>
+
+      <div id="editar-frequencia-wrapper" style="display:none">
+        <label>Frequência:</label>
+        <select id="editar-frequenciaSelecao">
+          <option value="diario">Diário</option>
+          <option value="semanal">Semanal</option>
+          <option value="mensal">Mensal</option>
+        </select>
+      </div>
+
+      <div id="editar-padrao-wrapper" style="display:none">
+        <label>Repetição personalizada:</label>
+        <select id="editar-modoPersonalizado">
+          <option value="datas">Datas específicas</option>
+          <option value="frequencia">A cada X dias</option>
+          <option value="unico">Evento único</option>
+          <option value="semanal">Semanal</option>
+        </select>
+
+        <div id="editar-bloco-datas" class="sub-bloco-personalizado">
+        <label>Datas e horários (separadas por vírgula):</label>
+        <input id="editar-padraoPersonalizado" type="text" placeholder="Ex: 2025-05-10T14:30, 2025-06-01T08:00"/>
+      </div>
+
+      <div id="editar-bloco-frequencia" class="sub-bloco-personalizado" style="display:none">
+        <label>Repetir a cada:</label>
+        <input id="editar-diasFrequencia" type="number" min="1" placeholder="Ex: 3" /> dias
+      </div>
+
+      <div id="editar-bloco-semanal" class="sub-bloco-personalizado" style="display:none">
+        <label>Repetir nos dias da semana:</label><br>
+        <label><input type="checkbox" name="editar-diasSemana" value="0"> Domingo</label>
+        <label><input type="checkbox" name="editar-diasSemana" value="1"> Segunda</label>
+        <label><input type="checkbox" name="editar-diasSemana" value="2"> Terça</label>
+        <label><input type="checkbox" name="editar-diasSemana" value="3"> Quarta</label>
+        <label><input type="checkbox" name="editar-diasSemana" value="4"> Quinta</label>
+        <label><input type="checkbox" name="editar-diasSemana" value="5"> Sexta</label>
+        <label><input type="checkbox" name="editar-diasSemana" value="6"> Sábado</label>
+        <br>
+        <label>Horário:</label>
+        <input type="time" id="editar-horaSemanal">
+      </div>
+
+
+        <!-- nenhum campo necessário para "unico" -->
+      </div>
+
+      <div id="editar-tag-selector">
+        <label>Tags:</label>
+        <select id="editar-tagPrincipal">
+          <option value="">-- Categoria Principal --</option>
+          <option value="Físico">Físico</option>
+          <option value="Intelecto">Intelecto</option>
+          <option value="Social">Social</option>
+          <option value="Criativo">Criativo</option>
+          <option value="Espiritual">Espiritual</option>
+        </select>
+
+        <select id="editar-tagSecundaria" disabled>
+          <option value="">-- Subcategoria --</option>
+        </select>
+      </div>
+
       <label for="fixarNaHomeEditar" class="fixar-label">
-      <input type="checkbox" id="fixarNaHomeEditar">
-      Fixar na Home
+        <input type="checkbox" id="fixarNaHomeEditar">
+        Fixar na Home
       </label>
+
+      <!-- Personalizado extra -->
+      <div id="editar-personalizadoExtras" style="display: none;">
+        <label><input type="checkbox" id="editar-permitirConclusao"> Permitir conclusão</label>
+
+        <label>Tags adicionais (separadas por vírgula):</label>
+        <input id="editar-tagsPersonalizadas" type="text" placeholder="ex: leitura, lazer" />
+      </div>
+
       <button id="salvar-edicao">Salvar</button>
       <button id="excluir-tarefa" class="danger">Excluir</button>
     </div>
   </div>
+
   <div id="modal-next-event" class="modal" style="display: none;">
     <div class="modal-content">
       <span id="fechar-modal-next-event" class="close-button">&times;</span>
@@ -195,6 +282,10 @@
   <span class="next-event icons-info">⏰</span>
   <span class="moedas-info icons-info">🪙 0 moedas</span>
  </div>
+  <button id="refresh-btn" class="refresh-button">
+    Recarregar Tarefas
+  </button>
+
   
   <!-- CONTEÚDO PRINCIPAL -->
   <div class="main-content">

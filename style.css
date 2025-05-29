@@ -1755,3 +1755,54 @@ div#config-buttosn-container {
 .dia.expirada-nao-periodico { background: #ffe9c6 !important; color: #7c5a2a !important; } /* laranja morto */
 .dia.expirada-personalizado { background: #d0e8d0 !important; color: #355c3a !important; } /* verde morto */
 .dia.expirada { background: #ffb3b3 !important; color: #b71c1c !important; } /* vermelho apagado */
+.checkbox-container label {
+  display: inline-block;
+  margin: 5px 8px;
+  position: relative;
+  cursor: pointer;
+}
+
+.checkbox-container input[type="checkbox"] {
+  display: none;
+}
+
+.custom-checkbox {
+  display: inline-block;
+  padding: 8px 16px;
+  border: 2px solid #4a90e2;
+  border-radius: 20px;
+  background-color: white;
+  color: #4a90e2;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.checkbox-container input[type="checkbox"]:checked + .custom-checkbox {
+  background-color: #4a90e2;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.custom-checkbox:hover {
+  background-color: #e6f0fa;
+}
+.refresh-button {
+  font-family: 'Times New Roman', Times, serif;
+  position: fixed;
+  bottom: 80px; /* acima da bottom-nav */
+  right: 20px;
+  padding: 10px 15px;
+  background-color: #254d79;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  z-index: 1000;
+  transition: background-color 0.2s;
+}
+
+.refresh-button:hover {
+  background-color: #0056b3;
+}
