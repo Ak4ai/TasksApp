@@ -4,7 +4,8 @@ const { getFirestore } = require('firebase-admin/firestore');
 // Inicialize o Firebase Admin apenas uma vez
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.applicationDefault(),
+    credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)),
+    projectId: process.env.GOOGLE_CLOUD_PROJECT, // opcional, mas recomendado
   });
 }
 const db = getFirestore();
