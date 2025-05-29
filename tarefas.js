@@ -427,10 +427,13 @@ async function carregarTarefas() {
       fixada: data.fixada || false,
       diasSemana: data.diasSemana || [],         
       horaSemanal: data.horaSemanal || null,
+      excluida: data.excluida || false // <-- ADICIONE ESTA LINHA
     });
   });
 
-  await ajustarRecurrentes(tarefas);
+  const tarefasNaoExcluidas = tarefas.filter(t => !t.excluida);
+
+  await ajustarRecurrentes(tarefasNaoExcluidas);
 
   const containers = {
     'periodico': document.querySelector('#tarefas-periodico .tasks-container'),
@@ -440,13 +443,13 @@ async function carregarTarefas() {
 
   Object.values(containers).forEach(c => c.innerHTML = '');
 
-    // ...dentro de carregarTarefas()...
-  tarefasFuturas = tarefas.filter(t => !t.finalizada && t.dataLimite >= agora);
-  tarefasExpiradas = tarefas.filter(t => !t.finalizada && t.dataLimite < agora);
-  tarefasConcluidas = tarefas.filter(t => t.finalizada);
-  tarefas.sort((a, b) => a.dataLimite - b.dataLimite);
+  // Use tarefasNaoExcluidas para montar as listas!
+  tarefasFuturas = tarefasNaoExcluidas.filter(t => !t.finalizada && t.dataLimite >= agora);
+  tarefasExpiradas = tarefasNaoExcluidas.filter(t => !t.finalizada && t.dataLimite < agora);
+  tarefasConcluidas = tarefasNaoExcluidas.filter(t => t.finalizada);
+  tarefasNaoExcluidas.sort((a, b) => a.dataLimite - b.dataLimite);
 
-  const tarefasFixadas = tarefas.filter(t => t.fixada && !t.finalizada);
+  const tarefasFixadas = tarefasNaoExcluidas.filter(t => t.fixada && !t.finalizada);
   const idsFixadas = new Set(tarefasFixadas.map(t => t.id));
 
   const containerFixadas = document.querySelector('#tarefas-fixadas .tasks-container');
@@ -457,20 +460,20 @@ async function carregarTarefas() {
   });
 
   // Renderiza futuras que não estão fixadas (para evitar duplicação)
-    tarefasFuturas.forEach(t => {
-      const div = renderizarTarefa(t);
-      containers[t.tipo].appendChild(div);
-    });
+  tarefasFuturas.forEach(t => {
+    const div = renderizarTarefa(t);
+    containers[t.tipo].appendChild(div);
+  });
   const tarefasJaPremiadas = JSON.parse(localStorage.getItem('tarefasPremiadas')) || [];
 
-    for (const t of tarefasConcluidas) {
-      if (!tarefasJaPremiadas.includes(t.id)) {
-        await concluirTarefaComMoedas(t.id);
-        tarefasJaPremiadas.push(t.id);
-      }
+  for (const t of tarefasConcluidas) {
+    if (!tarefasJaPremiadas.includes(t.id)) {
+      await concluirTarefaComMoedas(t.id);
+      tarefasJaPremiadas.push(t.id);
     }
+  }
 
-    localStorage.setItem('tarefasPremiadas', JSON.stringify(tarefasJaPremiadas));
+  localStorage.setItem('tarefasPremiadas', JSON.stringify(tarefasJaPremiadas));
 
   tarefasExpiradas.forEach(t => adicionarNaCard(t, 'purple-card'));
   tarefasConcluidas.forEach(t => adicionarNaCard(t, 'blue-card'));
@@ -991,7 +994,9 @@ async function atualizarTarefaNoFirestore(id, dados) {
 
 
 
-async function excluirTarefaDoFirestore(id) {
+// Altere a função de exclusão para aceitar exclusão total
+// ...existing code...
+async function excluirTarefaDoFirestore(id, exclusaoTotal = false) {
   const usuario = auth.currentUser;
   if (!usuario) {
     console.warn("Usuário não autenticado.");
@@ -999,17 +1004,33 @@ async function excluirTarefaDoFirestore(id) {
   }
 
   const refDoc = doc(db, "usuarios", usuario.uid, "tarefas", id);
-  await updateDoc(doc(db, "usuarios", usuario.uid, "tarefas", id), {
-  finalizada: true
-  });
 
+  if (exclusaoTotal) {
+    // Marca a tarefa original como excluída antes de deletar
+    await updateDoc(refDoc, { excluida: true });
+
+    // Remove tarefas subsequentes (repetidas) ligadas a esta
+    const tarefasColecao = collection(db, "usuarios", usuario.uid, "tarefas");
+    const q = query(tarefasColecao, where("tarefaOriginal", "==", id));
+    const snap = await getDocs(q);
+    for (const docSnap of snap.docs) {
+      await updateDoc(doc(db, "usuarios", usuario.uid, "tarefas", docSnap.id), { excluida: true });
+      await deleteDoc(doc(db, "usuarios", usuario.uid, "tarefas", docSnap.id));
+    }
+    // Exclui a tarefa original
+    await deleteDoc(refDoc);
+    return;
+  }
+
+  // Exclusão padrão (apenas marca como finalizada e exclui)
+  await updateDoc(refDoc, { finalizada: true });
   try {
     await deleteDoc(refDoc);
   } catch (e) {
     console.error("Erro ao excluir tarefa:", e);
   }
 }
-
+// ...existing code...
 
 function adicionarIconeDeExcluir(pElem, tarefa) {
   const btn = document.createElement('button');
@@ -1200,9 +1221,9 @@ function abrirModalDetalhe(tarefa) {
 
   // Excluir
   document.getElementById('excluir-tarefa').onclick = async () => {
-    
-    await excluirTarefaDoFirestore(tarefa.id);
+    await excluirTarefaDoFirestore(tarefa.id, true); // exclusão total
     modal.style.display = 'none';
+    setTimeout(() => carregarTarefas(), 500);
   };
 
   // Fechar
@@ -1323,9 +1344,19 @@ export async function ajustarRecurrentes(tarefas) {
   const tarefasColecao = collection(db, "usuarios", usuario.uid, "tarefas");
 
   for (const t of tarefas) {
-    if (t.repetida) {
+    // Checagem extra: garanta que a tarefa não foi excluída OU deletada no Firestore
+    const refDoc = doc(db, "usuarios", usuario.uid, "tarefas", t.id);
+    const snap = await getDoc(refDoc);
+    if (!snap.exists()) {
+      // Tarefa já foi removida do Firestore, não cria recorrente!
       continue;
     }
+    const dados = snap.data();
+    if (dados.excluida || dados.finalizada) {
+      // Tarefa excluída ou finalizada, não cria recorrente!
+      continue;
+    }
+    if (t.repetida) continue;
 
     let dataProxima = null;
     const dataLimiteAnterior = t.dataLimite.toDate ? t.dataLimite.toDate() : new Date(t.dataLimite);
@@ -1796,6 +1827,8 @@ async function venderItem(item) {
   const usuarioRef = doc(db, "usuarios", usuario.uid);
   const snap = await getDoc(usuarioRef);
   const dados = snap.data();
+
+
 
   let inventario = dados.inventario || [];
   let itensAtivos = dados.itensAtivos || [];
