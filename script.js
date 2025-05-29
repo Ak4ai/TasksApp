@@ -189,6 +189,22 @@ async function adicionarTarefa(nome, descricao, dataLimite) {
       novaTarefa.frequencia = dias; // Ex: repetir a cada X dias
     }
 
+    if (modo === 'semanal') {
+      const checkboxes = document.querySelectorAll('input[name="diasSemana"]:checked');
+      const diasSemana = Array.from(checkboxes).map(cb => parseInt(cb.value));
+      const horaSemanal = document.getElementById('horaSemanal').value;
+
+      if (diasSemana.length === 0 || !horaSemanal) {
+        alert("Selecione pelo menos um dia da semana e informe o horário.");
+        return;
+      }
+
+      novaTarefa.diasSemana = diasSemana; // ex: [1,3,5]
+      novaTarefa.horaSemanal = horaSemanal; // ex: "09:30"
+      console.log("Tarefa semanal:", novaTarefa);
+    }
+
+
     // modo 'unico' não adiciona mais nada
   }
 
