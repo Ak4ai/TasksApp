@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `notificacao 88`, hash: '74362cc', date: '2025-05-29 20:41:57' };
+window.APP_VERSION = { msg: `notification badge 89`, hash: '716861a', date: '2025-05-29 20:49:07' };

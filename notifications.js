@@ -73,6 +73,7 @@ document.getElementById('test-notification-btn').addEventListener('click', async
     uid: user.uid,
     title: "Notificação de Teste",
     body: "Esta é uma notificação de teste enviada pelo botão.",
+    badge: "/badge", // Caminho para o ícone da badge
     scheduledAt: new Date(),
     sent: false,
     createdAt: serverTimestamp()
