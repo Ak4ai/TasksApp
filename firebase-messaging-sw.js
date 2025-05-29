@@ -21,7 +21,8 @@ messaging.onBackgroundMessage(function(payload) {
       payload.data.title || 'Nova notificação',
       {
         body: payload.data.body || '',
-        icon: payload.data.icon || '/web-icon-192x192.png'
+        icon: payload.data.icon || '/web-icon-192x192.png',
+        badge: payload.data.badge || '/web-icon-192x192.png' // <-- badge aqui
       }
     );
   }
