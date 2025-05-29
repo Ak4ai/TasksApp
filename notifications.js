@@ -1,6 +1,6 @@
 import { messaging } from './firebase-config.js';
 import { getToken, onMessage } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-messaging.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 // Solicita permissão ao usuário
@@ -46,3 +46,28 @@ async function solicitarPermissaoNotificacao() {
 
 // Chame ao iniciar o app
 solicitarPermissaoNotificacao();
+
+document.getElementById('test-notification-btn').addEventListener('click', async () => {
+  const db = getFirestore();
+  const auth = getAuth();
+  const user = auth.currentUser;
+  if (!user) {
+    alert('Faça login para testar notificações.');
+    return;
+  }
+  // Cria uma notificação planejada para agora
+  await addDoc(collection(db, "scheduledNotifications"), {
+    uid: user.uid,
+    title: "Notificação de Teste",
+    body: "Esta é uma notificação de teste enviada pelo botão.",
+    scheduledAt: new Date(),
+    sent: false,
+    createdAt: serverTimestamp()
+  });
+  // Chama a API para enviar notificações
+  fetch('https://runa-phi.vercel.app/api/send-notifications')
+    .then(r => r.json())
+    .then(data => alert('Resultado: ' + JSON.stringify(data)))
+    .catch(e => alert('Erro ao chamar API: ' + e));
+});
+
