@@ -121,6 +121,8 @@ function isIOS() {
   if (isIOSDevice) {
     console.log('Este dispositivo É iOS');
     document.body.classList.add('ios-pwa');
+    solicitarPermissaoNotificacao();
+
   } else {
     console.log('Este dispositivo NÃO é iOS');
   }
@@ -133,8 +135,6 @@ isIOS();
 document.addEventListener('DOMContentLoaded', () => {
   // Também loga ao carregar o DOM
   isIOS();
-
-  solicitarPermissaoNotificacao();
 
   // Eventos dos botões do modal
   const modal = document.getElementById('ios-notification-modal');
