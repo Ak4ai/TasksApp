@@ -5,7 +5,6 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 
 let pendingFcmToken = null;
 let _isIOS = null;
-let modalTentativas = 0; // Limite de tentativas do modal
 
 // Solicita permissão ao usuário
 async function solicitarPermissaoNotificacao() {
@@ -164,14 +163,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Exibe modal após login se for iOS, usuário logado e não marcado "nunca mostrar"
 function mostrarModalNotificacaoIOS() {
-  // Limita a 10 tentativas por sessão
-  if (modalTentativas >= 10) return;
-  modalTentativas++;
-  solicitarPermissaoNotificacao();
-
   // Não mostra se não for iOS
-  if (_isIOS === null) isIOS();
+  if (_isIOS === null) isIOS(); // garante que _isIOS está setado
   if (!_isIOS) return;
+  solicitarPermissaoNotificacao();
   // Não mostra se já marcou "nunca mostrar"
   if (localStorage.getItem('iosNotifNeverShow')) return;
   // Não mostra se já aceitou a permissão
