@@ -422,6 +422,8 @@
           <!-- Adicione esta div para o log -->
           <div id="console-log" style="background:#222; color:#fff; padding:10px; margin-top:10px; max-height:200px; overflow:auto; font-size:12px; border-radius:6px;">
             <strong>Console:</strong>
+            <button id="clear-log-btn" style="float:right; font-size:11px;">Limpar</button>
+            <button id="copy-log-btn" style="float:right; font-size:11px; margin-right:6px;">Copiar</button>
             <div id="console-log-content"></div>
           </div>
           <!-- ...existing code... -->
@@ -636,26 +638,141 @@
     }
   </script>
 
-  <script>
-  // Redireciona console.log para a div #console-log-content
-  (function() {
-    const oldLog = console.log;
-    const logDiv = document.getElementById('console-log-content');
-    if (!logDiv) return;
-    console.log = function(...args) {
-      oldLog.apply(console, args);
-      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
-      const el = document.createElement('div');
-      el.textContent = msg;
-      logDiv.appendChild(el);
-      logDiv.scrollTop = logDiv.scrollHeight;
-    };
-  })();
-  </script>
-
   <!-- SCRIPTS PRINCIPAIS -->
   <script src="version.js"></script>
   <script type="module" src="script.js?v=1.0.10"></script>
   <script type="module" src="notifications.js"></script>
+  <script>
+  (function() {
+    const oldLog = console.log;
+    const oldWarn = console.warn;
+    const oldError = console.error;
+    const oldInfo = console.info;
+    const logDiv = document.getElementById('console-log-content');
+    const clearBtn = document.getElementById('clear-log-btn');
+    const copyBtn = document.getElementById('copy-log-btn');
+    if (!logDiv) return;
+
+    function isCollapsible(obj) {
+      return obj && typeof obj === 'object' && Object.keys(obj).length > 0;
+    }
+
+    function createCollapsible(obj) {
+      const details = document.createElement('details');
+      details.style.margin = '2px 0';
+      details.style.display = 'block';
+      const summary = document.createElement('summary');
+      // Mostra o nome da classe se existir
+      summary.textContent = (obj && obj.constructor && obj.constructor.name ? obj.constructor.name : '{ ... }') + ' { ... }';
+      summary.style.cursor = 'pointer';
+      summary.style.color = '#90caf9';
+      details.appendChild(summary);
+
+      const pre = document.createElement('pre');
+      pre.style.margin = '0 0 0 16px';
+      pre.style.whiteSpace = 'pre-wrap';
+      pre.style.color = '#fff';
+
+      // Tenta mostrar todas as propriedades, inclusive de instâncias
+      try {
+        let allProps = {};
+        let current = obj;
+        while (current && current !== Object.prototype) {
+          Object.getOwnPropertyNames(current).forEach(key => {
+            if (!(key in allProps)) {
+              try {
+                allProps[key] = obj[key];
+              } catch {}
+            }
+          });
+          current = Object.getPrototypeOf(current);
+        }
+        pre.textContent = JSON.stringify(allProps, null, 2);
+      } catch {
+        pre.textContent = '[Objeto circular ou não serializável]';
+      }
+      details.appendChild(pre);
+
+      return details;
+    }
+
+    function addLog(args, type = 'log') {
+      const el = document.createElement('div');
+      el.style.whiteSpace = 'pre-wrap';
+      el.style.marginBottom = '2px';
+      el.style.fontFamily = 'monospace';
+      const time = new Date().toLocaleTimeString();
+      let color = '#fff';
+      if (type === 'warn') color = '#ffeb3b';
+      if (type === 'error') color = '#ff5252';
+      if (type === 'info') color = '#4fc3f7';
+      el.style.color = color;
+
+      // Linha de horário + texto
+      let hasText = false;
+      let textLine = `<span style="color:#888;">[${time}]</span> `;
+      // Se o primeiro argumento é string, mostra como texto principal
+      if (typeof args[0] === 'string') {
+        textLine += args[0];
+        hasText = true;
+      }
+      const line = document.createElement('span');
+      line.innerHTML = textLine;
+
+      el.appendChild(line);
+
+      // Para cada argumento (exceto o primeiro se for string), se for objeto, mostra colapsável
+      for (let i = hasText ? 1 : 0; i < args.length; i++) {
+        const a = args[i];
+        if (isCollapsible(a)) {
+          el.appendChild(document.createElement('br'));
+          el.appendChild(createCollapsible(a));
+        } else if (typeof a !== 'undefined') {
+          // Se não for objeto, mostra como texto extra
+          const span = document.createElement('span');
+          span.textContent = (hasText || i > 0 ? ' ' : '') + String(a);
+          el.appendChild(span);
+        }
+      }
+
+      logDiv.appendChild(el);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    // Redefine os consoles
+    console.log = function(...args) {
+      oldLog.apply(console, args);
+      addLog(args, 'log');
+    };
+    console.warn = function(...args) {
+      oldWarn.apply(console, args);
+      addLog(args, 'warn');
+    };
+    console.error = function(...args) {
+      oldError.apply(console, args);
+      addLog(args, 'error');
+    };
+    console.info = function(...args) {
+      oldInfo.apply(console, args);
+      addLog(args, 'info');
+    };
+
+    clearBtn.onclick = () => {
+      logDiv.innerHTML = '';
+    };
+
+    copyBtn.onclick = () => {
+      // Copia todos os logs em texto puro (expande objetos)
+      let text = '';
+      logDiv.querySelectorAll('div').forEach(div => {
+        text += div.innerText + '\n';
+      });
+      navigator.clipboard.writeText(text).then(() => {
+        copyBtn.textContent = 'Copiado!';
+        setTimeout(() => { copyBtn.textContent = 'Copiar'; }, 1200);
+      });
+    };
+  })();
+  </script>
 </body>
 </html>
