@@ -256,31 +256,49 @@ function renderizarTarefa(t) {
   // Só adiciona o listener do checkbox se ele existir
   const checkbox = div.querySelector('.checkbox-tarefa');
   if (checkbox) {
-    checkbox.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const usuario = auth.currentUser;
+  checkbox.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const usuario = auth.currentUser;
 
-      await updateDoc(
-        doc(db, "usuarios", usuario.uid, "tarefas", t.id),
-        { finalizada: checkbox.checked }
-      );
+    await updateDoc(
+      doc(db, "usuarios", usuario.uid, "tarefas", t.id),
+      { finalizada: checkbox.checked }
+    );
 
-      // Processa tarefa periódica se for o caso
-      if (t.tipo === 'periodico' && checkbox.checked) {
-        await processarTarefaPeriodicaAoMarcar({
+    if (checkbox.checked) {
+      let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
+      personagemFalaAleatoriamente(classeAtiva);
+
+      // Só chama para personalizadas
+      if (t.tipo === 'personalizado') {
+        await criarRecorrentePersonalizada({
           ...t,
           finalizada: true
         });
+        // Chama ajuste só após concluir personalizada
+        await ajustarRecorrentesPersonalizadas([{
+          ...t,
+          finalizada: true
+        }]);
       }
+    }
 
-      // ✅ Personagem fala ao concluir a tarefa
-      if (checkbox.checked) {
-        let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
-        personagemFalaAleatoriamente(classeAtiva);
-      }
+    // Processa tarefa periódica se for o caso
+    if (t.tipo === 'periodico' && checkbox.checked) {
+      await processarTarefaPeriodicaAoMarcar({
+        ...t,
+        finalizada: true
+      });
+    }
 
-      await carregarTarefas();
-    });
+    // ✅ Personagem fala ao concluir a tarefa
+    if (checkbox.checked) {
+      let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
+      personagemFalaAleatoriamente(classeAtiva);
+    }
+
+    await carregarTarefas();
+  });
   }
 
 
@@ -1337,6 +1355,135 @@ async function existeTarefaRepetida(tarefasColecao, descricao, dataProxima) {
   return !snap.empty;
 }
 
+async function criarRecorrentePersonalizada(tarefa) {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+
+  if (tarefa.tipo !== 'personalizado') return;
+
+  let dataProxima = null;
+  const dataLimiteAnterior = tarefa.dataLimite.toDate ? tarefa.dataLimite.toDate() : new Date(tarefa.dataLimite);
+
+  // Cálculo da próxima data para personalizada
+  if (tarefa.modoPersonalizado === 'semanal' && Array.isArray(tarefa.diasSemana) && tarefa.diasSemana.length > 0) {
+    // Próximo dia da semana selecionado
+    let menorDiff = null;
+    let proximoDia = null;
+    tarefa.diasSemana.forEach(dia => {
+      let diff = (dia + 7 - dataLimiteAnterior.getDay()) % 7;
+      if (diff === 0) diff = 7; // sempre para frente
+      if (menorDiff === null || diff < menorDiff) {
+        menorDiff = diff;
+        proximoDia = new Date(dataLimiteAnterior);
+        proximoDia.setDate(proximoDia.getDate() + diff);
+      }
+    });
+    dataProxima = proximoDia;
+  } else if (tarefa.modoPersonalizado === 'frequencia' && typeof tarefa.frequencia === 'number') {
+    dataProxima = new Date(dataLimiteAnterior);
+    dataProxima.setDate(dataProxima.getDate() + tarefa.frequencia);
+  } else {
+    // Adicione outros modos se necessário
+    return;
+  }
+
+  if (!dataProxima) return;
+
+  const novaTarefa = {
+    nome: tarefa.nome,
+    descricao: tarefa.descricao,
+    tipo: 'personalizado',
+    dataLimite: Timestamp.fromDate(dataProxima),
+    finalizada: false,
+    repetida: true,
+    tarefaOriginal: tarefa.tarefaOriginal || tarefa.id,
+    tags: Array.isArray(tarefa.tags) ? [...tarefa.tags] : []
+  };
+  if (tarefa.modoPersonalizado !== undefined) novaTarefa.modoPersonalizado = tarefa.modoPersonalizado;
+  if (tarefa.frequencia !== undefined) novaTarefa.frequencia = tarefa.frequencia;
+  if (tarefa.padraoPersonalizado !== undefined) novaTarefa.padraoPersonalizado = tarefa.padraoPersonalizado;
+  if (tarefa.diasSemana !== undefined) novaTarefa.diasSemana = tarefa.diasSemana;
+  if (tarefa.horaSemanal !== undefined) novaTarefa.horaSemanal = tarefa.horaSemanal;
+  if (tarefa.permitirConclusao !== undefined) novaTarefa.permitirConclusao = tarefa.permitirConclusao;
+
+  const tarefasColecao = collection(db, "usuarios", usuario.uid, "tarefas");
+  await addDoc(tarefasColecao, novaTarefa);
+  const refDoc = doc(db, "usuarios", usuario.uid, "tarefas", tarefa.id);
+  await updateDoc(refDoc, { finalizada: true });
+}
+
+// Função para ajustar recorrência de tarefas PERSONALIZADAS
+export async function ajustarRecorrentesPersonalizadas(tarefas) {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+
+  const tarefasColecao = collection(db, "usuarios", usuario.uid, "tarefas");
+
+  for (const t of tarefas) {
+    // Só personalizadas, não finalizadas, não excluídas, não repetidas
+    if (
+      t.tipo !== 'personalizado' ||
+      t.finalizada ||
+      t.excluida ||
+      t.repetida
+    ) continue;
+
+    // Verifica se já existe próxima ocorrência
+    let dataProxima = null;
+    const dataLimiteAnterior = t.dataLimite.toDate ? t.dataLimite.toDate() : new Date(t.dataLimite);
+
+    // Exemplo: só faz para modo semanal (ajuste para outros modos se quiser)
+    if (t.modoPersonalizado === 'semanal' && Array.isArray(t.diasSemana) && t.diasSemana.length > 0) {
+      // Descobre o próximo dia da semana selecionado
+      const hoje = new Date();
+      let menorDiff = null;
+      let proximoDia = null;
+      t.diasSemana.forEach(dia => {
+        // dia: 0=Dom, 1=Seg, ..., 6=Sab
+        let diff = (dia + 7 - dataLimiteAnterior.getDay()) % 7;
+        if (diff === 0) diff = 7; // sempre para frente
+        if (menorDiff === null || diff < menorDiff) {
+          menorDiff = diff;
+          proximoDia = new Date(dataLimiteAnterior);
+          proximoDia.setDate(proximoDia.getDate() + diff);
+        }
+      });
+      dataProxima = proximoDia;
+    } else if (t.modoPersonalizado === 'frequencia' && typeof t.frequencia === 'number') {
+      dataProxima = new Date(dataLimiteAnterior);
+      dataProxima.setDate(dataProxima.getDate() + t.frequencia);
+    } else {
+      continue; // só trata semanal/frequencia, adicione outros modos se quiser
+    }
+
+    // Verifica duplicidade
+    const jaExiste = await existeTarefaRepetida(tarefasColecao, t.descricao, dataProxima);
+    if (jaExiste) continue;
+
+    // Cria nova tarefa personalizada recorrente
+    const novaTarefa = {
+      nome: t.nome,
+      descricao: t.descricao,
+      tipo: 'personalizado',
+      dataLimite: Timestamp.fromDate(dataProxima),
+      finalizada: false,
+      repetida: true,
+      tarefaOriginal: t.tarefaOriginal || t.id,
+      tags: Array.isArray(t.tags) ? [...t.tags] : []
+    };
+    if (t.modoPersonalizado !== undefined) novaTarefa.modoPersonalizado = t.modoPersonalizado;
+    if (t.frequencia !== undefined) novaTarefa.frequencia = t.frequencia;
+    if (t.padraoPersonalizado !== undefined) novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
+    if (t.diasSemana !== undefined) novaTarefa.diasSemana = t.diasSemana;
+    if (t.horaSemanal !== undefined) novaTarefa.horaSemanal = t.horaSemanal;
+    if (t.permitirConclusao !== undefined) novaTarefa.permitirConclusao = t.permitirConclusao;
+
+    await addDoc(tarefasColecao, novaTarefa);
+    await updateDoc(doc(db, "usuarios", usuario.uid, "tarefas", t.id), { finalizada: true });
+    mostrarPopup(`Nova tarefa personalizada criada: ${t.descricao} para ${dataProxima.toLocaleDateString('pt-BR')}`);
+  }
+}
+
 export async function ajustarRecurrentes(tarefas) {
   const usuario = auth.currentUser;
   if (!usuario) return;
@@ -1344,91 +1491,20 @@ export async function ajustarRecurrentes(tarefas) {
   const tarefasColecao = collection(db, "usuarios", usuario.uid, "tarefas");
 
   for (const t of tarefas) {
-    // Checagem extra: garanta que a tarefa não foi excluída OU deletada no Firestore
+    // Checa se a tarefa existe e não foi excluída/finalizada
     const refDoc = doc(db, "usuarios", usuario.uid, "tarefas", t.id);
     const snap = await getDoc(refDoc);
-    if (!snap.exists()) {
-      // Tarefa já foi removida do Firestore, não cria recorrente!
-      continue;
-    }
+    if (!snap.exists()) continue;
     const dados = snap.data();
-    if (dados.excluida) {
-      // Tarefa excluída ou finalizada, não cria recorrente!
-      continue;
-    }
+    if (dados.excluida || dados.finalizada) continue;
     if (t.repetida) continue;
 
     let dataProxima = null;
     const dataLimiteAnterior = t.dataLimite.toDate ? t.dataLimite.toDate() : new Date(t.dataLimite);
     const hoje = new Date();
 
-    const podeRecriar =
-      (!t.finalizada && dataLimiteAnterior < hoje) ||
-      (t.tipo === 'personalizado' && t.finalizada && ['frequencia', 'datas', 'semanal'].includes(t.modoPersonalizado));
-
-    if (!podeRecriar) continue;
-
-    // PERSONALIZADAS
-    if (t.tipo === 'personalizado') {
-      if (t.modoPersonalizado === 'frequencia') {
-        if (!t.frequencia) continue;
-        const proxima = new Date(dataLimiteAnterior);
-        proxima.setDate(proxima.getDate() + t.frequencia);
-        dataProxima = proxima;
-
-      } else if (t.modoPersonalizado === 'datas') {
-        if (!t.padraoPersonalizado) continue;
-
-        const datas = t.padraoPersonalizado
-          .split(',')
-          .map(str => new Date(str.trim()))
-          .filter(d => !isNaN(d))
-          .sort((a, b) => a - b);
-
-        dataProxima = datas.find(d => d > dataLimiteAnterior);
-        if (!dataProxima) {
-          continue;
-        }
-
-      } else if (t.modoPersonalizado === 'semanal') {
-  if (!Array.isArray(t.diasSemana) || !t.horaSemanal) continue;
-
-  // Usa dataLimiteAnterior + 1 dia para iniciar busca
-  const inicioBusca = new Date(dataLimiteAnterior);
-  inicioBusca.setDate(inicioBusca.getDate() + 1); // começa dia seguinte ao limite anterior
-
-  const [h, m] = t.horaSemanal.split(':').map(Number);
-
-  let proximaData = null;
-  let menorDiferenca = Infinity;
-
-  for (let i = 0; i < 14; i++) { // verifica até 2 semanas no futuro a partir do limite anterior
-    const dataCandidata = new Date(inicioBusca);
-    dataCandidata.setDate(inicioBusca.getDate() + i);
-    const diaSemana = dataCandidata.getDay();
-
-    if (t.diasSemana.includes(diaSemana)) {
-      dataCandidata.setHours(h, m, 0, 0);
-
-      if (dataCandidata > dataLimiteAnterior && dataCandidata - dataLimiteAnterior < menorDiferenca) {
-        menorDiferenca = dataCandidata - dataLimiteAnterior;
-        proximaData = dataCandidata;
-      }
-    }
-  }
-
-  if (!proximaData) {
-    console.warn(`⚠️ Não foi possível calcular próxima data para tarefa semanal: "${t.descricao}"`);
-    continue;
-  }
-
-  dataProxima = proximaData;
-}else {
-        continue;
-      }
-
-    // PERIÓDICAS
-    } else if (t.tipo === 'periodico') {
+    // Só recria para tarefas periódicas!
+    if (t.tipo === 'periodico') {
       const proxima = new Date(dataLimiteAnterior);
       switch (t.frequencia) {
         case 'diario':
@@ -1449,16 +1525,16 @@ export async function ajustarRecurrentes(tarefas) {
       }
       dataProxima = proxima;
     } else {
+      // Loga no console se não for periódica
+      console.log(`[ajustarRecurrentes] Tarefa pulada (não periódica):`, t.nome || t.descricao, t.tipo);
       continue;
     }
 
-    // ❗ Verifica duplicidade antes de criar
+    // Verifica duplicidade antes de criar
     const jaExiste = await existeTarefaRepetida(tarefasColecao, t.descricao, dataProxima);
-    if (jaExiste) {
-      continue;
-    }
+    if (jaExiste) continue;
 
-    // 🔧 Cria nova tarefa com os mesmos dados
+    // Cria nova tarefa com os mesmos dados
     const novaTarefa = {
       nome: t.nome,
       descricao: t.descricao,
@@ -1469,35 +1545,22 @@ export async function ajustarRecurrentes(tarefas) {
       tags: Array.isArray(t.tags) ? [...t.tags] : [],
       tarefaOriginal: t.id
     };
-
-    // Campos opcionais
-    if (t.frequencia != null) novaTarefa.frequencia = t.frequencia;
-    if (t.modoPersonalizado) novaTarefa.modoPersonalizado = t.modoPersonalizado;
-    if (t.padraoPersonalizado) novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
-    if (t.permitirConclusao != null) novaTarefa.permitirConclusao = t.permitirConclusao;
-    if (t.diasSemana) novaTarefa.diasSemana = t.diasSemana;
-    if (t.horaSemanal) novaTarefa.horaSemanal = t.horaSemanal;
+    if (t.frequencia !== undefined) novaTarefa.frequencia = t.frequencia;
+    if (t.modoPersonalizado !== undefined) novaTarefa.modoPersonalizado = t.modoPersonalizado;
+    if (t.padraoPersonalizado !== undefined) novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
+    if (t.permitirConclusao !== undefined) novaTarefa.permitirConclusao = t.permitirConclusao;
+    if (t.diasSemana !== undefined) novaTarefa.diasSemana = t.diasSemana;
+    if (t.horaSemanal !== undefined) novaTarefa.horaSemanal = t.horaSemanal;
 
     await addDoc(tarefasColecao, novaTarefa);
     mostrarPopup(`Nova tarefa criada: ${t.descricao} para ${dataProxima.toLocaleDateString('pt-BR')}`);
     personagemFalaAleatoriamente();
+    await carregarTarefas();
 
-    const refAntigo = doc(db, "usuarios", usuario.uid, "tarefas", t.id);
-    await updateDoc(refAntigo, { finalizada: true });
+    await updateDoc(refDoc, { finalizada: true });
     console.log(novaTarefa);
   }
-  await new Promise(resolve => setTimeout(resolve, 500)); // Delay de 0.5s
-  await carregarTarefas(); // Atualiza a lista de tarefas após ajustes
-  mostrarPopup('Tarefas periódicas ajustadas!', 3000);
 }
-
-
-
-
-
-
-
-
 
 export async function processarTarefaPeriodicaAoMarcar(t) {
   const usuario = auth.currentUser;
@@ -1944,7 +2007,6 @@ export async function carregarInventario() {
     itensContainer.appendChild(card);
   });
 }
-
 
 
 
