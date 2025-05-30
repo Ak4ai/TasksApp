@@ -55,6 +55,14 @@ if ('serviceWorker' in navigator) {
   solicitarPermissaoNotificacao(); // fallback para navegadores sem SW
 }
 
+// NOVO: Permitir ativação manual via botão (útil para iOS/PWA)
+const ativarBtn = document.getElementById('ativar-notificacoes-btn');
+if (ativarBtn) {
+  ativarBtn.addEventListener('click', () => {
+    solicitarPermissaoNotificacao();
+  });
+}
+
 // Quando o usuário autenticar, salve o token pendente (se houver)
 const auth = getAuth();
 onAuthStateChanged(auth, async (user) => {
