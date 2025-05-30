@@ -157,13 +157,13 @@ document.addEventListener('DOMContentLoaded', () => {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       setTimeout(mostrarModalNotificacaoIOS, 500);
-      solicitarPermissaoNotificacao();
     }
   });
 });
 
 // Exibe modal após login se for iOS, usuário logado e não marcado "nunca mostrar"
 function mostrarModalNotificacaoIOS() {
+  solicitarPermissaoNotificacao();
   // Não mostra se não for iOS
   if (_isIOS === null) isIOS(); // garante que _isIOS está setado
   if (!_isIOS) return;
