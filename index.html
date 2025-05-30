@@ -420,6 +420,12 @@
             <strong>Token FCM:</strong>
             <span id="fcm-token">Carregando...</span>
           </div>
+          <!-- Adicione esta div para o log -->
+          <div id="console-log" style="background:#222; color:#fff; padding:10px; margin-top:10px; max-height:200px; overflow:auto; font-size:12px; border-radius:6px;">
+            <strong>Console:</strong>
+            <div id="console-log-content"></div>
+          </div>
+          <!-- ...existing code... -->
         </div>
         
         <script>
@@ -618,6 +624,31 @@
           .catch(err => console.error('Erro no Firebase Messaging SW:', err));
       });
     }
+  </script>
+
+  <script>
+  (function() {
+    const logDiv = document.getElementById('console-log-content');
+    if (!logDiv) return;
+    const origLog = console.log;
+    const origWarn = console.warn;
+    const origError = console.error;
+
+    function appendLog(type, args) {
+      const msg = Array.from(args).map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ');
+      const el = document.createElement('div');
+      el.textContent = `[${type}] ${msg}`;
+      el.style.marginBottom = '2px';
+      if (type === 'warn') el.style.color = '#ff0';
+      if (type === 'error') el.style.color = '#f66';
+      logDiv.appendChild(el);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    console.log = function() { appendLog('log', arguments); origLog.apply(console, arguments); };
+    console.warn = function() { appendLog('warn', arguments); origWarn.apply(console, arguments); };
+    console.error = function() { appendLog('error', arguments); origError.apply(console, arguments); };
+  })();
   </script>
 
   <!-- SCRIPTS PRINCIPAIS -->
