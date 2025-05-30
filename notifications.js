@@ -157,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       setTimeout(mostrarModalNotificacaoIOS, 500);
+      solicitarPermissaoNotificacao();
     }
   });
 });
