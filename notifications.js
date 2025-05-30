@@ -112,6 +112,7 @@ function isIOS() {
     isIpadOS;
   if (isIOSDevice) {
     console.log('Este dispositivo É iOS');
+    document.body.classList.add('ios-pwa');
   } else {
     console.log('Este dispositivo NÃO é iOS');
   }
@@ -152,9 +153,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Exibe modal após login se for iOS, usuário logado e não marcado "nunca mostrar"
 function mostrarModalNotificacaoIOS() {
+  // Não mostra se não for iOS
   if (!isIOS()) return;
-  if (!localStorage.getItem('iosNotifNeverShow')) {
-    const modal = document.getElementById('ios-notification-modal');
-    if (modal) modal.style.display = 'flex';
-  }
+  // Não mostra se já marcou "nunca mostrar"
+  if (localStorage.getItem('iosNotifNeverShow')) return;
+  // Não mostra se já aceitou a permissão
+  if (Notification.permission === 'granted') return;
+
+  const modal = document.getElementById('ios-notification-modal');
+  if (modal) modal.style.display = 'flex';
 }
