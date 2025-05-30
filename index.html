@@ -624,8 +624,7 @@
     <button class="nav-button" data-tab="tab-inventario">🎒</button>
     
     <button class="nav-button" data-tab="tab-settings">⚙️</button>
-  </div>
-  
+  </div> 
 
   <!-- Service Worker -->
   <script>
@@ -636,6 +635,23 @@
           .catch(err => console.error('Erro no Firebase Messaging SW:', err));
       });
     }
+  </script>
+
+  <script>
+  // Redireciona console.log para a div #console-log-content
+  (function() {
+    const oldLog = console.log;
+    const logDiv = document.getElementById('console-log-content');
+    if (!logDiv) return;
+    console.log = function(...args) {
+      oldLog.apply(console, args);
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      const el = document.createElement('div');
+      el.textContent = msg;
+      logDiv.appendChild(el);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    };
+  })();
   </script>
 
   <!-- SCRIPTS PRINCIPAIS -->
