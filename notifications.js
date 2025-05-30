@@ -134,6 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Também loga ao carregar o DOM
   isIOS();
 
+  solicitarPermissaoNotificacao();
+
   // Eventos dos botões do modal
   const modal = document.getElementById('ios-notification-modal');
   if (modal) {
