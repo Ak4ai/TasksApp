@@ -1352,7 +1352,7 @@ export async function ajustarRecurrentes(tarefas) {
       continue;
     }
     const dados = snap.data();
-    if (dados.excluida || dados.finalizada) {
+    if (dados.excluida) {
       // Tarefa excluída ou finalizada, não cria recorrente!
       continue;
     }

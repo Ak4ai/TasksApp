@@ -70,7 +70,8 @@ self.addEventListener('install', function(event) {
   const title = data.title || 'Nova notificação';
   const options = {
     body: data.body || '',
-    badge: data.badge || '/badge.png'
+    badge: data.badge || '/badge.png',
+    color: '#ca77f9' // Cor de fundo para Android
   };
   event.waitUntil(
     self.registration.showNotification(title, options)
