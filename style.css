@@ -1815,3 +1815,33 @@ div#config-buttosn-container {
 div#console-log {
     width: 90%;
 }
+
+div#ios-notif-info {
+    display: flex
+;
+}
+
+.ios-button {
+  background-color: #007aff; /* Azul padrão do iOS */
+  color: white;
+  padding: 5px 25px !important;
+  font-size: 16px !important;
+  border: none;
+  border-radius: 5px !important;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: auto !important;
+}
+
+#ios-notification-modal > div > label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #ffffff;
+  text-align: center;
+  margin: 0;
+}
+
+#ios-notification-modal > div > h2 {
+  margin: 15px;
+}
