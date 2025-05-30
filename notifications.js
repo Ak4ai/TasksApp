@@ -127,9 +127,6 @@ function isIOS() {
   return isIOSDevice;
 }
 
-// Loga imediatamente ao carregar o script
-isIOS();
-
 document.addEventListener('DOMContentLoaded', () => {
   // Também loga ao carregar o DOM
   isIOS();
