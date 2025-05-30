@@ -38,11 +38,19 @@ async function solicitarPermissaoNotificacao() {
       console.warn('Permissão de notificação negada');
       const el = document.getElementById('fcm-token');
       if (el) el.textContent = 'Permissão negada';
+      // Se não marcou "não mostrar novamente", mostra o modal de novo
+      if (!localStorage.getItem('iosNotifNeverShow')) {
+        setTimeout(mostrarModalNotificacaoIOS, 300);
+      }
     }
   } catch (e) {
     console.error('Erro ao obter token FCM:', e);
     const el = document.getElementById('fcm-token');
     if (el) el.textContent = 'Erro ao obter token';
+    // Se não marcou "não mostrar novamente", mostra o modal de novo
+    if (!localStorage.getItem('iosNotifNeverShow')) {
+      setTimeout(mostrarModalNotificacaoIOS, 300);
+    }
   }
 }
 
