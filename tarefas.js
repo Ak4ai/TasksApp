@@ -134,22 +134,74 @@ function renderizarTarefa(t) {
   div.setAttribute('data-tipo', t.tipo || 'personalizado');
 
   const isConcluivel = t.tipo !== 'personalizado' || t.permitirConclusao;
+  const dataLimite = new Date(t.dataLimite);
+  const agora = new Date();
+  const diffMs = dataLimite - agora;
+
+  // Cálculos de tempo
+  const horas = Math.floor(diffMs / (1000 * 60 * 60));
+  const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const semanas = Math.floor(dias / 7);
+  const meses = Math.floor(dias / 30);
+
+  // Elementos HTML
+  const idSelect = `select-tempo-${t.id}`;
+  const idSpan = `span-tempo-${t.id}`;
 
   div.innerHTML = `
-  <div class="titulo-tarefa">
-    ${isConcluivel ? `<input type="checkbox" class="checkbox-tarefa" title="Marcar como feita" ${t.finalizada ? 'checked' : ''}>` : ''}
-    <strong>${t.nome}</strong>
-  </div>
-  <small class="anotacao">${(t.descricao || '').trim()}</small>
-  <small>Até: ${t.dataLimite.toLocaleString('pt-BR')}</small>
-  <span class="tipo-badge">
-    ${{
-      periodico: 'Importante Periódico',
-      'nao-periodico': 'Importante Não-Periódico',
-      personalizado: 'Personalizado'
-    }[t.tipo || 'personalizado']}
-  </span>
+    <div class="titulo-tarefa">
+      ${isConcluivel ? `<input type="checkbox" class="checkbox-tarefa" title="Marcar como feita" ${t.finalizada ? 'checked' : ''}>` : ''}
+      <strong>${t.nome}</strong>
+    </div>
+    <small class="anotacao">${(t.descricao || '').trim()}</small>
+    <small>Até: ${dataLimite.toLocaleString('pt-BR')}</small>
+    <div style="margin-top: 4px;">
+      <label>Tempo restante: 
+        <span id="${idSpan}">${dias} dias</span>
+      </label>
+      <select id="${idSelect}" class="select-task">
+        <option value="horas">Horas</option>
+        <option value="dias" selected>Dias</option>
+        <option value="semanas">Semanas</option>
+        <option value="meses">Meses</option>
+      </select>
+    </div>
+    <span class="tipo-badge">
+      ${{
+        periodico: 'Importante Periódico',
+        'nao-periodico': 'Importante Não-Periódico',
+        personalizado: 'Personalizado'
+      }[t.tipo || 'personalizado']}
+    </span>
   `;
+
+  // Lógica de troca de visualização
+  setTimeout(() => {
+    const select = document.getElementById(idSelect);
+    const span = document.getElementById(idSpan);
+
+    if (select && span) {
+      select.addEventListener('change', () => {
+        const val = select.value;
+        let texto = '';
+        if (diffMs < 0) {
+          texto = 'Expirado';
+        } else {
+          if (val === 'horas') texto = `${horas} horas`;
+          else if (val === 'dias') texto = `${dias} dias`;
+          else if (val === 'semanas') texto = `${semanas} semanas`;
+          else if (val === 'meses') texto = `${meses} meses`;
+        }
+        span.textContent = texto;
+      });
+
+      // Aqui, para evitar abrir modal ao clicar no select:
+      select.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+    }
+  }, 0);
+
 
   // Adiciona visualização de tags se existirem
   if (t.tags && t.tags.length) {
@@ -521,6 +573,31 @@ async function carregarTarefas() {
 
   tempoMaisRecente = tarefasFuturas.length ? tarefasFuturas[0].dataLimite : null;
   atualizarContadorProximaTarefa();
+
+  // Filtrar tarefas com prazo nas próximas 24 horas (dataLimite >= agora e <= 24h)
+  const limite24h = new Date(agora.getTime() + 24 * 60 * 60 * 1000);
+  const tarefas24h = tarefasNaoExcluidas.filter(t => 
+    !t.finalizada && 
+    t.dataLimite >= agora && 
+    t.dataLimite <= limite24h
+  );
+
+  // Ordena pelo prazo
+  tarefas24h.sort((a, b) => a.dataLimite - b.dataLimite);
+
+  const containerProximas = document.querySelector('#tarefas-proximas .tasks-container');
+  if (containerProximas) {
+    containerProximas.innerHTML = '';
+    if (tarefas24h.length === 0) {
+      containerProximas.innerHTML = `<p>Nenhuma tarefa com prazo nas próximas 24 horas.</p>`;
+    } else {
+      tarefas24h.forEach(t => {
+        const div = renderizarTarefa(t);
+        containerProximas.appendChild(div);
+      });
+    }
+  }
+
 
   carregandoTarefas = false;
 
@@ -1525,9 +1602,7 @@ export async function ajustarRecurrentes(tarefas) {
       }
       dataProxima = proxima;
     } else {
-      // Loga no console se não for periódica
-      console.log(`[ajustarRecurrentes] Tarefa pulada (não periódica):`, t.nome || t.descricao, t.tipo);
-      continue;
+     continue;
     }
 
     // Verifica duplicidade antes de criar
@@ -1558,7 +1633,6 @@ export async function ajustarRecurrentes(tarefas) {
     await carregarTarefas();
 
     await updateDoc(refDoc, { finalizada: true });
-    console.log(novaTarefa);
   }
 }
 
