@@ -1840,3 +1840,20 @@ div#ios-notif-info {
 #ios-notification-modal > div > h2 {
   margin: 15px;
 }
+
+.select-task {
+  margin-left: auto;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  font-weight: 600;
+  cursor: pointer;
+  /* cor de fundo e borda base, que podem mudar conforme a aba/tipo */
+  background-color: var(--btn-bg, #2a3f6b);
+  color: var(--btn-color, #cfe3ff);
+  transition: border-color 0.3s ease;
+}
+
+.select-task:hover {
+  border-color: var(--btn-border, #5390d9);
+}
