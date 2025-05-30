@@ -1813,7 +1813,9 @@ div#config-buttosn-container {
 }
 
 div#console-log {
-    width: 90%;
+    width: 95%;
+    border: 1px solid #343434;
+    border-radius: 10px;
 }
 
 div#ios-notif-info {
