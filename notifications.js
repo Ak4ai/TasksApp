@@ -99,3 +99,55 @@ document.getElementById('test-notification-btn').addEventListener('click', async
     .catch(e => alert('Erro ao chamar API: ' + e));
 });
 
+console.log('notifications.js carregado');
+
+function isIOS() {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (isIOS) {
+    console.log('Este dispositivo É iOS');
+  } else {
+    console.log('Este dispositivo NÃO é iOS');
+  }
+  return isIOS;
+}
+
+// Loga imediatamente ao carregar o script
+isIOS();
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Também loga ao carregar o DOM
+  isIOS();
+
+  // Eventos dos botões do modal
+  const modal = document.getElementById('ios-notification-modal');
+  if (modal) {
+    document.getElementById('ios-notif-yes').onclick = () => {
+      modal.style.display = 'none';
+      solicitarPermissaoNotificacao();
+    };
+    // Adicione ao seu script principal
+    document.getElementById('fechar-ios-notification-modal').onclick = function() {
+      document.getElementById('ios-notification-modal').style.display = 'none';
+    };
+    document.getElementById('ios-notif-never').onclick = () => {
+      localStorage.setItem('iosNotifNeverShow', '1');
+      modal.style.display = 'none';
+    };
+  }
+
+  // Após login, se iOS, mostra o modal
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      setTimeout(mostrarModalNotificacaoIOS, 500);
+    }
+  });
+});
+
+// Exibe modal após login se for iOS, usuário logado e não marcado "nunca mostrar"
+function mostrarModalNotificacaoIOS() {
+  if (!isIOS()) return;
+  if (!localStorage.getItem('iosNotifNeverShow')) {
+    const modal = document.getElementById('ios-notification-modal');
+    if (modal) modal.style.display = 'flex';
+  }
+}

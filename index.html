@@ -414,10 +414,6 @@
           <div id="config-buttosn-container">
             <button id="test-notification-btn" style="background:#4caf50; color:white;">Testar Notificação</button>
           </div>
-          <!-- ADICIONE ESTE BLOCO: -->
-          <div id="config-buttosn-container">
-            <button id="ativar-notificacoes-btn" style="background:#1976d2; color:white;">Ativar Notificações</button>
-          </div>
           <h3>Versionamento</h3>
           <div id="git-version-label" style="margin-bottom:10px; color:#888;">Versão: carregando...</div>
           <div id="fcm-token-container" style="word-break:break-all; margin-top:10px;">
@@ -564,7 +560,19 @@
       </div>
     </div>
 
-
+    <!-- ...existing code... -->
+    <div id="ios-notification-modal" class="modal" style="display:none;">
+      <div class="modal-content">
+        <span class="close-button" id="fechar-ios-notification-modal">&times;</span>
+        <h2>Receber notificações?</h2>
+        <label>Deseja receber lembretes de tarefas no seu dispositivo?</label>
+        <div id="ios-notif-info" style="margin:10px 0; color:#666;">
+          <button id="ios-notif-yes" class="ios-button" style="background:#1976d2; color:#fff; margin:10px;">Sim</button>
+          <button id="ios-notif-never" class="ios-button" style="background:#f44336; color:#fff; margin:10px;">Não mostrar novamente</button>
+        </div>
+      </div>
+    </div>
+    <!-- ...existing code... -->
 
     </div>
     <div id="app-header">
@@ -628,31 +636,6 @@
           .catch(err => console.error('Erro no Firebase Messaging SW:', err));
       });
     }
-  </script>
-
-  <script>
-  (function() {
-    const logDiv = document.getElementById('console-log-content');
-    if (!logDiv) return;
-    const origLog = console.log;
-    const origWarn = console.warn;
-    const origError = console.error;
-
-    function appendLog(type, args) {
-      const msg = Array.from(args).map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ');
-      const el = document.createElement('div');
-      el.textContent = `[${type}] ${msg}`;
-      el.style.marginBottom = '2px';
-      if (type === 'warn') el.style.color = '#ff0';
-      if (type === 'error') el.style.color = '#f66';
-      logDiv.appendChild(el);
-      logDiv.scrollTop = logDiv.scrollHeight;
-    }
-
-    console.log = function() { appendLog('log', arguments); origLog.apply(console, arguments); };
-    console.warn = function() { appendLog('warn', arguments); origWarn.apply(console, arguments); };
-    console.error = function() { appendLog('error', arguments); origError.apply(console, arguments); };
-  })();
   </script>
 
   <!-- SCRIPTS PRINCIPAIS -->
