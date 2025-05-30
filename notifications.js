@@ -102,12 +102,14 @@ document.getElementById('test-notification-btn').addEventListener('click', async
 console.log('notifications.js carregado');
 
 function isIOS() {
-  // Verifica userAgent, platform e userAgentData para cobrir iPadOS moderno
   const ua = navigator.userAgent || '';
   const platform = navigator.platform || '';
-  const isIOSDevice = /iphone|ipod|ipad/i.test(ua) ||
-    (/Macintosh/i.test(platform) && 'ontouchend' in document) ||
-    (navigator.userAgentData && navigator.userAgentData.platform && /iPad|iPhone|iPod/.test(navigator.userAgentData.platform));
+  // iPadOS 13+ reporta como Macintosh, mas tem touch
+  const isIpadOS = /Macintosh/.test(ua) && navigator.maxTouchPoints && navigator.maxTouchPoints > 2;
+  const isIOSDevice =
+    /iphone|ipod|ipad/i.test(ua) ||
+    /iPad|iPhone|iPod/.test(platform) ||
+    isIpadOS;
   if (isIOSDevice) {
     console.log('Este dispositivo É iOS');
   } else {
