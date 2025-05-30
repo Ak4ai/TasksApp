@@ -46,8 +46,14 @@ async function solicitarPermissaoNotificacao() {
   }
 }
 
-// Chame ao iniciar o app
-solicitarPermissaoNotificacao();
+// Aguarde o SW estar pronto antes de pedir permissão/token
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.ready.then(() => {
+    solicitarPermissaoNotificacao();
+  });
+} else {
+  solicitarPermissaoNotificacao(); // fallback para navegadores sem SW
+}
 
 // Quando o usuário autenticar, salve o token pendente (se houver)
 const auth = getAuth();
