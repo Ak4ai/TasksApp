@@ -38,19 +38,11 @@ async function solicitarPermissaoNotificacao() {
       console.warn('Permissão de notificação negada');
       const el = document.getElementById('fcm-token');
       if (el) el.textContent = 'Permissão negada';
-      // Se não marcou "não mostrar novamente", mostra o modal de novo
-      if (!localStorage.getItem('iosNotifNeverShow')) {
-        setTimeout(mostrarModalNotificacaoIOS, 300);
-      }
     }
   } catch (e) {
     console.error('Erro ao obter token FCM:', e);
     const el = document.getElementById('fcm-token');
     if (el) el.textContent = 'Erro ao obter token';
-    // Se não marcou "não mostrar novamente", mostra o modal de novo
-    if (!localStorage.getItem('iosNotifNeverShow')) {
-      setTimeout(mostrarModalNotificacaoIOS, 300);
-    }
   }
 }
 
@@ -120,7 +112,6 @@ function isIOS() {
     isIpadOS;
   if (isIOSDevice) {
     console.log('Este dispositivo É iOS');
-    document.body.classList.add('ios-pwa');
   } else {
     console.log('Este dispositivo NÃO é iOS');
   }
@@ -161,13 +152,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Exibe modal após login se for iOS, usuário logado e não marcado "nunca mostrar"
 function mostrarModalNotificacaoIOS() {
-  // Não mostra se não for iOS
   if (!isIOS()) return;
-  // Não mostra se já marcou "nunca mostrar"
-  if (localStorage.getItem('iosNotifNeverShow')) return;
-  // Não mostra se já aceitou a permissão
-  if (Notification.permission === 'granted') return;
-
-  const modal = document.getElementById('ios-notification-modal');
-  if (modal) modal.style.display = 'flex';
+  if (!localStorage.getItem('iosNotifNeverShow')) {
+    const modal = document.getElementById('ios-notification-modal');
+    if (modal) modal.style.display = 'flex';
+  }
 }
