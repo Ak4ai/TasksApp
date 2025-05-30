@@ -60,11 +60,11 @@ module.exports = async (req, res) => {
     for (const token of tokens) {
       const message = {
         token,
-        notification: {
+        data: {
           title: notif.title,
           body: notif.body,
-          badge: notif.badge || 'https://raw.githubusercontent.com/Ak4ai/TasksApp/e38ef409e5a90d423d1b5034e2229433d85cd538/badge.png',
-        },
+          badge: notif.badge || 'https://raw.githubusercontent.com/Ak4ai/TasksApp/e38ef409e5a90d423d1b5034e2229433d85cd538/badge.png'
+        }
       };
 
       try {

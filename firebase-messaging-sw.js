@@ -13,21 +13,6 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage(function(payload) {
-  console.log('[firebase-messaging-sw.js] Mensagem recebida em background:', payload);
-  // Só mostra manualmente se NÃO houver notification no payload
-  if (!payload.notification && payload.data) {
-    self.registration.showNotification(
-      payload.data.title || 'Nova notificação',
-      {
-        body: payload.data.body || '',
-        icon: payload.data.icon || '/web-icon-192x192.png',
-        badge: payload.data.badge || '/web-icon-192x192.png' // <-- badge aqui
-      }
-    );
-  }
-});
-
 self.addEventListener('install', function(event) {
     event.waitUntil(
       caches.open('my-cache').then(function(cache) {
@@ -74,3 +59,20 @@ self.addEventListener('install', function(event) {
       })
     );
   });
+
+  self.addEventListener('push', function(event) {
+  let data = {};
+  try {
+    data = event.data.json();
+  } catch (e) {
+    data = {};
+  }
+  const title = data.title || 'Nova notificação';
+  const options = {
+    body: data.body || '',
+    badge: data.badge || '/badge.png'
+  };
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
