@@ -73,7 +73,7 @@ document.getElementById('test-notification-btn').addEventListener('click', async
     uid: user.uid,
     title: "Notificação de Teste",
     body: "Esta é uma notificação de teste enviada pelo botão.",
-    badge: "/badge.png", // Caminho para o ícone da badge
+    badge: "https://raw.githubusercontent.com/Ak4ai/TasksApp/e38ef409e5a90d423d1b5034e2229433d85cd538/badge.png",
     scheduledAt: new Date(),
     sent: false,
     createdAt: serverTimestamp()
