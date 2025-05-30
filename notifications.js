@@ -4,6 +4,7 @@ import { getFirestore, doc, setDoc, collection, addDoc, serverTimestamp } from "
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 let pendingFcmToken = null;
+let _isIOS = null;
 
 // Solicita permissão ao usuário
 async function solicitarPermissaoNotificacao() {
@@ -109,22 +110,26 @@ document.getElementById('test-notification-btn').addEventListener('click', async
 
 console.log('notifications.js carregado');
 
+// Altere a função isIOS para usar cache:
 function isIOS() {
+  if (_isIOS !== null) return _isIOS; // retorna o valor já detectado
+
   const ua = navigator.userAgent || '';
   const platform = navigator.platform || '';
-  // iPadOS 13+ reporta como Macintosh, mas tem touch
   const isIpadOS = /Macintosh/.test(ua) && navigator.maxTouchPoints && navigator.maxTouchPoints > 2;
   const isIOSDevice =
     /iphone|ipod|ipad/i.test(ua) ||
     /iPad|iPhone|iPod/.test(platform) ||
     isIpadOS;
+
+  _isIOS = isIOSDevice;
   if (isIOSDevice) {
     console.log('Este dispositivo É iOS');
     document.body.classList.add('ios-pwa');
   } else {
     console.log('Este dispositivo NÃO é iOS');
   }
-  return isIOSDevice;
+  return _isIOS;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -159,7 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // Exibe modal após login se for iOS, usuário logado e não marcado "nunca mostrar"
 function mostrarModalNotificacaoIOS() {
   // Não mostra se não for iOS
-  if (!isIOS()) return;
+  if (_isIOS === null) isIOS(); // garante que _isIOS está setado
+  if (!_isIOS) return;
   // Não mostra se já marcou "nunca mostrar"
   if (localStorage.getItem('iosNotifNeverShow')) return;
   // Não mostra se já aceitou a permissão
