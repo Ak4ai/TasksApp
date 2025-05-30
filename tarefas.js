@@ -1481,12 +1481,14 @@ export async function ajustarRecurrentes(tarefas) {
     await addDoc(tarefasColecao, novaTarefa);
     mostrarPopup(`Nova tarefa criada: ${t.descricao} para ${dataProxima.toLocaleDateString('pt-BR')}`);
     personagemFalaAleatoriamente();
-    await carregarTarefas();
 
     const refAntigo = doc(db, "usuarios", usuario.uid, "tarefas", t.id);
     await updateDoc(refAntigo, { finalizada: true });
     console.log(novaTarefa);
   }
+  await new Promise(resolve => setTimeout(resolve, 500)); // Delay de 0.5s
+  await carregarTarefas(); // Atualiza a lista de tarefas após ajustes
+  mostrarPopup('Tarefas periódicas ajustadas!', 3000);
 }
 
 
