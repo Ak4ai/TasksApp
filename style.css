@@ -1821,6 +1821,8 @@ div#console-log {
 div#ios-notif-info {
     display: flex
 ;
+    justify-content: center;
+    align-items: center;
 }
 
 .ios-button {
