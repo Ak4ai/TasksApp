@@ -102,13 +102,18 @@ document.getElementById('test-notification-btn').addEventListener('click', async
 console.log('notifications.js carregado');
 
 function isIOS() {
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  if (isIOS) {
+  // Verifica userAgent, platform e userAgentData para cobrir iPadOS moderno
+  const ua = navigator.userAgent || '';
+  const platform = navigator.platform || '';
+  const isIOSDevice = /iphone|ipod|ipad/i.test(ua) ||
+    (/Macintosh/i.test(platform) && 'ontouchend' in document) ||
+    (navigator.userAgentData && navigator.userAgentData.platform && /iPad|iPhone|iPod/.test(navigator.userAgentData.platform));
+  if (isIOSDevice) {
     console.log('Este dispositivo É iOS');
   } else {
     console.log('Este dispositivo NÃO é iOS');
   }
-  return isIOS;
+  return isIOSDevice;
 }
 
 // Loga imediatamente ao carregar o script
