@@ -17,6 +17,82 @@ const subTagsPorCategoria = {
   "Espiritual": ["Meditação", "Yoga", "Orações"]
 };
 
+const ITENS_CONFIG = {
+  // Cosméticos
+  hat: {
+    tipo: "cosmetico",
+    nome: "Chapéu de Caubói",
+    efeito: null
+  },
+  viking: {
+    tipo: "cosmetico",
+    nome: "Capacete Viking",
+    efeito: null
+  },
+  mago: {
+    tipo: "cosmetico",
+    nome: "Chapéu de Mago",
+    efeito: null
+  },
+  cartola: {
+    tipo: "cosmetico",
+    nome: "Cartola de Mágico",
+    efeito: null
+  },
+  astronauta: {
+    tipo: "cosmetico",
+    nome: "Capacete Astronauta",
+    efeito: null
+  },
+  oculos: {
+    tipo: "cosmetico",
+    nome: "Óculos Descolado",
+    efeito: null
+  },
+  carnaval: {
+    tipo: "cosmetico",
+    nome: "Máscara de Carnaval",
+    efeito: null
+  },
+  // Armas
+  espada: {
+    tipo: "arma",
+    nome: "Espada Lendária",
+    efeito: { dano: 10 }
+  },
+  escudo: {
+    tipo: "arma",
+    nome: "Escudo Resistente",
+    efeito: { defesa: 5 }
+  },
+  arco: {
+    tipo: "arma",
+    nome: "Arco do Élfico",
+    efeito: { dano: 7 }
+  },
+  machado: {
+    tipo: "arma",
+    nome: "Machado de Guerra",
+    efeito: { dano: 8 }
+  },
+  cajado: {
+    tipo: "arma",
+    nome: "Cajado Arcano",
+    efeito: { dano: 5 }
+  },
+  // Itens bônus
+  coroa: {
+    tipo: "bonus",
+    nome: "Coroa Brilhante",
+    efeito: { moedasExtra: 3 } // +3 moedas por tarefa
+  },
+  livro: {
+    tipo: "bonus",
+    nome: "Livro de Feitiços",
+    efeito: { xpExtra: 0.2 } // +20% XP por tarefa
+  },
+};
+
 function getNomeItem(id) {
   const NOMES_ITENS = {
     hat: "Chapéu de Caubói",
@@ -989,6 +1065,29 @@ function criarBotoesXP(classeAtiva) {
   container.appendChild(divBotoes);
 }
 
+
+function calcularBonusXP(itensAtivos) {
+  let bonus = 0;
+  itensAtivos.forEach(item => {
+    const config = ITENS_CONFIG[item];
+    if (config && config.tipo === "bonus" && config.efeito?.xpExtra) {
+      bonus += config.efeito.xpExtra;
+    }
+  });
+  return bonus;
+}
+
+function calcularBonusMoedas(itensAtivos) {
+  let bonus = 0;
+  itensAtivos.forEach(item => {
+    const config = ITENS_CONFIG[item];
+    if (config && config.tipo === "bonus" && config.efeito?.moedasExtra) {
+      bonus += config.efeito.moedasExtra;
+    }
+  });
+  return bonus;
+}
+
 function xpNecessarioParaNivel(nivel) {
   return 100 + (nivel - 1) * 20;
 }
@@ -1003,17 +1102,23 @@ async function atualizarXP(tarefasConcluidas, classeAtiva) {
   const xpPorTarefa = 10;
   let xpTotal = 0;
 
+  const dadosUsuario = usuarioSnap.exists() ? usuarioSnap.data() : {};
+  const itensAtivos = dadosUsuario.itensAtivos || [];
+
   tarefasConcluidas.forEach(tarefa => {
     let xpBase = xpPorTarefa;
 
     const tags = tarefa.tags || [];
     const bonusCategorias = classesJogador[classeAtiva]?.bonusCategorias || [];
-
     const temBonus = tags.some(tag => bonusCategorias.includes(tag));
 
     if (temBonus) {
       xpBase += xpBase * classesJogador[classeAtiva].bonusXP;
     }
+
+    // Bônus de itens
+    const bonusXP = calcularBonusXP(itensAtivos);
+    xpBase += xpBase * bonusXP;
 
     xpTotal += xpBase;
   });
@@ -1882,7 +1987,12 @@ async function concluirTarefaComMoedas(tarefaId) {
   const dados = usuarioSnap.exists() ? usuarioSnap.data() : null;
   const nivel = dados && typeof dados.nivel === "number" ? dados.nivel : 1; // valor padrão
 
-  const ganho = 5 + nivel * 2; // fórmula de moedas
+  // Verifica itens ativos para bônus de moedas
+  const itensAtivos = dados && Array.isArray(dados.itensAtivos) ? dados.itensAtivos : [];
+  const bonusMoedas = calcularBonusMoedas(itensAtivos);
+
+  let ganho = 5 + nivel * 2;
+  ganho += bonusMoedas; // Aplica bônus de moedas dos itens ativos
 
   await updateDoc(usuarioRef, {
     moedas: increment(ganho)
