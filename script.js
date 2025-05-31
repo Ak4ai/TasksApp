@@ -234,12 +234,6 @@ async function adicionarTarefa(nome, descricao, dataLimite) {
   // 5) Recarrega a UI
   await carregarTarefas();
 }
-
-
-
-
-
-
   
   document.getElementById('fechar-modal').addEventListener('click', () => {
     document.getElementById('modal-criar-tarefa').style.display = 'none';
@@ -594,4 +588,24 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('abas-mostradas');
       }
     });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Evento para abrir modal de função do item
+  document.querySelectorAll('.item-card').forEach(card => {
+    // Evita conflito com o botão de comprar
+    card.addEventListener('click', function(e) {
+      if (e.target.classList.contains('btn-comprar')) return;
+      const nome = card.querySelector('.item-nome').textContent;
+      const funcao = card.getAttribute('data-funcao') || 'Sem função especial.';
+      document.getElementById('titulo-item-modal').textContent = nome;
+      document.getElementById('funcao-item-modal').textContent = funcao;
+      document.getElementById('modal-funcao-item').style.display = 'block';
+    });
+  });
+
+  // Fecha o modal
+  document.getElementById('fechar-modal-funcao').onclick = () => {
+    document.getElementById('modal-funcao-item').style.display = 'none';
+  };
 });
