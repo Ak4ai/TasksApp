@@ -1890,3 +1890,27 @@ div#ios-notif-info {
 .select-task:hover {
   border-color: var(--btn-border, #5390d9);
 }
+
+/* Centraliza e limita o tamanho do modal de função do item */
+#modal-funcao-item .modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 92vw;
+  max-width: 320px;
+  box-sizing: border-box;
+  padding: 20px 10px;
+  z-index: 9999;
+  text-align: center;
+  margin: 0; /* Remova qualquer margin */
+}
+
+/* Responsivo para telas muito pequenas */
+@media (max-width: 400px) {
+  #modal-funcao-item .modal-content {
+    width: 98vw;
+    max-width: 98vw;
+    padding: 12px 4px;
+  }
+}
