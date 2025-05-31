@@ -610,16 +610,7 @@ async function carregarTarefas() {
     const div = renderizarTarefa(t);
     containers[t.tipo].appendChild(div);
   });
-  const tarefasJaPremiadas = JSON.parse(localStorage.getItem('tarefasPremiadas')) || [];
-
-  for (const t of tarefasConcluidas) {
-    if (!tarefasJaPremiadas.includes(t.id)) {
-      await concluirTarefaComMoedas(t.id);
-      tarefasJaPremiadas.push(t.id);
-    }
-  }
-
-  localStorage.setItem('tarefasPremiadas', JSON.stringify(tarefasJaPremiadas));
+  
 
   tarefasExpiradas.forEach(t => adicionarNaCard(t, 'purple-card'));
   tarefasConcluidas.forEach(t => adicionarNaCard(t, 'blue-card'));
@@ -1402,7 +1393,7 @@ function abrirModalDetalhe(tarefa) {
 
     const permitirConclusao = document.getElementById('editar-permitirConclusao').checked;
     const frequencia = document.getElementById('editar-frequenciaSelecao').value;
-    const modoPersonalizado = document.getElementById('editar-modoPersonalizado').value;
+    const modoPersonalizado = document.getElementById('modoPersonalizado').value;
 
     const todasAsTags = [...new Set([
       ...(tagPrincipal ? [tagPrincipal] : []),
@@ -1410,25 +1401,37 @@ function abrirModalDetalhe(tarefa) {
       ...tagsExtras
     ])];
 
-    await atualizarTarefaNoFirestore(
-      tarefa.id,
-      {
-        nome: novoNome,
-        descricao: novaDescricao,
-        dataLimite: novaData,
-        tipo: novoTipo,
-        fixada: fixarNaHome,
-        permitirConclusao,
-        frequencia,
-        modoPersonalizado,
-        tags: todasAsTags
-      }
-    );
-
-    modal.style.display = 'none';
-    mostrarPopup(`Editando tarefa: ${tarefa.nome}`, 3000);
-    await carregarTarefas();
+    // MONTE O OBJETO CONFORME O TIPO
+  let updateData = {
+    nome: novoNome,
+    descricao: novaDescricao,
+    dataLimite: novaData,
+    tipo: novoTipo,
+    fixada: fixarNaHome,
+    tags: todasAsTags
   };
+
+  if (novoTipo === 'periodico') {
+    updateData.frequencia = frequencia;
+    updateData.modoPersonalizado = null;
+    updateData.permitirConclusao = null;
+  } else if (novoTipo === 'personalizado') {
+    updateData.modoPersonalizado = modoPersonalizado;
+    updateData.permitirConclusao = permitirConclusao;
+    updateData.frequencia = frequencia; // se usar frequência personalizada
+  } else {
+    // Não periódica: remova campos extras
+    updateData.frequencia = null;
+    updateData.modoPersonalizado = null;
+    updateData.permitirConclusao = null;
+  }
+
+  await atualizarTarefaNoFirestore(tarefa.id, updateData);
+
+  modal.style.display = 'none';
+  mostrarPopup(`Editando tarefa: ${tarefa.nome}`, 3000);
+  await carregarTarefas();
+};
 
   // Excluir
   document.getElementById('excluir-tarefa').onclick = async () => {
@@ -1697,7 +1700,7 @@ export async function ajustarRecurrentes(tarefas) {
     const hoje = new Date();
 
     // Só recria para tarefas periódicas!
-    if (t.tipo === 'periodico') {
+    if (t.tipo === 'periodico' && t.finalizada) {
       const proxima = new Date(dataLimiteAnterior);
       switch (t.frequencia) {
         case 'diario':
