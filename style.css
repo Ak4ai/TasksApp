@@ -70,6 +70,11 @@ body.ios-pwa .bottom-nav {
   box-sizing: border-box;
 }
 
+.item-card:hover {
+  transform: scale(1.04);
+  box-shadow: 0 4px 16px #0003;
+}
+
 .item-imagem {
   max-width: 80px;
   max-height: 80px;
@@ -106,6 +111,34 @@ body.ios-pwa .bottom-nav {
 
 .btn-comprar:hover {
   background-color: #c2bdbd;
+}
+
+/* Títulos das categorias da loja */
+.loja-titulo {
+  font-size: 1.5em;
+  font-weight: bold;
+  text-align: center;
+  margin: 30px 0 10px 0;
+  letter-spacing: 1px;
+  padding-left: 0;
+}
+
+/* Cosméticos */
+.loja-titulo-cosmeticos {
+  color: #b388ff;
+  text-shadow: 0 2px 8px #6c3bb3a0;
+}
+
+/* Armas */
+.loja-titulo-armas {
+  color: #4fc3f7;
+  text-shadow: 0 2px 8px #1e88e5a0;
+}
+
+/* Bônus */
+.loja-titulo-bonus {
+  color: #ffe082;
+  text-shadow: 0 2px 8px #bfa000a0;
 }
 
 
