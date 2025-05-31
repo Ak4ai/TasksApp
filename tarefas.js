@@ -84,12 +84,22 @@ const ITENS_CONFIG = {
   coroa: {
     tipo: "bonus",
     nome: "Coroa Brilhante",
-    efeito: { moedasExtra: 3 } // +3 moedas por tarefa
+    efeito: { moedasExtra: 5 } // +5 moedas por tarefa
   },
   livro: {
     tipo: "bonus",
     nome: "Livro de Feitiços",
     efeito: { xpExtra: 0.2 } // +20% XP por tarefa
+  },
+  pergaminho: {
+    tipo: "bonus",
+    nome: "Pergaminho Antigo",
+    efeito: { xpExtra: 5 } // +5 de XP por tarefa
+  },
+  anel: {
+    tipo: "bonus",
+    nome: "Anel do Herói",
+    efeito: { moedasExtra: 5 } // +3 moedas por tarefa
   },
 };
 
