@@ -989,6 +989,9 @@ function criarBotoesXP(classeAtiva) {
   container.appendChild(divBotoes);
 }
 
+function xpNecessarioParaNivel(nivel) {
+  return 100 + (nivel - 1) * 20;
+}
 
 async function atualizarXP(tarefasConcluidas, classeAtiva) {
   const usuario = auth.currentUser;
@@ -1015,9 +1018,17 @@ async function atualizarXP(tarefasConcluidas, classeAtiva) {
     xpTotal += xpBase;
   });
 
-  const nivel = Math.floor(xpTotal / 100) + 1;
-  const xpAtual = xpTotal % 100;
-  const porcentagem = Math.min(100, (xpAtual / 100) * 100);
+  let xpRestante = xpTotal;
+  let nivel = 1;
+  let xpParaProximo = xpNecessarioParaNivel(nivel);
+
+  while (xpRestante >= xpParaProximo) {
+    xpRestante -= xpParaProximo;
+    nivel++;
+    xpParaProximo = xpNecessarioParaNivel(nivel);
+  }
+  const xpAtual = xpRestante;
+  const porcentagem = Math.min(100, (xpAtual / xpParaProximo) * 100);
 
   // Atualiza ou cria o documento do usuário
   if (usuarioSnap.exists()) {
@@ -1037,7 +1048,7 @@ async function atualizarXP(tarefasConcluidas, classeAtiva) {
 
   xpInfo.querySelector('strong').textContent = `Nível ${nivel} (${classeAtiva})`;
   xpInfo.querySelector('.xp-fill').style.width = `${porcentagem}%`;
-  xpInfo.querySelector('span').textContent = `XP: ${Math.floor(xpAtual)} / 100`;
+  xpInfo.querySelector('span').textContent = `XP: ${Math.floor(xpAtual)} / ${xpParaProximo}`;
 
   const corPorClasse = {
     'Guerreiro': '#FF5733',
@@ -1052,7 +1063,7 @@ async function atualizarXP(tarefasConcluidas, classeAtiva) {
   // ATUALIZA O LEVEL NA BARRA SUPERIOR
   const classNameSpan = document.querySelector('.class-name');
   if (classNameSpan) {
-    classNameSpan.textContent = `👤 ${Math.floor(xpAtual)} / 100`;
+    classNameSpan.textContent = `👤 ${Math.floor(xpAtual)} / ${xpParaProximo}`;
   }
 
   return nivel;
@@ -1077,7 +1088,7 @@ function adicionarNaCard(tarefa, cardClass) {
     p.innerHTML   = `<strong>${tarefa.nome}</strong> – até ${dataFormatada} às ${horaFormatada}`;
     p.setAttribute('data-id', tarefa.id);
 
-    card.appendChild(p);
+  card.appendChild(p);
   adicionarIconeDeExcluir(p, tarefa);
 }
 
