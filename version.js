@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `Adição de mais alguns itens`, hash: '801384e', date: '2025-05-31 16:49:01' };
+window.APP_VERSION = { msg: `Conserto da divisão da loja`, hash: 'f6e711a', date: '2025-05-31 19:08:41' };
