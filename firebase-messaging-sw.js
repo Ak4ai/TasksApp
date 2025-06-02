@@ -67,11 +67,13 @@ self.addEventListener('install', function(event) {
   } catch (e) {
     data = {};
   }
-  const title = data.title || 'Nova notificação';
+  // Corrigido: pega do objeto data.data
+  const payload = data.data || {};
+  const title = payload.title || 'Nova notificação';
   const options = {
-    body: data.body || '',
-    badge: data.badge || '/badge.png',
-    color: '#ca77f9' // Cor de fundo para Android
+    body: payload.body || '',
+    badge: payload.badge || '/badge.png',
+    color: '#ca77f9'
   };
   event.waitUntil(
     self.registration.showNotification(title, options)
