@@ -58,10 +58,26 @@ async function solicitarPermissaoNotificacao() {
 // Aguarde o SW estar pronto antes de pedir permissão/token
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.ready.then(() => {
-    solicitarPermissaoNotificacao();
+    if (_isIOS === null) isIOS();
+    if (_isIOS) {
+      // Se já aceitou permissão, só busca o token
+      if (Notification.permission === 'granted') {
+        buscarTokenFCM();
+      }
+      // Se não, só mostra o modal (não chama solicitarPermissaoNotificacao aqui!)
+    } else {
+      solicitarPermissaoNotificacao();
+    }
   });
 } else {
-  solicitarPermissaoNotificacao(); // fallback para navegadores sem SW
+  if (_isIOS === null) isIOS();
+  if (_isIOS) {
+    if (Notification.permission === 'granted') {
+      buscarTokenFCM();
+    }
+  } else {
+    solicitarPermissaoNotificacao();
+  }
 }
 
 // NOVO: Permitir ativação manual via botão (útil para iOS/PWA)
@@ -173,4 +189,35 @@ function mostrarModalNotificacaoIOS() {
 
   const modal = document.getElementById('ios-notification-modal');
   if (modal) modal.style.display = 'flex';
+}
+
+async function buscarTokenFCM() {
+  try {
+    // Registra o SW se necessário
+    const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    const token = await getToken(messaging, {
+      vapidKey: 'BGqnPKyVrK1n4mnSspDY75WGNYDEqJ4k0MBamGuMhdSMImw5q33T-ssiEWHRczZrq01XNP4xuxrKXlUkKluXyAQ',
+      serviceWorkerRegistration: swReg
+    });
+    console.log('Token FCM:', token);
+    // Salva/exibe o token como já faz em solicitarPermissaoNotificacao
+    const el = document.getElementById('fcm-token');
+    if (el) el.textContent = token || 'Não foi possível obter o token';
+
+    // Salva no Firestore se autenticado
+    const db = getFirestore();
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (user) {
+      await setDoc(doc(db, `usuarios/${user.uid}/fcmTokens`, token), { token });
+      console.log('Token salvo no Firestore para o usuário:', user.uid);
+    } else {
+      pendingFcmToken = token;
+      console.warn('Usuário não autenticado, token FCM será salvo após login.');
+    }
+  } catch (e) {
+    console.error('Erro ao obter token FCM:', e);
+    const el = document.getElementById('fcm-token');
+    if (el) el.textContent = 'Erro ao obter token';
+  }
 }
