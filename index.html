@@ -450,25 +450,28 @@
         </div>
         
         <script>
-          document.getElementById('clear-cache-button').addEventListener('click', () => {
-            if (confirm('Tem certeza que deseja limpar o cache, LocalStorage e recarregar a página?')) {
+          document.getElementById('clear-cache-button').addEventListener('click', async () => {
+            if (confirm('Tem certeza que deseja limpar o cache, LocalStorage, desinstalar o Service Worker e recarregar a página?')) {
               // Limpar LocalStorage
               localStorage.clear();
-
+        
               // Limpar Cache
               if ('caches' in window) {
-                caches.keys().then(cacheNames => {
-                  cacheNames.forEach(cacheName => {
-                    caches.delete(cacheName);
-                  });
-                });
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
               }
-
+        
+              // Desinstalar Service Worker
+              if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(registrations.map(reg => reg.unregister()));
+                console.log('Todos os Service Workers foram desinstalados.');
+              }
+        
               // Hard Refresh
               location.reload(true);
             }
           });
-          
         </script>
       </div>
       <!-- Aba Loja -->
