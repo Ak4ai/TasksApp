@@ -417,6 +417,20 @@
             <button id="clear-cache-button">Limpar Cache</button>
             <button id="delete-all-tasks-button" style="color: red;">Excluir Todas as Tarefas</button>
             <button id="test-notification-btn" style="background:#4caf50; color:white;">Testar Notificação</button>
+            <!-- Modal de Teste de Notificação -->
+            <div id="modal-test-notification" class="modal" style="display:none;">
+              <div class="modal-content">
+                <span class="close-button" id="fechar-modal-test-notification">&times;</span>
+                <h2>Testar Notificação</h2>
+                <label for="test-notif-title">Título:</label>
+                <input type="text" id="test-notif-title" placeholder="Título da notificação" />
+                <label for="test-notif-body">Mensagem:</label>
+                <input type="text" id="test-notif-body" placeholder="Mensagem da notificação" />
+                <label for="test-notif-datetime">Data/Hora de envio:</label>
+                <input type="datetime-local" id="test-notif-datetime" />
+                <button id="enviar-test-notification" style="margin-top:10px;">Agendar Notificação</button>
+              </div>
+            </div>
             <button id="ativar-notificacoes-btn" style="background:#1976d2; color:white;">Ativar Notificações</button>
           </div>  
           <h3>Versionamento</h3>

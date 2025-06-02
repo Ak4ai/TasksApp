@@ -99,30 +99,30 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-document.getElementById('test-notification-btn').addEventListener('click', async () => {
-  const db = getFirestore();
-  const auth = getAuth();
-  const user = auth.currentUser;
-  if (!user) {
-    alert('Faça login para testar notificações.');
-    return;
-  }
-  // Cria uma notificação planejada para agora
-  await addDoc(collection(db, "scheduledNotifications"), {
-    uid: user.uid,
-    title: "Notificação de Teste",
-    body: "Esta é uma notificação de teste enviada pelo botão.",
-    badge: "https://raw.githubusercontent.com/Ak4ai/TasksApp/e38ef409e5a90d423d1b5034e2229433d85cd538/badge.png",
-    scheduledAt: new Date(),
-    sent: false,
-    createdAt: serverTimestamp()
-  });
-  // Chama a API para enviar notificações
-  fetch('https://runa-phi.vercel.app/api/send-notifications')
-    .then(r => r.json())
-    .then(data => alert('Resultado: ' + JSON.stringify(data)))
-    .catch(e => alert('Erro ao chamar API: ' + e));
-});
+// document.getElementById('test-notification-btn').addEventListener('click', async () => {
+//   const db = getFirestore();
+//   const auth = getAuth();
+//   const user = auth.currentUser;
+//   if (!user) {
+//     alert('Faça login para testar notificações.');
+//     return;
+//   }
+//   // Cria uma notificação planejada para agora
+//   await addDoc(collection(db, "scheduledNotifications"), {
+//     uid: user.uid,
+//     title: "Notificação de Teste",
+//     body: "Esta é uma notificação de teste enviada pelo botão.",
+//     badge: "https://raw.githubusercontent.com/Ak4ai/TasksApp/e38ef409e5a90d423d1b5034e2229433d85cd538/badge.png",
+//     scheduledAt: new Date(),
+//     sent: false,
+//     createdAt: serverTimestamp()
+//   });
+//   // Chama a API para enviar notificações
+//   fetch('https://runa-phi.vercel.app/api/send-notifications')
+//     .then(r => r.json())
+//     .then(data => alert('Resultado: ' + JSON.stringify(data)))
+//     .catch(e => alert('Erro ao chamar API: ' + e));
+// });
 
 console.log('notifications.js carregado');
 
@@ -221,3 +221,60 @@ async function buscarTokenFCM() {
     if (el) el.textContent = 'Erro ao obter token';
   }
 }
+
+// Modal de Teste de Notificação
+const testNotifBtn = document.getElementById('test-notification-btn');
+const modalTestNotif = document.getElementById('modal-test-notification'); // <-- CORRIGIDO
+const fecharModalTestNotif = document.getElementById('fechar-modal-test-notification'); // <-- CORRIGIDO
+const enviarTestNotif = document.getElementById('enviar-test-notification'); // <-- CORRIGIDO
+
+if (testNotifBtn && modalTestNotif && fecharModalTestNotif && enviarTestNotif) {
+  testNotifBtn.addEventListener('click', () => {
+    modalTestNotif.style.display = 'flex';
+    // Preenche data/hora padrão para agora
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 1); // 1 min no futuro
+    document.getElementById('test-notif-datetime').value = now.toISOString().slice(0,16);
+  });
+
+  fecharModalTestNotif.onclick = () => {
+    modalTestNotif.style.display = 'none';
+  };
+
+  enviarTestNotif.onclick = async () => {
+    const title = document.getElementById('test-notif-title').value || 'Notificação de Teste';
+    const body = document.getElementById('test-notif-body').value || 'Esta é uma notificação de teste.';
+    const datetime = document.getElementById('test-notif-datetime').value;
+    if (!datetime) {
+      alert('Escolha a data/hora de envio!');
+      return;
+    }
+    const db = getFirestore();
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) {
+      alert('Faça login para testar notificações.');
+      return;
+    }
+    await addDoc(collection(db, "scheduledNotifications"), {
+      uid: user.uid,
+      title,
+      body,
+      badge: "https://raw.githubusercontent.com/Ak4ai/TasksApp/e38ef409e5a90d423d1b5034e2229433d85cd538/badge.png",
+      scheduledAt: new Date(datetime),
+      sent: false,
+      createdAt: serverTimestamp()
+    });
+    fetch('https://runa-phi.vercel.app/api/send-notifications', { method: 'POST' })
+      .then(r => r.json())
+      .then(data => alert('Resultado: ' + JSON.stringify(data)))
+      .catch(e => alert('Erro ao chamar API: ' + e));
+    modalTestNotif.style.display = 'none';
+  };
+}
+
+window.onclick = function(event) {
+  if (event.target === modalTestNotif) {
+    modalTestNotif.style.display = "none";
+  }
+};
