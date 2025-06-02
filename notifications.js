@@ -166,7 +166,6 @@ function mostrarModalNotificacaoIOS() {
   // Não mostra se não for iOS
   if (_isIOS === null) isIOS(); // garante que _isIOS está setado
   if (!_isIOS) return;
-  solicitarPermissaoNotificacao();
   // Não mostra se já marcou "nunca mostrar"
   if (localStorage.getItem('iosNotifNeverShow')) return;
   // Não mostra se já aceitou a permissão
