@@ -1,10 +1,100 @@
 import { auth } from './auth.js';
 import { db, carregarMeuSimpleID } from './firebase-config.js';
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import { collection, addDoc, getDocs, Timestamp, deleteDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { doc, collection, addDoc, getDocs, Timestamp, deleteDoc, serverTimestamp, setDoc, getDoc, increment } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 // script.js
 import { carregarTarefas,mostrarPopup,carregarInventario } from './tarefas.js';
+export { atacarInimigo, inimigoAtaca, darRecompensa };
 
+
+// Retorna um novo inimigo padrão
+function getNovoInimigo() {
+  return {
+    nome: "Goblin",
+    vidaAtual: 100,
+    vidaMaxima: 100,
+    imagem: "img/goblin.png",
+    recompensaXP: 100,
+    recompensaMoedas: 50,
+    danoPorExpirada: 10
+  };
+}
+
+// Carrega o inimigo do Firestore (ou cria um novo se não existir)
+async function carregarInimigoFirestore(uid) {
+  const ref = doc(db, "usuarios", uid, "inimigo", "atual");
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    return snap.data();
+  } else {
+    const novo = getNovoInimigo();
+    await setDoc(ref, novo);
+    return novo;
+  }
+}
+
+// Salva o inimigo no Firestore
+async function salvarInimigoFirestore(uid, inimigo) {
+  const ref = doc(db, "usuarios", uid, "inimigo", "atual");
+  await setDoc(ref, inimigo);
+}
+
+async function atualizarUIInimigo() {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+  const inimigo = await carregarInimigoFirestore(usuario.uid);
+
+  document.getElementById('inimigo-img').src = inimigo.imagem;
+  document.getElementById('inimigo-nome').textContent = inimigo.nome;
+  document.getElementById('inimigo-vida-text').textContent = `${inimigo.vidaAtual} / ${inimigo.vidaMaxima}`;
+  document.getElementById('inimigo-recompensa').textContent =
+    `Recompensa: ${inimigo.recompensaXP} XP, ${inimigo.recompensaMoedas} moedas`;
+
+  // Atualiza barra de vida
+  const percent = Math.max(0, Math.round((inimigo.vidaAtual / inimigo.vidaMaxima) * 100));
+  document.getElementById('inimigo-vida-fill').style.width = percent + "%";
+}
+
+async function atacarInimigo(dano = 10) {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+  let inimigo = await carregarInimigoFirestore(usuario.uid);
+
+  inimigo.vidaAtual -= dano;
+  if (inimigo.vidaAtual <= 0) {
+    // Derrotou o inimigo!
+    mostrarPopup(`Você derrotou ${inimigo.nome}! Ganhou ${inimigo.recompensaXP} XP e ${inimigo.recompensaMoedas} moedas!`);
+    await darRecompensa(usuario.uid, inimigo.recompensaXP, inimigo.recompensaMoedas);
+    inimigo = getNovoInimigo();
+  }
+  await salvarInimigoFirestore(usuario.uid, inimigo);
+  atualizarUIInimigo();
+}
+
+async function inimigoAtaca() {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+  let inimigo = await carregarInimigoFirestore(usuario.uid);
+
+  mostrarPopup(`${inimigo.nome} te atacou! Você perdeu ${inimigo.danoPorExpirada} XP!`);
+  await perderXP(usuario.uid, inimigo.danoPorExpirada);
+}
+
+async function darRecompensa(uid, xp, moedas) {
+  const usuarioRef = doc(db, "usuarios", uid);
+  // Atualiza os campos de xp e moedas (cria se não existir)
+  await setDoc(usuarioRef, {
+    xp: increment(xp),
+    moedas: increment(moedas)
+  }, { merge: true });
+}
+
+async function perderXP(uid, xp) {
+  const usuarioRef = doc(db, "usuarios", uid);
+  await setDoc(usuarioRef, {
+    xp: increment(-Math.abs(xp))
+  }, { merge: true });
+}
 
 // Variável para armazenar a fila de mensagens
 const filaDeMensagens = [];
@@ -222,8 +312,6 @@ async function adicionarTarefa(nome, descricao, dataLimite) {
   // 4) Grava no Firestore
   const tarefasRef = collection(db, "usuarios", usuario.uid, "tarefas");
   const docRef = await addDoc(tarefasRef, novaTarefa);
-  
-  // ...existing code...
   
   // 5) Agendar notificações se selecionado
   if (notificacoes.length > 0) {
@@ -780,6 +868,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }, 2000);
 
   // ...existing code...
+  atualizarUIInimigo();
 });
-
 

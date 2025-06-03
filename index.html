@@ -346,7 +346,7 @@
       <!-- Aba Home -->
       <div id="tab-home" class="tab-content active">
         <div class="home-layout">
-          <!-- ...existing code... -->
+          
           <div class="tarefas-slider-coluna">
             <div class="tarefas-slider-header">
               <button id="tarefas-slider-prev" aria-label="Anterior" class="tarefas-slider-nav-btn">&#8592;</button>
@@ -373,7 +373,16 @@
               </div>
             </div>
           </div>
-          <!-- ...existing code... -->
+          
+          <div id="inimigo-container" style="display: flex; flex-direction: column; align-items: center; margin: 20px 0;">
+            <img id="inimigo-img" src="img/goblin.png" alt="Inimigo" style="width: 80px; height: 80px; margin-bottom: 8px;">
+            <div id="inimigo-nome" style="font-weight: bold; font-size: 1.2em;">Goblin</div>
+            <div id="inimigo-vida-bar" style="width: 120px; height: 18px; background: #333; border-radius: 9px; margin: 8px 0; overflow: hidden;">
+              <div id="inimigo-vida-fill" style="height: 100%; background: #4caf50; width: 100%; transition: width 0.3s;"></div>
+            </div>
+            <div id="inimigo-vida-text" style="font-size: 0.95em;">100 / 100</div>
+            <div id="inimigo-recompensa" style="font-size: 0.95em; margin-top: 6px;">Recompensa: 100 XP, 50 moedas</div>
+          </div>
 
           <!-- Coluna da direita: Gráficos -->
           <div class="grafico-coluna">
