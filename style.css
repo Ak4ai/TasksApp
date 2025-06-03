@@ -2123,6 +2123,10 @@ div#ios-notif-info {
     max-width: 98vw;
     padding: 12px 4px;
   }
+
+  .item-card{
+    width: 40%;
+  }
 }
 
 /* ...existing code... */
