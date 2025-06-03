@@ -336,7 +336,16 @@
 
           <!-- Coluna da direita: Gráficos -->
           <div class="grafico-coluna">
-            <h3 style="text-align: center; margin-bottom: 20px;">Progresso de Tarefas</h3>
+            <div class="grafico-header">
+              <button id="grafico-prev" aria-label="Anterior" class="grafico-nav-btn">&#8592;</button>
+              <h3 class="grafico-titulo">Progresso de Tarefas</h3>
+              <button id="grafico-next" aria-label="Próximo" class="grafico-nav-btn">&#8594;</button>
+            </div>
+            <div class="grafico-indicadores">
+              <span class="grafico-indicador" data-idx="0"></span>
+              <span class="grafico-indicador" data-idx="1"></span>
+              <span class="grafico-indicador" data-idx="2"></span>
+            </div>
             <div class="grafico-grid">
               <div class="grafico-card">
                 <canvas id="graficoDia"></canvas>
@@ -647,6 +656,7 @@
       });
     </script>
   </div>
+  
   <!-- NAVEGAÇÃO INFERIOR -->
   <div class="bottom-nav">
     <button class="nav-button" data-tab="tab-home">🏠</button>

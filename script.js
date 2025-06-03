@@ -609,3 +609,76 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modal-funcao-item').style.display = 'none';
   };
 });
+
+// ...existing code...
+
+function isMobile() {
+  return window.innerWidth <= 1040;
+}
+function setupGraficoCarousel() {
+  const grid = document.querySelector('.grafico-grid');
+  const cards = Array.from(document.querySelectorAll('.grafico-card'));
+  const prevBtn = document.getElementById('grafico-prev');
+  const nextBtn = document.getElementById('grafico-next');
+  const indicadores = Array.from(document.querySelectorAll('.grafico-indicador'));
+  if (!grid || cards.length === 0) return;
+
+  let current = 0;
+
+  function updateIndicadores(idx) {
+    indicadores.forEach((el, i) => {
+      el.classList.toggle('ativo', i === idx);
+    });
+  }
+
+  function scrollToCard(idx) {
+    if (!isMobile()) return;
+    current = Math.max(0, Math.min(idx, cards.length - 1));
+    cards[current].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    updateIndicadores(current);
+    // Desabilita botões nas extremidades
+    if (prevBtn && nextBtn) {
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === cards.length - 1;
+    }
+  }
+
+  // Botões
+  if (prevBtn && nextBtn) {
+    prevBtn.onclick = () => scrollToCard(current - 1);
+    nextBtn.onclick = () => scrollToCard(current + 1);
+  }
+
+  // Indicadores clicáveis
+  indicadores.forEach((el, i) => {
+    el.onclick = () => scrollToCard(i);
+  });
+
+  // Swipe touch events
+  let startX = null;
+  grid.addEventListener('touchstart', e => {
+    if (!isMobile()) return;
+    startX = e.touches[0].clientX;
+  });
+  grid.addEventListener('touchend', e => {
+    if (!isMobile() || startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 50) {
+      if (dx < 0) scrollToCard(current + 1);
+      else scrollToCard(current - 1);
+    }
+    startX = null;
+  });
+
+  // Snap para o card correto ao redimensionar
+  window.addEventListener('resize', () => {
+    if (isMobile()) {
+      scrollToCard(current);
+    }
+  });
+
+  // Inicializa
+  if (isMobile()) scrollToCard(0);
+  else updateIndicadores(0);
+}
+window.addEventListener('DOMContentLoaded', setupGraficoCarousel);
