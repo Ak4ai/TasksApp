@@ -323,16 +323,33 @@
       <!-- Aba Home -->
       <div id="tab-home" class="tab-content active">
         <div class="home-layout">
-          <!-- Coluna da esquerda: Tarefas Fixadas -->
-          <div id="tarefas-fixadas" class="card green-card">
-            <span class="card-title">Tarefas Fixadas</span>
-            <div class="tasks-container"></div>
+          <!-- ...existing code... -->
+          <div class="tarefas-slider-coluna">
+            <div class="tarefas-slider-header">
+              <button id="tarefas-slider-prev" aria-label="Anterior" class="tarefas-slider-nav-btn">&#8592;</button>
+              <h3 class="tarefas-slider-titulo">Tarefas</h3>
+              <button id="tarefas-slider-next" aria-label="Próximo" class="tarefas-slider-nav-btn">&#8594;</button>
+            </div>
+            <div class="tarefas-slider-indicadores">
+              <span class="tarefas-slider-indicador" data-idx="0"></span>
+              <span class="tarefas-slider-indicador" data-idx="1"></span>
+            </div>
+            <div class="tarefas-slider-grid">
+              <div class="tarefas-slider-card">
+                <div id="tarefas-fixadas" class="card green-card">
+                  <span class="card-title">Tarefas Fixadas</span>
+                  <div class="tasks-container"></div>
+                </div>
+              </div>
+              <div class="tarefas-slider-card">
+                <div id="tarefas-proximas" class="card green-card">
+                  <span class="card-title">Tarefas Próximas (24h)</span>
+                  <div class="tasks-container"></div>
+                </div>
+              </div>
+            </div>
           </div>
-          <!-- Container para tarefas próximas -->
-          <div id="tarefas-proximas" class="card green-card">
-            <span class="card-title">Tarefas Próximas (24h)</span>
-            <div class="tasks-container"></div>
-          </div>
+          <!-- ...existing code... -->
 
           <!-- Coluna da direita: Gráficos -->
           <div class="grafico-coluna">
