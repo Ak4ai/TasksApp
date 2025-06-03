@@ -682,3 +682,71 @@ function setupGraficoCarousel() {
   else updateIndicadores(0);
 }
 window.addEventListener('DOMContentLoaded', setupGraficoCarousel);
+
+// ...existing code...
+
+function isMobileTarefasSlider() {
+  return window.innerWidth <= 1040;
+}
+function setupTarefasSliderCarousel() {
+  const grid = document.querySelector('.tarefas-slider-grid');
+  const cards = Array.from(document.querySelectorAll('.tarefas-slider-card'));
+  const prevBtn = document.getElementById('tarefas-slider-prev');
+  const nextBtn = document.getElementById('tarefas-slider-next');
+  const indicadores = Array.from(document.querySelectorAll('.tarefas-slider-indicador'));
+  if (!grid || cards.length === 0) return;
+
+  let current = 0;
+
+  function updateIndicadores(idx) {
+    indicadores.forEach((el, i) => {
+      el.classList.toggle('ativo', i === idx);
+    });
+  }
+
+  function scrollToCard(idx) {
+    if (!isMobileTarefasSlider()) return;
+    current = Math.max(0, Math.min(idx, cards.length - 1));
+    cards[current].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    updateIndicadores(current);
+    if (prevBtn && nextBtn) {
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === cards.length - 1;
+    }
+  }
+
+  if (prevBtn && nextBtn) {
+    prevBtn.onclick = () => scrollToCard(current - 1);
+    nextBtn.onclick = () => scrollToCard(current + 1);
+  }
+
+  indicadores.forEach((el, i) => {
+    el.onclick = () => scrollToCard(i);
+  });
+
+  let startX = null;
+  grid.addEventListener('touchstart', e => {
+    if (!isMobileTarefasSlider()) return;
+    startX = e.touches[0].clientX;
+  });
+  grid.addEventListener('touchend', e => {
+    if (!isMobileTarefasSlider() || startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 50) {
+      if (dx < 0) scrollToCard(current + 1);
+      else scrollToCard(current - 1);
+    }
+    startX = null;
+  });
+
+  window.addEventListener('resize', () => {
+    if (isMobileTarefasSlider()) {
+      scrollToCard(current);
+    }
+  });
+
+  if (isMobileTarefasSlider()) scrollToCard(0);
+  else updateIndicadores(0);
+}
+window.addEventListener('DOMContentLoaded', setupTarefasSliderCarousel);
+// ...existing code...
