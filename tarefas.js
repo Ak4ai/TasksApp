@@ -703,6 +703,12 @@ async function carregarTarefas() {
   graficoSemana = criarGraficoPizza(ctxSemana, percentualSemana, 'Tarefas Concluídas Esta Semana');
   graficoMes = criarGraficoPizza(ctxMes, percentualMes, 'Tarefas Concluídas Este Mês');
   renderizarCalendario(tarefas);
+
+  // ⬇️ ESCONDE O LOADER AQUI
+  const loader = document.getElementById('app-loader');
+  if (loader) loader.style.display = 'none';
+
+  carregandoTarefas = false;
 }
 
 

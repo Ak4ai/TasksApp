@@ -757,3 +757,18 @@ function setupTarefasSliderCarousel() {
 }
 window.addEventListener('DOMContentLoaded', setupTarefasSliderCarousel);
 
+// ...existing code...
+window.addEventListener('DOMContentLoaded', () => {
+  // ...existing code...
+
+  // Mostra aviso se o carregamento demorar mais de 6 segundos
+  setTimeout(() => {
+    const warning = document.getElementById('loader-warning');
+    if (warning && document.getElementById('app-loader').style.display !== 'none') {
+      warning.style.display = 'flex';
+    }
+  }, 2000);
+
+  // ...existing code...
+});
+// ...existing code...
