@@ -136,6 +136,17 @@
 
       <input type="datetime-local" id="dataLimite" required>
 
+      <!-- ...dentro de #modal-criar-tarefa .modal-content, antes do botão Criar tarefa... -->
+      <div id="notificacoes-wrapper" style="margin: 12px 0;">
+        <label>Notificar:</label>
+        <div style="display: flex;flex-wrap: wrap;gap: 10px;flex-direction: row;align-content: center;align-items: center;justify-content: center;">
+          <label><input type="checkbox" class="notificacao-checkbox" value="30"> 30 min antes</label>
+          <label><input type="checkbox" class="notificacao-checkbox" value="15"> 15 min antes</label>
+          <label><input type="checkbox" class="notificacao-checkbox" value="60"> 1 hora antes</label>
+          <label><input type="checkbox" class="notificacao-checkbox" value="1440"> 1 dia antes</label>
+        </div>
+      </div>
+
       <label for="anexoArquivo">Anexo (opcional):</label>
       <input type="file" id="anexoArquivo" />
 

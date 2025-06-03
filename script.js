@@ -1,7 +1,7 @@
 import { auth } from './auth.js';
 import { db, carregarMeuSimpleID } from './firebase-config.js';
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import { collection, addDoc, getDocs, Timestamp, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { collection, addDoc, getDocs, Timestamp, deleteDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 // script.js
 import { carregarTarefas,mostrarPopup,carregarInventario } from './tarefas.js';
 
@@ -214,31 +214,41 @@ async function adicionarTarefa(nome, descricao, dataLimite) {
     // modo 'unico' não adiciona mais nada
   }
 
-
-
+  const notificacoes = Array.from(document.querySelectorAll('.notificacao-checkbox:checked'))
+    .map(cb => parseInt(cb.value, 10)); // minutos antes
+  
+  novaTarefa.notificacoes = notificacoes;
+  
   // 4) Grava no Firestore
   const tarefasRef = collection(db, "usuarios", usuario.uid, "tarefas");
   const docRef = await addDoc(tarefasRef, novaTarefa);
-
-
-  // Lida com o anexo (se houver)
-  const input = document.getElementById('anexoArquivo');
-  const arquivo = input.files[0];
-
-  if (arquivo) {
-    const base64 = await fileToBase64(arquivo);
-    const anexoObj = {
-      nome: arquivo.name,
-      tipo: arquivo.type,
-      base64: base64
-    };
-
-    // Salva no localStorage usando o ID da tarefa
-    localStorage.setItem(`anexos_${docRef.id}`, JSON.stringify(anexoObj));
+  
+  // ...existing code...
+  
+  // 5) Agendar notificações se selecionado
+  if (notificacoes.length > 0) {
+    const dataTarefa = new Date(dataLimite);
+    for (const minutosAntes of notificacoes) {
+      const dataNotificacao = new Date(dataTarefa.getTime() - minutosAntes * 60000);
+      await addDoc(collection(db, "scheduledNotifications"), {
+        uid: usuario.uid,
+        tarefaId: docRef.id,
+        title: `Tarefa: ${nome}`,
+        body: `Sua tarefa "${nome}" está chegando!\nData limite: ${dataLimiteDate.toLocaleString()}`,
+        badge: "https://raw.githubusercontent.com/Ak4ai/TasksApp/e38ef409e5a90d423d1b5034e2229433d85cd538/badge.png",
+        scheduledAt: dataNotificacao,
+        sent: false,
+        createdAt: serverTimestamp()
+      });
+    }
+    // Chama a API para processar notificações agendadas
+    fetch('https://runa-phi.vercel.app/api/send-notifications', { method: 'POST' })
+      .then(r => r.json())
+      .then(data => console.log('Notificações processadas:', data))
+      .catch(e => console.warn('Erro ao chamar API de notificações:', e));
   }
 
-
-  // 5) Recarrega a UI
+  // 6) Recarrega a UI
   await carregarTarefas();
 }
   
@@ -771,4 +781,5 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // ...existing code...
 });
-// ...existing code...
+
+

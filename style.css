@@ -1451,10 +1451,6 @@ textarea:focus {
   display: block;
 }
 
-#modal-criar-tarefa label:first-child {
-  margin-top: 0; /* Remove o espaço do primeiro label do modal */
-}
-
 .popup-personagem {
   position: fixed;
   top: 20px;
@@ -1499,7 +1495,6 @@ textarea:focus {
 ;
     justify-content: center;
     align-items: center;
-    gap: 20px;
     align-content: center;
     flex-direction: column;
     flex-wrap: wrap;
