@@ -1,6 +1,7 @@
 import { auth } from './auth.js';
 import { db } from './firebase-config.js';
 import { collection, query, where, getDocs, getDoc, doc, updateDoc, deleteDoc, Timestamp, addDoc, increment, arrayUnion, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { atacarInimigo, inimigoAtaca, darRecompensa } from './script.js';
 export { carregarTarefas, tempoMaisRecente, atualizarDataAtual };
 
 let carregandoTarefas = false;
@@ -419,6 +420,23 @@ function renderizarTarefa(t) {
           finalizada: true
         }]);
       }
+
+      const usuarioRef = doc(db, "usuarios", usuario.uid);
+      const usuarioSnap = await getDoc(usuarioRef);
+      const itensAtivos = usuarioSnap.exists() ? usuarioSnap.data().itensAtivos || [] : [];
+      const bonusXP = calcularBonusXP(itensAtivos);
+      const bonusMoedas = calcularBonusMoedas(itensAtivos);
+
+      let xpBase = 10; // ou outro valor base
+      xpBase += xpBase * bonusXP;
+
+      let moedasGanhar = 5; // valor base
+      moedasGanhar += moedasGanhar * bonusMoedas;
+
+      await darRecompensa(usuario.uid, Math.round(xpBase), moedasGanhar);
+
+      await atacarInimigo(10); // 10 é o dano
+
     }
 
     // Processa tarefa periódica se for o caso
@@ -1100,40 +1118,20 @@ function xpNecessarioParaNivel(nivel) {
   return 100 + (nivel - 1) * 20;
 }
 
-async function atualizarXP(tarefasConcluidas, classeAtiva) {
+async function atualizarXP() {
   const usuario = auth.currentUser;
   if (!usuario) return;
 
   const usuarioRef = doc(db, "usuarios", usuario.uid);
   const usuarioSnap = await getDoc(usuarioRef);
 
-  const xpPorTarefa = 10;
-  let xpTotal = 0;
+  // Lê o XP atual do Firestore
+  const xpTotal = usuarioSnap.exists() ? usuarioSnap.data().xp || 0 : 0;
 
-  const dadosUsuario = usuarioSnap.exists() ? usuarioSnap.data() : {};
-  const itensAtivos = dadosUsuario.itensAtivos || [];
-
-  tarefasConcluidas.forEach(tarefa => {
-    let xpBase = xpPorTarefa;
-
-    const tags = tarefa.tags || [];
-    const bonusCategorias = classesJogador[classeAtiva]?.bonusCategorias || [];
-    const temBonus = tags.some(tag => bonusCategorias.includes(tag));
-
-    if (temBonus) {
-      xpBase += xpBase * classesJogador[classeAtiva].bonusXP;
-    }
-
-    // Bônus de itens
-    const bonusXP = calcularBonusXP(itensAtivos);
-    xpBase += xpBase * bonusXP;
-
-    xpTotal += xpBase;
-  });
-
-  let xpRestante = xpTotal;
+  // Calcula nível e XP para próximo nível
   let nivel = 1;
   let xpParaProximo = xpNecessarioParaNivel(nivel);
+  let xpRestante = xpTotal;
 
   while (xpRestante >= xpParaProximo) {
     xpRestante -= xpParaProximo;
@@ -1143,23 +1141,11 @@ async function atualizarXP(tarefasConcluidas, classeAtiva) {
   const xpAtual = xpRestante;
   const porcentagem = Math.min(100, (xpAtual / xpParaProximo) * 100);
 
-  // Atualiza ou cria o documento do usuário
-  if (usuarioSnap.exists()) {
-    await updateDoc(usuarioRef, {
-      nivel: nivel,
-      xp: xpAtual
-    });
-  } else {
-    await setDoc(usuarioRef, {
-      nivel: nivel,
-      xp: xpAtual
-    });
-  }
-
+  // Atualiza apenas a UI
   const xpInfo = document.querySelector('.xp-info');
   if (!xpInfo) return;
 
-  xpInfo.querySelector('strong').textContent = `Nível ${nivel} (${classeAtiva})`;
+  xpInfo.querySelector('strong').textContent = `Nível ${nivel}`;
   xpInfo.querySelector('.xp-fill').style.width = `${porcentagem}%`;
   xpInfo.querySelector('span').textContent = `XP: ${Math.floor(xpAtual)} / ${xpParaProximo}`;
 
@@ -1171,6 +1157,7 @@ async function atualizarXP(tarefasConcluidas, classeAtiva) {
     'Bruxo': '#FF8C33'
   };
 
+  let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
   xpInfo.querySelector('.xp-fill').style.backgroundColor = corPorClasse[classeAtiva] || '#ccc';
 
   // ATUALIZA O LEVEL NA BARRA SUPERIOR
@@ -1482,9 +1469,6 @@ function mostrarBlocoPersonalizado(modo) {
   }
 }
 
-
-
-
   function atualizarContadorProximaTarefa() {
     const span = document.querySelector('.next-event');
   
@@ -1499,7 +1483,10 @@ function mostrarBlocoPersonalizado(modo) {
         if (t.dataLimite <= agora) {
           // Venceu: mover para expiradas
           tarefasExpiradas.push(t);
-  
+
+          // Chama o ataque do inimigo
+          inimigoAtaca();
+
           // Remover visual da lista
           const elem = document.querySelector(`[data-id="${t.id}"]`);
           if (elem) elem.remove();
@@ -1856,7 +1843,7 @@ export async function processarTarefaPeriodicaAoMarcar(t) {
   // nada mais necessário aqui pois já foi atualizada antes de chamar esta função
 }
 
-  document.querySelector('.next-event').addEventListener('click', () => {
+document.querySelector('.next-event').addEventListener('click', () => {
     const modalNextEvent = document.getElementById('modal-next-event');
     if (modalNextEvent.style.display === 'flex') return;
   
