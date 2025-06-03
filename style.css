@@ -52,7 +52,7 @@ body.ios-pwa .bottom-nav {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
     justify-items: center;
-    width: 90%;
+    width: 100%;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
@@ -2024,6 +2024,7 @@ div#config-buttosn-container {
   background-color: #e6f0fa;
 }
 .refresh-button {
+  display: none;
   font-family: 'Times New Roman', Times, serif;
   position: fixed;
   bottom: 80px; /* acima da bottom-nav */
