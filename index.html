@@ -312,12 +312,17 @@
           <option value="Bardo">Bardo</option>
           <option value="Bruxo">Bruxo</option>
         </select>
+        <div id="status-id">
+          <p>ID atual: <span id="id-atual">Carregando...</span></p>
+          <p><span id="msg-mudanca"></span></p>
+        </div>
         <div id="itens-ativos-container" class="itens-ativos-grid">
         <!-- Cards de itens ativos aparecerão aqui -->
       </div>
       </div>
       
     </div>
+
     <!-- TABS -->
     <div class="tabs">
       <!-- Aba Home -->
@@ -438,6 +443,14 @@
         <!-- Exemplo: botão de logout, tema, etc. -->
         <div class="settings-container">
           <h3>Configurações do Usuário</h3>
+
+          <div id="simpleid-container">
+            <input type="text" id="meu-id-simples" placeholder="Escolha seu ID público (ex: joao123)">
+            <button onclick="definirMeuID()">Salvar ID</button>
+          </div>
+
+
+
           <div id="config-buttosn-container">
             <button id="logout-button">Logout</button>
             <button id="clear-cache-button">Limpar Cache</button>
