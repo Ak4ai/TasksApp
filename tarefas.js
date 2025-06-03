@@ -1,6 +1,6 @@
 import { auth } from './auth.js';
 import { db } from './firebase-config.js';
-import { collection, query, where, getDocs, getDoc, doc, updateDoc, deleteDoc,Timestamp, addDoc, increment,arrayUnion, setDoc } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { collection, query, where, getDocs, getDoc, doc, updateDoc, deleteDoc, Timestamp, addDoc, increment, arrayUnion, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 export { carregarTarefas, tempoMaisRecente, atualizarDataAtual };
 
 let carregandoTarefas = false;
@@ -583,7 +583,8 @@ async function carregarTarefas() {
       fixada: data.fixada || false,
       diasSemana: data.diasSemana || [],         
       horaSemanal: data.horaSemanal || null,
-      excluida: data.excluida || false // <-- ADICIONE ESTA LINHA
+      excluida: data.excluida || false,
+      notificacoes: data.notificacoes || [] // <-- ADICIONE ESTA LINHA
     });
   });
 
@@ -1601,6 +1602,9 @@ async function criarRecorrentePersonalizada(tarefa) {
 
   if (!dataProxima) return;
 
+  // COPIA O CAMPO DE NOTIFICAÇÕES DA TAREFA ORIGINAL
+  const notificacoes = Array.isArray(tarefa.notificacoes) ? tarefa.notificacoes : [];
+
   const novaTarefa = {
     nome: tarefa.nome,
     descricao: tarefa.descricao,
@@ -1609,8 +1613,10 @@ async function criarRecorrentePersonalizada(tarefa) {
     finalizada: false,
     repetida: true,
     tarefaOriginal: tarefa.tarefaOriginal || tarefa.id,
-    tags: Array.isArray(tarefa.tags) ? [...tarefa.tags] : []
+    tags: Array.isArray(tarefa.tags) ? [...tarefa.tags] : [],
+    notificacoes
   };
+
   if (tarefa.modoPersonalizado !== undefined) novaTarefa.modoPersonalizado = tarefa.modoPersonalizado;
   if (tarefa.frequencia !== undefined) novaTarefa.frequencia = tarefa.frequencia;
   if (tarefa.padraoPersonalizado !== undefined) novaTarefa.padraoPersonalizado = tarefa.padraoPersonalizado;
@@ -1619,7 +1625,21 @@ async function criarRecorrentePersonalizada(tarefa) {
   if (tarefa.permitirConclusao !== undefined) novaTarefa.permitirConclusao = tarefa.permitirConclusao;
 
   const tarefasColecao = collection(db, "usuarios", usuario.uid, "tarefas");
-  await addDoc(tarefasColecao, novaTarefa);
+  const novaTarefaRef = await addDoc(tarefasColecao, novaTarefa);  
+  
+  for (const minutosAntes of notificacoes) {
+    const dataNotificacao = new Date(dataProxima.getTime() - minutosAntes * 60000);
+      await addDoc(collection(db, "scheduledNotifications"), {
+        uid: usuario.uid,
+        tarefaId: novaTarefaRef.id,
+        title: `Tarefa: ${novaTarefa.nome}`,
+        body: `Sua tarefa "${novaTarefa.nome}" está chegando!\nData limite: ${dataProxima.toLocaleString()}`,
+        badge: "https://raw.githubusercontent.com/Ak4ai/TasksApp/e38ef409e5a90d423d1b5034e2229433d85cd538/badge.png",
+        scheduledAt: dataNotificacao,
+        sent: false,
+        createdAt: serverTimestamp()
+    });
+  }
   const refDoc = doc(db, "usuarios", usuario.uid, "tarefas", tarefa.id);
   await updateDoc(refDoc, { finalizada: true });
 }
@@ -1672,6 +1692,8 @@ export async function ajustarRecorrentesPersonalizadas(tarefas) {
     const jaExiste = await existeTarefaRepetida(tarefasColecao, t.descricao, dataProxima);
     if (jaExiste) continue;
 
+    const notificacoes = Array.isArray(t.notificacoes) ? t.notificacoes : [];
+
     // Cria nova tarefa personalizada recorrente
     const novaTarefa = {
       nome: t.nome,
@@ -1681,7 +1703,8 @@ export async function ajustarRecorrentesPersonalizadas(tarefas) {
       finalizada: false,
       repetida: true,
       tarefaOriginal: t.tarefaOriginal || t.id,
-      tags: Array.isArray(t.tags) ? [...t.tags] : []
+      tags: Array.isArray(t.tags) ? [...t.tags] : [],
+      notificacoes
     };
     if (t.modoPersonalizado !== undefined) novaTarefa.modoPersonalizado = t.modoPersonalizado;
     if (t.frequencia !== undefined) novaTarefa.frequencia = t.frequencia;
@@ -1690,7 +1713,22 @@ export async function ajustarRecorrentesPersonalizadas(tarefas) {
     if (t.horaSemanal !== undefined) novaTarefa.horaSemanal = t.horaSemanal;
     if (t.permitirConclusao !== undefined) novaTarefa.permitirConclusao = t.permitirConclusao;
 
-    await addDoc(tarefasColecao, novaTarefa);
+    const novaTarefaRef = await addDoc(tarefasColecao, novaTarefa);
+    // AGENDAR NOTIFICAÇÕES PARA A NOVA TAREFA
+    console.log("Notificações para nova tarefa:", notificacoes, "Nova tarefa:", novaTarefa);
+    for (const minutosAntes of notificacoes) {
+      const dataNotificacao = new Date(dataProxima.getTime() - minutosAntes * 60000);
+      await addDoc(collection(db, "scheduledNotifications"), {
+        uid: usuario.uid,
+        tarefaId: novaTarefaRef.id,
+        title: `Tarefa: ${novaTarefa.nome}`,
+        body: `Sua tarefa "${novaTarefa.nome}" está chegando!\nData limite: ${dataProxima.toLocaleString()}`,
+        badge: "https://raw.githubusercontent.com/Ak4ai/TasksApp/e38ef409e5a90d423d1b5034e2229433d85cd538/badge.png",
+        scheduledAt: dataNotificacao,
+        sent: false,
+        createdAt: serverTimestamp()
+      });
+    }
     await updateDoc(doc(db, "usuarios", usuario.uid, "tarefas", t.id), { finalizada: true });
     mostrarPopup(`Nova tarefa personalizada criada: ${t.descricao} para ${dataProxima.toLocaleDateString('pt-BR')}`);
   }

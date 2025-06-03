@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `94_4 visual`, hash: '6ed1573', date: '2025-06-03 15:24:02' };
+window.APP_VERSION = { msg: `95-Notificações iniciais e recorrentes para personalizadas`, hash: 'eea96d1', date: '2025-06-03 17:27:42' };
