@@ -1460,10 +1460,22 @@ textarea:focus {
     flex: 1 1;
     width: 100%;
     max-height: 466px;
+    min-height: 90%;
     overflow: auto;
     border: none;
     box-shadow: none;
 }
+
+.tarefas-slider-divider {
+  width: 2px;
+  background: #343434;
+  margin: 82px 12px;
+  border-radius: 2px;
+  min-height: 120px;
+  align-self: stretch;
+
+}
+
 /* Coluna de gráficos */
 .grafico-coluna {
   flex: 1 1;
@@ -2022,17 +2034,18 @@ div#ios-notif-info {
   margin-left: auto;
   padding: 6px 12px;
   border-radius: 4px;
-  border: 2px solid transparent;
+  border: 2px solid #ffffff18;
   font-weight: 600;
   cursor: pointer;
   /* cor de fundo e borda base, que podem mudar conforme a aba/tipo */
-  background-color: var(--btn-bg, #2a3f6b);
-  color: var(--btn-color, #cfe3ff);
+  background-color: var(--btn-bg, #6a6a6a3c);
+  color: var(--btn-color, #ccc);
   transition: border-color 0.3s ease;
 }
 
 .select-task:hover {
-  border-color: var(--btn-border, #5390d9);
+  border-color: var(--btn-border, #00000042);
+  color: #000;
 }
 
 /* Centraliza e limita o tamanho do modal de função do item */
@@ -2238,3 +2251,92 @@ div#ios-notif-info {
   font-style: italic;
   color: #64748b; /* Cinza azulado para a mensagem */
 }
+/* ...existing code... */
+
+/* Spinner animado */
+.spinner {
+  border: 6px solid #eee;
+  border-top: 6px solid #be6ef6;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+
+#app-loader {
+    position: fixed;
+    z-index: 9999;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #121318c0;
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+    flex-direction: column;
+    align-content: center;
+}
+
+#loader-warning {
+  display: none;
+  color: #fbc9ff;
+  background: #4a1f69;
+  border: 1.5px solid #be6ef6;
+  border-radius: 12px;
+  margin-top: 28px;
+  text-align: center;
+  font-size: 1.08em;
+  font-weight: 500;
+  padding: 18px 22px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  max-width: 340px;
+  width: 60%;
+  letter-spacing: 0.01em;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+/* ...existing code... */
+
+
+/* Firefox */
+@media (pointer: fine) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #343434 #bd6ef600;
+  }
+}
+
+/* Barra de scroll personalizada para desktop */
+@media (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    background: #bd6ef600;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #6b3f2a;
+    border-radius: 8px;
+    border: 2px solid #bd6ef618;
+    min-height: 40px;
+    transition: background 0.3s;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #bd6ef600;
+  }
+  ::-webkit-scrollbar-track {
+    background: #bd6ef600;
+    border-radius: 8px;
+  }
+  ::-webkit-scrollbar-corner {
+    background: #bd6ef600;
+  }
+}
+
+/* ...existing code... */

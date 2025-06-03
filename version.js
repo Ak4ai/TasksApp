@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `idSimple`, hash: 'dfaea4a', date: '2025-06-03 12:58:51' };
+window.APP_VERSION = { msg: `94_1`, hash: 'e849d6a', date: '2025-06-03 14:19:16' };
