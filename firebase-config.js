@@ -32,7 +32,7 @@ export async function carregarMeuSimpleID() {
     const user = auth.currentUser;
     if (!user) return;
 
-    const ref = doc(db, "users", user.uid);
+    const ref = doc(db, "usuarios", user.uid);
     const snap = await getDoc(ref);
 
     const idSpan = document.getElementById("id-atual");
@@ -74,12 +74,12 @@ async function definirMeuID() {
         return alert("ID inválido. Use letras, números e underscore (3 a 20 caracteres).");
     }
 
-    const ref = doc(db, "users", user.uid);
+    const ref = doc(db, "usuarios", user.uid);
     const snap = await getDoc(ref);
     const agora = new Date();
 
     // Verifica se já existe esse ID simples em outro usuário
-    const q = query(collection(db, "users"), where("simpleID", "==", inputID));
+    const q = query(collection(db, "usuarios"), where("simpleID", "==", inputID));
     const results = await getDocs(q);
     if (!results.empty) {
         const existingUID = results.docs[0].id;

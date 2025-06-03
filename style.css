@@ -48,10 +48,16 @@ body.ios-pwa .bottom-nav {
 }
 
 .loja-grid, .inventario-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 colunas */
-  gap: 20px; /* Espaço entre os cards */
-  justify-items: center;
+    display: flex;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    justify-items: center;
+    width: 90%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
 }
 
 .item-card {
@@ -65,9 +71,55 @@ body.ios-pwa .bottom-nav {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  height: 255px; /* altura fixa para normalizar */
-  width: 160px; /* largura fixa para normalizar */
+  width: 150px;
+  aspect-ratio: 160 / 255;
   box-sizing: border-box;
+}
+
+.LojaSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 90%;
+    padding: 50px 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+div#tab-loja {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    align-content: center;
+    margin: 0 5%;
+    flex-wrap: nowrap;
+    background-color: #1f1f1f;
+    border: solid 1px #343434;
+    border-radius: 10px;
+}
+
+@media (max-width: 1040px) {
+  div#tab-loja {
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      align-content: center;
+      margin: 0;
+      background-color: #00000006;
+      border: none;
+      flex-wrap: wrap;
+  }
+  .LojaSection {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #1f1f1f;
+      max-width: 90%;
+      padding: 50px 1rem;
+      border: solid 1px #343434;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+  }
 }
 
 .item-card:hover {
