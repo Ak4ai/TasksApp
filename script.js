@@ -1,5 +1,6 @@
 import { auth } from './auth.js';
-import { db } from './firebase-config.js';
+import { db, carregarMeuSimpleID } from './firebase-config.js';
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { collection, addDoc, getDocs, Timestamp, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 // script.js
 import { carregarTarefas,mostrarPopup,carregarInventario } from './tarefas.js';
@@ -29,6 +30,12 @@ document.getElementById('delete-all-tasks-button').addEventListener('click', asy
         });
 
 document.addEventListener('DOMContentLoaded', () => {
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      carregarMeuSimpleID();
+  }
+  });
   const botao = document.getElementById('botao-criar-tarefa');
 
   // ✅ Remove listeners duplicados antes de adicionar
@@ -749,4 +756,4 @@ function setupTarefasSliderCarousel() {
   else updateIndicadores(0);
 }
 window.addEventListener('DOMContentLoaded', setupTarefasSliderCarousel);
-// ...existing code...
+
