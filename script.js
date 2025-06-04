@@ -87,7 +87,8 @@ const INIMIGOS = [
 
 function getNovoInimigo(indice = 0) {
   const idx = Math.max(0, Math.min(indice, INIMIGOS.length - 1));
-  return { ...INIMIGOS[idx], indice: idx };
+  const base = INIMIGOS[idx];
+  return { ...base, indice: idx, vidaAtual: base.vidaMaxima };  
 }
 
 // Carrega o inimigo do Firestore (ou cria um novo se não existir)
@@ -117,8 +118,10 @@ async function atualizarUIInimigo() {
   document.getElementById('inimigo-img').src = inimigo.imagem;
   document.getElementById('inimigo-nome').textContent = inimigo.nome;
   document.getElementById('inimigo-vida-text').textContent = `${inimigo.vidaAtual} / ${inimigo.vidaMaxima}`;
-  document.getElementById('inimigo-recompensa').textContent =
-    `Recompensa: ${inimigo.recompensaXP} XP, ${inimigo.recompensaMoedas} moedas`;
+  const recompensaDiv = document.getElementById('inimigo-recompensa');
+  if (recompensaDiv) {
+    recompensaDiv.textContent = `Recompensa: ${inimigo.recompensaXP} XP, ${inimigo.recompensaMoedas} moedas`;
+  }
 
   // Atualiza barra de vida
   const percent = Math.max(0, Math.round((inimigo.vidaAtual / inimigo.vidaMaxima) * 100));
@@ -218,6 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       carregarMeuSimpleID();
+      atualizarUIInimigo();
   }
   });
   const botao = document.getElementById('botao-criar-tarefa');
