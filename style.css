@@ -2309,6 +2309,17 @@ div#ios-notif-info {
   font-style: italic;
   color: #64748b; /* Cinza azulado para a mensagem */
 }
+
+#id-atual-config {
+  font-weight: 700;
+  color: #2563eb; /* Azul forte para destacar o ID */
+}
+
+#msg-mudanca-config {
+  font-style: italic;
+  color: #64748b; /* Cinza azulado para a mensagem */
+}
+
 /* ...existing code... */
 
 /* Spinner animado */
