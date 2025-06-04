@@ -1,5 +1,5 @@
 import { auth } from './auth.js';
-import { db, carregarMeuSimpleID } from './firebase-config.js';
+import { db, carregarMeuSimpleID, listarAmigosAceitos } from './firebase-config.js';
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { doc, collection, addDoc, getDocs, Timestamp, deleteDoc, serverTimestamp, setDoc, getDoc, increment } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 // script.js
@@ -441,55 +441,63 @@ async function adicionarTarefa(nome, descricao, dataLimite) {
   // Importação
   import { atualizarDataAtual } from './tarefas.js';
   
-  document.addEventListener('DOMContentLoaded', () => {
-    atualizarDataAtual();
-  
-    // Configura tabs
-    document.querySelectorAll('.bottom-nav .nav-button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const alvo = btn.dataset.tab;
-  
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.getElementById(alvo).classList.add('active');
-  
-        // Remove classes ativas e foca
-        document.querySelectorAll('.nav-button').forEach(b => {
-          b.classList.remove('active');
-          b.blur(); // <-- remove foco/hover preso
-        });
-  
-        btn.classList.add('active');
-  
-        if (alvo === 'tab-tasks') {
-          carregarTarefas();
-        }
-        if (alvo === 'tab-inventario') {
-          carregarInventario();
-        }
+document.addEventListener('DOMContentLoaded', () => {
+  atualizarDataAtual();
 
-        // Atualiza as classes do body para as cores dos cards
-        document.body.classList.remove(
-          'tab-home-active',
-          'tab-tasks-active',
-          'tab-tasks-nao-periodicas-active',
-          'tab-tasks-personalizadas-active'
-        );
-        if (alvo === 'tab-home') document.body.classList.add('tab-home-active');
-        if (alvo === 'tab-tasks') document.body.classList.add('tab-tasks-active');
-        if (alvo === 'tab-tasks-nao-periodicas') document.body.classList.add('tab-tasks-nao-periodicas-active');
-        if (alvo === 'tab-tasks-personalizadas') document.body.classList.add('tab-tasks-personalizadas-active');
+  // Configura tabs
+  document.querySelectorAll('.bottom-nav .nav-button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const alvo = btn.dataset.tab;
 
-        
+      // Troca a aba visível
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.getElementById(alvo).classList.add('active');
 
-        // ⬇️ ATUALIZA VISIBILIDADE DO APP BODY
-        atualizarVisibilidadeAppBody();
+      // Remove classes ativas nos botões
+      document.querySelectorAll('.nav-button').forEach(b => {
+        b.classList.remove('active');
+        b.blur();
       });
+
+      btn.classList.add('active');
+
+      // Ações específicas por aba
+      if (alvo === 'tab-tasks') {
+        carregarTarefas();
+      }
+
+      if (alvo === 'tab-inventario') {
+        carregarInventario();
+      }
+
+      if (alvo === 'tab-amigos') {
+        listarAmigosAceitos(); // <-- carrega amigos
+      }
+
+      // Atualiza classes no body (para temas/cor)
+      document.body.classList.remove(
+        'tab-home-active',
+        'tab-tasks-active',
+        'tab-tasks-nao-periodicas-active',
+        'tab-tasks-personalizadas-active',
+        'tab-amigos-active'
+      );
+
+      if (alvo === 'tab-home') document.body.classList.add('tab-home-active');
+      if (alvo === 'tab-tasks') document.body.classList.add('tab-tasks-active');
+      if (alvo === 'tab-tasks-nao-periodicas') document.body.classList.add('tab-tasks-nao-periodicas-active');
+      if (alvo === 'tab-tasks-personalizadas') document.body.classList.add('tab-tasks-personalizadas-active');
+      if (alvo === 'tab-amigos') document.body.classList.add('tab-amigos-active');
+
+      atualizarVisibilidadeAppBody();
     });
-  
-    // Inicializa na home
-    document.querySelector('.nav-button[data-tab="tab-home"]').click();
-    carregarTarefas();
   });
+
+  // Inicializa na home
+  document.querySelector('.nav-button[data-tab="tab-home"]').click();
+  carregarTarefas();
+});
+
 
 document.getElementById('refresh-btn').addEventListener('click', () => {
   mostrarPopup('Atualizando tarefas...', 2000);

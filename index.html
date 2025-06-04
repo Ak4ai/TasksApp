@@ -463,6 +463,14 @@
           <button class="criar-button">Criar Tarefa</button>
         </div>
       </div>
+      <div id="tab-amigos" class="tab-content" style="display:none;">
+        <div class="app">
+          <div id="lista-amigos" class="task-group">
+            <h2>Amigos</h2>
+            <ul id="amigos-container"></ul>
+          </div>
+        </div>
+      </div>
 
 
       <!-- Aba Configurações -->
@@ -476,6 +484,16 @@
             <input type="text" id="meu-id-simples" placeholder="Escolha seu ID público (ex: joao123)">
             <button onclick="definirMeuID()">Salvar ID</button>
           </div>
+          <h3>Adicionar Amigo</h3>
+          <div id="friend-request-container">
+            <input type="text" id="buscar-amigo" placeholder="Digite o ID do amigo" list="lista-ids" />
+            <datalist id="lista-ids"></datalist>
+            <button id="btn-adicionar-amigo">Adicionar</button>
+          </div>
+          <button id="btn-pedidos-amizade">📨 Pedidos de Amizade</button>
+          
+
+
 
 
 
@@ -742,6 +760,7 @@
     </div>
     <button class="nav-button" data-tab="tab-loja">🛒</button>
     <button class="nav-button" data-tab="tab-inventario">🎒</button>
+    <button class="nav-button" data-tab="tab-amigos">👤</button>
     
     <button class="nav-button" data-tab="tab-settings">⚙️</button>
   </div> 
@@ -899,6 +918,13 @@
     <span class="close-button" id="fechar-modal-funcao">&times;</span>
     <h2 id="titulo-item-modal"></h2>
     <p id="funcao-item-modal" style="text-align:center; margin-top:20px; font-size:1.2em;"></p>
+  </div>
+</div>
+<div id="modal-amizades" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span id="fechar-modal-amizades" class="close-button">&times;</span>
+    <h3>Pedidos de Amizade Recebidos</h3>
+    <ul id="lista-pedidos-amizade"></ul>
   </div>
 </div>
 </body>
