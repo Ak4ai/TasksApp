@@ -3,7 +3,7 @@ import { db, carregarMeuSimpleID } from './firebase-config.js';
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { doc, collection, addDoc, getDocs, Timestamp, deleteDoc, serverTimestamp, setDoc, getDoc, increment } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 // script.js
-import { carregarTarefas,mostrarPopup,carregarInventario } from './tarefas.js';
+import { carregarTarefas,mostrarPopup,carregarInventario, calcularDefesa } from './tarefas.js';
 export { atacarInimigo, inimigoAtaca, darRecompensa };
 
 

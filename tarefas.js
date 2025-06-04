@@ -2,7 +2,7 @@ import { auth } from './auth.js';
 import { db } from './firebase-config.js';
 import { collection, query, where, getDocs, getDoc, doc, updateDoc, deleteDoc, Timestamp, addDoc, increment, arrayUnion, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 import { atacarInimigo, inimigoAtaca, darRecompensa } from './script.js';
-export { carregarTarefas, tempoMaisRecente, atualizarDataAtual };
+export { carregarTarefas, tempoMaisRecente, atualizarDataAtual, calcularDefesa };
 
 let carregandoTarefas = false;
 let tempoMaisRecente = null;
@@ -83,7 +83,7 @@ const ITENS_CONFIG = {
   },
   // Itens de proteção
   escudo: {
-    tipo: "arma",
+    tipo: "protecao",
     nome: "Escudo Resistente",
     efeito: { defesa: 5 }
   },
