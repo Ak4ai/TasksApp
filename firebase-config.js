@@ -5,7 +5,8 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.0/firebase
 import { getMessaging } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-messaging.js";
 import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -112,8 +113,169 @@ async function definirMeuID() {
 }
 
 
+async function carregarUsuariosParaAutocomplete() {
+  const auth = getAuth();
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const snapshot = await getDocs(collection(db, "usuarios"));
+  const datalist = document.getElementById("lista-ids");
+  datalist.innerHTML = "";
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    if (data.simpleID && data.uid !== user.uid) {
+      const option = document.createElement("option");
+      option.value = data.simpleID;
+      datalist.appendChild(option);
+    }
+  });
+}
+
+async function adicionarAmigoPorSimpleID() {
+  const auth = getAuth();
+  const user = auth.currentUser;
+  if (!user) return alert("Você precisa estar logado.");
+
+  const inputID = document.getElementById("buscar-amigo").value.trim().toLowerCase();
+  if (!inputID) return alert("Digite um ID para buscar.");
+
+  // Busca usuário pelo simpleID
+  const q = query(collection(db, "usuarios"), where("simpleID", "==", inputID));
+  const res = await getDocs(q);
+
+  if (res.empty) {
+    return alert("Usuário não encontrado.");
+  }
+
+  const amigoDoc = res.docs[0];
+  const amigoUID = amigoDoc.id;
+
+  if (amigoUID === user.uid) {
+    return alert("Você não pode adicionar a si mesmo.");
+  }
+
+  // Cria relação de amizade
+  await addDoc(collection(db, "amizades"), {
+    from: user.uid,
+    to: amigoUID,
+    status: "pending",
+    timestamp: new Date()
+  });
+
+
+  alert("Pedido de amizade enviado!");
+}
+
+async function listarPedidosDeAmizade() {
+  const auth = getAuth();
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const q = query(
+    collection(db, "amizades"),
+    where("to", "==", user.uid),
+    where("status", "==", "pending")
+  );
+
+  const snapshot = await getDocs(q);
+  const lista = document.getElementById("lista-pedidos-amizade");
+  lista.innerHTML = "";
+
+  for (const docSnap of snapshot.docs) {
+    const dados = docSnap.data();
+    const idDoc = docSnap.id;
+
+    // Pega o simpleID de quem enviou
+    const remetenteSnap = await getDoc(doc(db, "usuarios", dados.from));
+    const remetenteID = remetenteSnap.exists() ? remetenteSnap.data().simpleID : "(usuário)";
+
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <strong>${remetenteID}</strong>
+      <button onclick="aceitarPedido('${idDoc}')">Aceitar</button>
+      <button onclick="rejeitarPedido('${idDoc}')">Rejeitar</button>
+    `;
+    lista.appendChild(li);
+  }
+}
+
+async function aceitarPedido(idDoc) {
+  const ref = doc(db, "amizades", idDoc);
+  await setDoc(ref, { status: "accepted" }, { merge: true });
+  alert("Pedido aceito!");
+  listarPedidosDeAmizade();
+}
+
+async function rejeitarPedido(idDoc) {
+  const ref = doc(db, "amizades", idDoc);
+  await setDoc(ref, { status: "rejected" }, { merge: true });
+  alert("Pedido rejeitado.");
+  listarPedidosDeAmizade();
+}
+
+export async function listarAmigosAceitos() {
+  const auth = getAuth();
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const container = document.getElementById("amigos-container");
+  container.innerHTML = "";
+
+  // busca amizades onde o usuário é FROM ou TO e status é accepted
+  const q1 = query(collection(db, "amizades"), where("from", "==", user.uid), where("status", "==", "accepted"));
+  const q2 = query(collection(db, "amizades"), where("to", "==", user.uid), where("status", "==", "accepted"));
+
+  const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+
+  const amigosUIDs = [];
+
+  snap1.forEach(doc => amigosUIDs.push(doc.data().to));
+  snap2.forEach(doc => amigosUIDs.push(doc.data().from));
+
+  for (const uid of amigosUIDs) {
+    const userDoc = await getDoc(doc(db, "usuarios", uid));
+    const data = userDoc.exists() ? userDoc.data() : null;
+
+    if (data) {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <span>${data.simpleID}</span>
+        <small>UID: ${uid}</small>
+      `;
+      container.appendChild(li);
+    }
+  }
+}
+
+
+
+
 // Chame ao carregar a página:
 window.definirMeuID = definirMeuID; // <-- Torna a função acessível globalmente
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("btn-adicionar-amigo").addEventListener("click", adicionarAmigoPorSimpleID);
+  document.getElementById("buscar-amigo").addEventListener("focus", carregarUsuariosParaAutocomplete);
+  const modal = document.getElementById("modal-amizades");
+  const fecharBtn = document.getElementById("fechar-modal-amizades");
+  const abrirBtn = document.getElementById("btn-pedidos-amizade");
+
+  abrirBtn.addEventListener("click", () => {
+    modal.style.display = "block";
+    listarPedidosDeAmizade();
+  });
+
+  fecharBtn.addEventListener("click", () => {
+    modal.style.display = "none";
+  });
+
+  window.addEventListener("click", (e) => {
+    if (e.target === modal) modal.style.display = "none";
+  });
+});
+
+
 
 export { app, db, messaging }; // <-- Agora pode exportar com segurança
 
