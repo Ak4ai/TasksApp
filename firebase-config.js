@@ -155,6 +155,32 @@ async function adicionarAmigoPorSimpleID() {
     return alert("Você não pode adicionar a si mesmo.");
   }
 
+  // Verifica se já existe amizade ou convite entre os dois usuários
+  const amizadesRef = collection(db, "amizades");
+  const qExistente = query(
+    amizadesRef,
+    where("from", "in", [user.uid, amigoUID]),
+    where("to", "in", [user.uid, amigoUID])
+  );
+  const snap = await getDocs(qExistente);
+
+  let jaExiste = false;
+  snap.forEach(doc => {
+    const dados = doc.data();
+    // Se já existe amizade (em qualquer direção) e não foi rejeitada
+    if (
+      ((dados.from === user.uid && dados.to === amigoUID) ||
+      (dados.from === amigoUID && dados.to === user.uid)) &&
+      dados.status !== "rejected"
+    ) {
+      jaExiste = true;
+    }
+  });
+
+  if (jaExiste) {
+    return alert("Você já enviou um convite ou já é amigo dessa pessoa!");
+  }
+
   // Cria relação de amizade
   await addDoc(collection(db, "amizades"), {
     from: user.uid,
@@ -162,7 +188,6 @@ async function adicionarAmigoPorSimpleID() {
     status: "pending",
     timestamp: new Date()
   });
-
 
   alert("Pedido de amizade enviado!");
 }
@@ -238,7 +263,7 @@ export async function listarAmigosAceitos() {
   for (const uid of amigosUnicos) {
     const userDoc = await getDoc(doc(db, "usuarios", uid));
     const data = userDoc.exists() ? userDoc.data() : null;
-    
+
     if (data) {
       const li = document.createElement("li");
       li.innerHTML = `

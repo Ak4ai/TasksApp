@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `Ajuste para aparecer os amigos na aba de amigos`, hash: '032936a', date: '2025-06-04 15:16:38' };
+window.APP_VERSION = { msg: `Só permite enviar pedido se não houver amizade ou convite pendente/aceito.`, hash: '54d2dcb', date: '2025-06-04 15:26:25' };
