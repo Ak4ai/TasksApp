@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `Só permite enviar pedido se não houver amizade ou convite pendente/aceito.`, hash: '54d2dcb', date: '2025-06-04 15:26:25' };
+window.APP_VERSION = { msg: `Modal de amigo/ mudanças no container de amigo/ tentativa de correção da duplicação de amigos`, hash: '49f769b', date: '2025-06-04 15:57:41' };

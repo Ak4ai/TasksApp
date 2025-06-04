@@ -815,6 +815,26 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('fechar-modal-funcao').onclick = () => {
     document.getElementById('modal-funcao-item').style.display = 'none';
   };
+
+  // Listeners do modal de amigo
+  const modalAmigo = document.getElementById('modal-amigo');
+  const btnFecharModalAmigo = document.getElementById('btn-fechar-modal-amigo');
+  const btnDesfazerAmizade = document.getElementById('btn-desfazer-amizade');
+
+  if (btnFecharModalAmigo) {
+    btnFecharModalAmigo.onclick = () => {
+      modalAmigo.style.display = 'none';
+    };
+  }
+
+  if (btnDesfazerAmizade) {
+    btnDesfazerAmizade.onclick = () => {
+      const uid = modalAmigo.dataset.uid;
+      desfazerAmizade(uid);
+      modalAmigo.style.display = 'none';
+    };
+  }
+
 });
 
 // ...existing code...
