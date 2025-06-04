@@ -7,17 +7,87 @@ import { carregarTarefas,mostrarPopup,carregarInventario } from './tarefas.js';
 export { atacarInimigo, inimigoAtaca, darRecompensa };
 
 
-// Retorna um novo inimigo padrão
-function getNovoInimigo() {
-  return {
+const INIMIGOS = [
+  // Lista de inimigos
+  {
+    nome: "Slime",
+    vidaAtual: 30,
+    vidaMaxima: 30,
+    imagem: "img/slime.png",
+    recompensaXP: 60,
+    recompensaMoedas: 20,
+    danoPorExpirada: 5
+  },
+  {
     nome: "Goblin",
-    vidaAtual: 100,
-    vidaMaxima: 100,
+    vidaAtual: 50,
+    vidaMaxima: 50,
     imagem: "img/goblin.png",
     recompensaXP: 100,
     recompensaMoedas: 50,
     danoPorExpirada: 10
-  };
+  },
+  {
+    nome: "Esqueleto",
+    vidaAtual: 90,
+    vidaMaxima: 90,
+    imagem: "img/esqueleto.png",
+    recompensaXP: 120,
+    recompensaMoedas: 60,
+    danoPorExpirada: 12
+  },
+  {
+    nome: "Orc",
+    vidaAtual: 150,
+    vidaMaxima: 150,
+    imagem: "img/orc.png",
+    recompensaXP: 150,
+    recompensaMoedas: 80,
+    danoPorExpirada: 15
+  },
+  {
+    nome: "Mago Sombrio",
+    vidaAtual: 130,
+    vidaMaxima: 130,
+    imagem: "img/mago_sombrio.png",
+    recompensaXP: 180,
+    recompensaMoedas: 100,
+    danoPorExpirada: 18
+  },
+  {
+    nome: "Cavaleiro Negro",
+    vidaAtual: 180,
+    vidaMaxima: 180,
+    imagem: "img/cavaleiro_negro.png",
+    recompensaXP: 220,
+    recompensaMoedas: 120,
+    danoPorExpirada: 20
+  },
+  {
+    nome: "Dragão",
+    vidaAtual: 300,
+    vidaMaxima: 300,
+    imagem: "img/dragao.png",
+    recompensaXP: 300,
+    recompensaMoedas: 150,
+    danoPorExpirada: 25
+  },
+  {
+    nome: "Rei Demônio",
+    vidaAtual: 400,
+    vidaMaxima: 400,
+    imagem: "img/rei_demonio.png",
+    recompensaXP: 500,
+    recompensaMoedas: 300,
+    danoPorExpirada: 35
+  }
+  // Adicionar mais inimigos aqui
+];
+
+
+function getNovoInimigo(indice = 0) {
+  const idx = Math.max(0, Math.min(indice, INIMIGOS.length - 1));
+  return { ...INIMIGOS[idx], indice: idx };
 }
 
 // Carrega o inimigo do Firestore (ou cria um novo se não existir)
@@ -60,15 +130,30 @@ async function atacarInimigo(dano = 10) {
   if (!usuario) return;
   let inimigo = await carregarInimigoFirestore(usuario.uid);
 
-  inimigo.vidaAtual -= dano;
+  // Subtrai o dano da vida atual
+  inimigo.vidaAtual = Math.max(0, inimigo.vidaAtual - dano);
+
+  // Salva o inimigo atualizado
+  await salvarInimigoFirestore(usuario.uid, inimigo);
+
+  // Atualiza a UI
+  atualizarUIInimigo();
+
+  // Se morreu, processa derrota e troca de inimigo
   if (inimigo.vidaAtual <= 0) {
-    // Derrotou o inimigo!
     mostrarPopup(`Você derrotou ${inimigo.nome}! Ganhou ${inimigo.recompensaXP} XP e ${inimigo.recompensaMoedas} moedas!`);
     await darRecompensa(usuario.uid, inimigo.recompensaXP, inimigo.recompensaMoedas);
-    inimigo = getNovoInimigo();
+
+    // Avança para o próximo inimigo
+    const proximoIndice = (inimigo.indice ?? 0) + 1;
+    if (proximoIndice < INIMIGOS.length) {
+      inimigo = getNovoInimigo(proximoIndice);
+    } else {
+      inimigo = getNovoInimigo(0);
+    }
+    await salvarInimigoFirestore(usuario.uid, inimigo);
+    atualizarUIInimigo();
   }
-  await salvarInimigoFirestore(usuario.uid, inimigo);
-  atualizarUIInimigo();
 }
 
 async function inimigoAtaca() {
@@ -870,4 +955,3 @@ window.addEventListener('DOMContentLoaded', () => {
   // ...existing code...
   atualizarUIInimigo();
 });
-
