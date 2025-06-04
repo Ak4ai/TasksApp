@@ -312,6 +312,9 @@
     <!-- ...existing code... -->
     <div class="top-info-character">
       <div class="character-box">
+        <div id="status-id">
+            <p>Seu ID: <span id="id-atual">Carregando...</span></p>
+        </div>
         <img src="" alt="Personagem" />
         <div class="xp-info">
           <strong>Nível 1</strong>
@@ -330,15 +333,21 @@
           <option value="Bardo">Bardo</option>
           <option value="Bruxo">Bruxo</option>
         </select>
-        <div id="status-id">
-          <p>ID atual: <span id="id-atual">Carregando...</span></p>
-          <p><span id="msg-mudanca"></span></p>
-        </div>
         <div id="itens-ativos-container" class="itens-ativos-grid">
         <!-- Cards de itens ativos aparecerão aqui -->
+        </div>
+
+        <div id="inimigo-container" style="display: flex; flex-direction: column; align-items: center; margin: 20px 0;">
+            <img id="inimigo-img" src="img/goblin.png" alt="Inimigo" style="width: 60px; height: 60px; margin-bottom: 8px;">
+            <div id="inimigo-nome" style="font-weight: bold; font-size: 1.2em;">Goblin</div>
+            <div id="inimigo-vida-bar" style="width: 120px; height: 18px; background: #333; border-radius: 9px; margin: 8px 0; overflow: hidden;">
+              <div id="inimigo-vida-fill" style="height: 100%; background: #4caf50; width: 100%; transition: width 0.3s;"></div>
+            </div>
+            <div id="inimigo-vida-text" style="font-size: 0.95em;">100 / 100</div>
+          </div>
+
+        
       </div>
-      </div>
-      
     </div>
 
     <!-- TABS -->
@@ -372,16 +381,6 @@
                 </div>
               </div>
             </div>
-          </div>
-          
-          <div id="inimigo-container" style="display: flex; flex-direction: column; align-items: center; margin: 20px 0;">
-            <img id="inimigo-img" src="img/goblin.png" alt="Inimigo" style="width: 80px; height: 80px; margin-bottom: 8px;">
-            <div id="inimigo-nome" style="font-weight: bold; font-size: 1.2em;">Goblin</div>
-            <div id="inimigo-vida-bar" style="width: 120px; height: 18px; background: #333; border-radius: 9px; margin: 8px 0; overflow: hidden;">
-              <div id="inimigo-vida-fill" style="height: 100%; background: #4caf50; width: 100%; transition: width 0.3s;"></div>
-            </div>
-            <div id="inimigo-vida-text" style="font-size: 0.95em;">100 / 100</div>
-            <div id="inimigo-recompensa" style="font-size: 0.95em; margin-top: 6px;">Recompensa: 100 XP, 50 moedas</div>
           </div>
 
           <!-- Coluna da direita: Gráficos -->
@@ -479,6 +478,11 @@
         <!-- Exemplo: botão de logout, tema, etc. -->
         <div class="settings-container">
           <h3>Configurações do Usuário</h3>
+
+          <div id="status-id">
+            <p>ID atual: <span id="id-atual">Carregando...</span></p>
+            <p><span id="msg-mudanca"></span></p>
+          </div>
 
           <div id="simpleid-container">
             <input type="text" id="meu-id-simples" placeholder="Escolha seu ID público (ex: joao123)">

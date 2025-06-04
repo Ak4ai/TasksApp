@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `Modal de amigo/ mudanças no container de amigo/ tentativa de correção da duplicação de amigos`, hash: '49f769b', date: '2025-06-04 15:57:41' };
+window.APP_VERSION = { msg: `Inimigo na topbar`, hash: '294491e', date: '2025-06-04 16:20:03' };
