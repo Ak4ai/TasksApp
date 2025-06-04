@@ -233,10 +233,12 @@ export async function listarAmigosAceitos() {
   snap1.forEach(doc => amigosUIDs.push(doc.data().to));
   snap2.forEach(doc => amigosUIDs.push(doc.data().from));
 
-  for (const uid of amigosUIDs) {
+  const amigosUnicos = [...new Set(amigosUIDs)].filter(uid => uid !== user.uid);
+
+  for (const uid of amigosUnicos) {
     const userDoc = await getDoc(doc(db, "usuarios", uid));
     const data = userDoc.exists() ? userDoc.data() : null;
-
+    
     if (data) {
       const li = document.createElement("li");
       li.innerHTML = `
