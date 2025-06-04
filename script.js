@@ -161,8 +161,17 @@ async function inimigoAtaca() {
   if (!usuario) return;
   let inimigo = await carregarInimigoFirestore(usuario.uid);
 
-  mostrarPopup(`${inimigo.nome} te atacou! Você perdeu ${inimigo.danoPorExpirada} XP!`);
-  await perderXP(usuario.uid, inimigo.danoPorExpirada);
+  // Pegue os itens ativos do usuário
+  const usuarioRef = doc(db, "usuarios", usuario.uid);
+  const usuarioSnap = await getDoc(usuarioRef);
+  const itensAtivos = usuarioSnap.exists() ? usuarioSnap.data().itensAtivos || [] : [];
+  const defesa = calcularDefesa(itensAtivos);
+
+  let xpPerdido = inimigo.danoPorExpirada - defesa;
+  if (xpPerdido < 0) xpPerdido = 0;
+
+  mostrarPopup(`${inimigo.nome} te atacou! Você perdeu ${xpPerdido} XP!`);
+  await perderXP(usuario.uid, xpPerdido);
 }
 
 async function darRecompensa(uid, xp, moedas) {

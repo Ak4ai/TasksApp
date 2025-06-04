@@ -81,6 +81,12 @@ const ITENS_CONFIG = {
     nome: "Cajado Arcano",
     efeito: { dano: 5 }
   },
+  // Itens de proteção
+  escudo: {
+    tipo: "arma",
+    nome: "Escudo Resistente",
+    efeito: { defesa: 5 }
+  },
   // Itens bônus
   coroa: {
     tipo: "bonus",
@@ -435,7 +441,8 @@ function renderizarTarefa(t) {
 
       await darRecompensa(usuario.uid, Math.round(xpBase), moedasGanhar);
 
-      await atacarInimigo(10); // 10 é o dano
+      const danoArmas = calcularDanoArmas(itensAtivos);
+      await atacarInimigo(10 + danoArmas);
 
     }
 
@@ -1112,6 +1119,28 @@ function calcularBonusMoedas(itensAtivos) {
     }
   });
   return bonus;
+}
+
+function calcularDanoArmas(itensAtivos) {
+  let dano = 0;
+  itensAtivos.forEach(item => {
+    const config = ITENS_CONFIG[item];
+    if (config && config.tipo === "arma" && config.efeito?.dano) {
+      dano += config.efeito.dano;
+    }
+  });
+  return dano;
+}
+
+function calcularDefesa(itensAtivos) {
+  let defesa = 0;
+  itensAtivos.forEach(item => {
+    const config = ITENS_CONFIG[item];
+    if (config && config.tipo === "protecao" && config.efeito?.defesa) {
+      defesa += config.efeito.defesa;
+    }
+  });
+  return defesa;
 }
 
 function xpNecessarioParaNivel(nivel) {
