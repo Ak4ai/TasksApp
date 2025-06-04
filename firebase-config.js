@@ -38,11 +38,14 @@ export async function carregarMeuSimpleID() {
 
     const idSpan = document.getElementById("id-atual");
     const msgMudanca = document.getElementById("msg-mudanca");
+    const idSpanConfig = document.getElementById("id-atual-config");
+    const msgMudancaConfig = document.getElementById("msg-mudanca-config");
 
     if (snap.exists()) {
         const data = snap.data();
         const simpleID = data.simpleID || "(não definido)";
-        idSpan.textContent = simpleID;
+        if (idSpan) idSpan.textContent = simpleID;
+        if (idSpanConfig) idSpanConfig.textContent = simpleID;
 
         if (data.lastChange) {
             const ultimaData = data.lastChange.toDate();
@@ -50,18 +53,23 @@ export async function carregarMeuSimpleID() {
             const diasPassados = Math.floor((agora - ultimaData) / (1000 * 60 * 60 * 24));
             if (diasPassados < DIAS_ESPERA) {
                 const restante = DIAS_ESPERA - diasPassados;
-                msgMudanca.textContent = `Você poderá mudar seu ID novamente em ${restante} dia(s).`;
+                if (msgMudanca) msgMudanca.textContent = `Você poderá mudar seu ID novamente em ${restante} dia(s).`;
+                if (msgMudancaConfig) msgMudancaConfig.textContent = `Você poderá mudar seu ID novamente em ${restante} dia(s).`;
                 document.getElementById("meu-id-simples").disabled = true;
             } else {
-                msgMudanca.textContent = `Você pode mudar seu ID agora.`;
+                if (msgMudanca) msgMudanca.textContent = `Você pode mudar seu ID agora.`;
+                if (msgMudancaConfig) msgMudancaConfig.textContent = `Você pode mudar seu ID agora.`;
                 document.getElementById("meu-id-simples").disabled = false;
             }
         } else {
-            msgMudanca.textContent = "Você pode escolher seu ID.";
+            if (msgMudanca) msgMudanca.textContent = "Você pode escolher seu ID.";
+            if (msgMudancaConfig) msgMudancaConfig.textContent = "Você pode escolher seu ID.";
         }
     } else {
-        idSpan.textContent = "(não definido)";
-        msgMudanca.textContent = "Você pode escolher seu ID.";
+        if (idSpan) idSpan.textContent = "(não definido)";
+        if (idSpanConfig) idSpanConfig.textContent = "(não definido)";
+        if (msgMudanca) msgMudanca.textContent = "Você pode escolher seu ID.";
+        if (msgMudancaConfig) msgMudancaConfig.textContent = "Você pode escolher seu ID.";
     }
 }
 
@@ -167,11 +175,12 @@ async function adicionarAmigoPorSimpleID() {
   let jaExiste = false;
   snap.forEach(doc => {
     const dados = doc.data();
-    // Se já existe amizade (em qualquer direção) e não foi rejeitada
+    // Só considera se NÃO estiver removido ou rejeitado
     if (
       ((dados.from === user.uid && dados.to === amigoUID) ||
       (dados.from === amigoUID && dados.to === user.uid)) &&
-      dados.status !== "rejected"
+      dados.status !== "rejected" &&
+      dados.status !== "removed"
     ) {
       jaExiste = true;
     }
