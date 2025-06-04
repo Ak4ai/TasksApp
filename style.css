@@ -187,10 +187,15 @@ div#tab-loja {
   text-shadow: 0 2px 8px #1e88e5a0;
 }
 
+.loja-titulo-protecao {
+  color: #ffd700;
+  text-shadow: 0 2px 8px #bfa000a0;
+}
+
 /* Bônus */
 .loja-titulo-bonus {
-  color: #ffe082;
-  text-shadow: 0 2px 8px #bfa000a0;
+  color: #13e90c;
+  text-shadow: 0 2px 8px #328c08a0;
 }
 
 
