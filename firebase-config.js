@@ -279,3 +279,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 export { app, db, messaging }; // <-- Agora pode exportar com segurança
 
+window.aceitarPedido = aceitarPedido;
+window.rejeitarPedido = rejeitarPedido;
+window.listarAmigosAceitos = listarAmigosAceitos;

@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `system friends`, hash: '5461543', date: '2025-06-04 13:36:52' };
+window.APP_VERSION = { msg: `Arrumando sistema de amizade`, hash: '6d159dd', date: '2025-06-04 14:47:44' };
