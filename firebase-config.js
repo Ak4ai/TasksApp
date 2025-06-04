@@ -239,6 +239,14 @@ async function rejeitarPedido(idDoc) {
   listarPedidosDeAmizade();
 }
 
+function abrirModalAmigo(nome, uid) {
+  document.getElementById('modal-amigo-nome').textContent = nome;
+  const modal = document.getElementById('modal-amigo');
+  modal.style.display = 'flex';
+  // Salva o UID do amigo para usar ao clicar em "Desfazer amizade"
+  modal.dataset.uid = uid;
+}
+
 export async function listarAmigosAceitos() {
   const auth = getAuth();
   const user = auth.currentUser;
@@ -247,18 +255,36 @@ export async function listarAmigosAceitos() {
   const container = document.getElementById("amigos-container");
   container.innerHTML = "";
 
-  // busca amizades onde o usuário é FROM ou TO e status é accepted
+  // Busca amizades onde o usuário é FROM ou TO e status é accepted
   const q1 = query(collection(db, "amizades"), where("from", "==", user.uid), where("status", "==", "accepted"));
   const q2 = query(collection(db, "amizades"), where("to", "==", user.uid), where("status", "==", "accepted"));
 
   const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
 
-  const amigosUIDs = [];
+  // Usar Set de pares ordenados para evitar duplicidade
+  const paresAmizade = new Set();
 
-  snap1.forEach(doc => amigosUIDs.push(doc.data().to));
-  snap2.forEach(doc => amigosUIDs.push(doc.data().from));
+  snap1.forEach(doc => {
+    const uid1 = user.uid;
+    const uid2 = doc.data().to;
+    const chave = [uid1, uid2].sort().join('-');
+    paresAmizade.add(chave);
+  });
+  snap2.forEach(doc => {
+    const uid1 = doc.data().from;
+    const uid2 = user.uid;
+    const chave = [uid1, uid2].sort().join('-');
+    paresAmizade.add(chave);
+  });
 
-  const amigosUnicos = [...new Set(amigosUIDs)].filter(uid => uid !== user.uid);
+  // Garante que cada UID de amigo só aparece uma vez
+  const amigosUIDsSet = new Set();
+  Array.from(paresAmizade).forEach(chave => {
+    const [uid1, uid2] = chave.split('-');
+    if (uid1 === user.uid) amigosUIDsSet.add(uid2);
+    else amigosUIDsSet.add(uid1);
+  });
+  const amigosUnicos = Array.from(amigosUIDsSet);
 
   for (const uid of amigosUnicos) {
     const userDoc = await getDoc(doc(db, "usuarios", uid));
@@ -267,12 +293,39 @@ export async function listarAmigosAceitos() {
     if (data) {
       const li = document.createElement("li");
       li.innerHTML = `
-        <span>${data.simpleID}</span>
-        <small>UID: ${uid}</small>
+        <span class="amigo-nome" style="cursor:pointer;font-weight:bold;">${data.simpleID}</span>
+       <small>UID: ${uid}</small>
       `;
+      li.addEventListener('click', () => {
+        abrirModalAmigo(data.simpleID, uid);
+      });
       container.appendChild(li);
     }
   }
+}
+
+async function desfazerAmizade(uidAmigo) {
+  const auth = getAuth();
+  const user = auth.currentUser;
+  if (!user) return;
+
+  // Busca a amizade (em qualquer direção)
+  const amizadesRef = collection(db, "amizades");
+  const q = query(
+    amizadesRef,
+    where("from", "in", [user.uid, uidAmigo]),
+    where("to", "in", [user.uid, uidAmigo]),
+    where("status", "==", "accepted")
+  );
+  const snap = await getDocs(q);
+
+  // Marca como "removed" ou deleta
+  for (const docSnap of snap.docs) {
+    await setDoc(doc(db, "amizades", docSnap.id), { status: "removed" }, { merge: true });
+  }
+
+  alert("Amizade desfeita!");
+  listarAmigosAceitos();
 }
 
 
@@ -309,3 +362,4 @@ export { app, db, messaging }; // <-- Agora pode exportar com segurança
 window.aceitarPedido = aceitarPedido;
 window.rejeitarPedido = rejeitarPedido;
 window.listarAmigosAceitos = listarAmigosAceitos;
+window.desfazerAmizade = desfazerAmizade;
