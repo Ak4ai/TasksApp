@@ -511,13 +511,26 @@ document.getElementById('refresh-btn').addEventListener('click', () => {
 
 let touchStartX = 0;
 let touchEndX = 0;
-const minSwipeDistance = 100; // AUMENTADO para reduzir sensibilidade
+const minSwipeDistance = 100;
+
+// Helper para saber se o evento começou em um carousel
+function isInCarouselArea(target) {
+  return target.closest && target.closest('.carousel-swipe-area');
+}
+
+let swipeStartedInCarousel = false;
 
 document.addEventListener('touchstart', e => {
+  swipeStartedInCarousel = isInCarouselArea(e.target);
+  if (swipeStartedInCarousel) return;
   touchStartX = e.changedTouches[0].screenX;
 }, false);
 
 document.addEventListener('touchend', e => {
+  if (swipeStartedInCarousel) {
+    swipeStartedInCarousel = false;
+    return;
+  }
   touchEndX = e.changedTouches[0].screenX;
   handleSwipe();
 }, false);
@@ -528,38 +541,31 @@ function handleSwipe() {
 
   const navButtons = Array.from(document.querySelectorAll('.bottom-nav .nav-button'));
   const activeBtn = document.querySelector('.bottom-nav .nav-button.active');
-  const activeTabId = activeBtn.dataset.tab;
-  const activeTab = document.getElementById(activeTabId);
   let idx = navButtons.indexOf(activeBtn);
 
   // Determinar próximo índice
+  let direction;
   if (deltaX < 0) {
     idx = (idx + 1) % navButtons.length;
+    direction = 'left';
   } else {
     idx = (idx - 1 + navButtons.length) % navButtons.length;
+    direction = 'right';
   }
 
   const nextBtn = navButtons[idx];
   const nextTabId = nextBtn.dataset.tab;
-  const nextTab = document.getElementById(nextTabId);
 
-  // Aplica classe de animação de saída
-  activeTab.classList.add('tab-exit');
-  nextTab.classList.add('tab-enter');
-
-  setTimeout(() => {
+  // Anima o main-content e troca a aba no callback
+  animateMainContent(direction, () => {
     // Troca aba ativa
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    nextTab.classList.add('active');
+    document.getElementById(nextTabId).classList.add('active');
 
     navButtons.forEach(b => b.classList.remove('active'));
     nextBtn.classList.add('active');
 
-    // Remove animações após transição
-    activeTab.classList.remove('tab-exit');
-    nextTab.classList.remove('tab-enter');
-
-    // ATUALIZA AS CLASSES DO BODY PARA AS CORES DOS CARDS
+    // Atualiza classes do body
     document.body.classList.remove(
       'tab-home-active',
       'tab-tasks-active',
@@ -571,9 +577,8 @@ function handleSwipe() {
     if (nextTabId === 'tab-tasks-nao-periodicas') document.body.classList.add('tab-tasks-nao-periodicas-active');
     if (nextTabId === 'tab-tasks-personalizadas') document.body.classList.add('tab-tasks-personalizadas-active');
 
-    // ⬇️ ATUALIZA VISIBILIDADE DO APP BODY
     atualizarVisibilidadeAppBody();
-  }, 250);
+  });
 
   // Desativa hover momentaneamente
   navButtons.forEach(btn => {
@@ -584,6 +589,46 @@ function handleSwipe() {
   setTimeout(() => {
     navButtons.forEach(btn => btn.classList.remove('disable-hover'));
   }, 300);
+}
+
+// ...existing code...
+
+function animateMainContent(direction, callback) {
+  const mainContent = document.querySelector('.main-content');
+  if (!mainContent) return callback && callback();
+
+  // Remove classes antigas
+  mainContent.classList.remove('slide-in-left', 'slide-in-right', 'slide-out-left', 'slide-out-right');
+
+  // Define as classes de saída e entrada
+  const outClass = direction === 'left' ? 'slide-out-left' : 'slide-out-right';
+  const inClass = direction === 'left' ? 'slide-in-right' : 'slide-in-left';
+
+  mainContent.classList.add(outClass);
+
+  mainContent.addEventListener('animationend', function handler() {
+    mainContent.classList.remove(outClass);
+    // Troca o conteúdo da aba aqui (ex: ativa a próxima aba)
+    if (callback) callback();
+
+    mainContent.classList.add(inClass);
+    // Remove a classe de entrada após a animação
+    setTimeout(() => {
+      mainContent.classList.remove(inClass);
+    }, 300);
+
+    mainContent.removeEventListener('animationend', handler);
+  });
+}
+
+// Exemplo de uso ao trocar de aba:
+function trocarAbaComAnimacao(tabAtual, tabNova, direction) {
+  animateMainContent(direction, () => {
+    // Esconde todas as tabs
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    // Mostra a nova tab
+    document.getElementById(tabNova).classList.add('active');
+  });
 }
 
 function atualizarVisibilidadeAppBody() {
@@ -739,66 +784,6 @@ document.addEventListener('DOMContentLoaded', () => {
   btnCriarTarefa.addEventListener('click', () => {
   ajustarWrappers();
 });
-
-    let startX = 0;
-    let isAtLeftEdge = false;
-    const indicator = document.getElementById('pull-up-indicator');
-  
-    if (!indicator) return;
-  
-    // Ajuste o CSS do indicador para ficar na esquerda/vertical centralizado:
-    // #pull-up-indicator {
-    //   position: fixed;
-    //   left: 0;
-    //   top: 50%;
-    //   transform: translateY(-50%) scale(0.8);
-    //   opacity: 0;
-    //   transition: transform 0.2s ease, opacity 0.2s ease;
-    // }
-  
-    window.addEventListener('touchstart', (e) => {
-      startX = e.touches[0].clientX;
-      const windowWidth = window.innerWidth;
-      // região de início: primeiros 20% da largura
-      const leftThreshold = windowWidth * 0.2;
-  
-      if (startX > leftThreshold) {
-        isAtLeftEdge = false;
-        indicator.style.opacity = '0';
-        return;
-      }
-  
-      isAtLeftEdge = true;
-      indicator.style.opacity = '1';
-    });
-  
-    window.addEventListener('touchmove', (e) => {
-      if (!isAtLeftEdge) return;
-  
-      const currentX = e.touches[0].clientX;
-      const distance = currentX - startX;  // positiva para a direita
-  
-      if (distance > 0 && distance < 100) {
-        // move o indicador para a direita à medida que arrasta
-        indicator.style.transform =
-          `translateY(-50%) translateX(${distance / 2}px) scale(${1 + distance / 200})`;
-        indicator.style.opacity = `${Math.min(1, distance / 50)}`;
-      }
-    });
-  
-    window.addEventListener('touchend', (e) => {
-      const endX = e.changedTouches[0].clientX;
-      const swipeDistance = endX - startX;
-  
-      // reset visual
-      indicator.style.opacity = '0';
-      indicator.style.transform = 'translateY(-50%) scale(0.8)';
-  
-      // aciona ação se arrastou > 280px da borda esquerda
-      if (isAtLeftEdge && swipeDistance > 280) {
-        document.body.classList.add('abas-mostradas');
-      }
-    });
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -846,6 +831,15 @@ document.addEventListener('DOMContentLoaded', () => {
 function isMobile() {
   return window.innerWidth <= 1040;
 }
+
+function animateCarousel(grid, idx, cardSelector) {
+  const cards = Array.from(grid.querySelectorAll(cardSelector));
+  if (!cards[idx]) return;
+  const cardWidth = cards[idx].offsetWidth;
+  const offset = -idx * cardWidth;
+  grid.style.transform = `translateX(${offset}px)`;
+}
+
 function setupGraficoCarousel() {
   const grid = document.querySelector('.grafico-grid');
   const cards = Array.from(document.querySelectorAll('.grafico-card'));
@@ -995,4 +989,25 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // ...existing code...
   atualizarUIInimigo();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btnAbrirPersonagem = document.querySelector('.class-name.icons-info');
+  const modalPersonagem = document.getElementById('modal-personagem');
+  const fecharModalPersonagem = document.getElementById('fechar-modal-personagem');
+
+  if (btnAbrirPersonagem && modalPersonagem && fecharModalPersonagem) {
+    btnAbrirPersonagem.addEventListener('click', () => {
+      modalPersonagem.style.display = 'flex';
+    });
+    fecharModalPersonagem.addEventListener('click', () => {
+      modalPersonagem.style.display = 'none';
+    });
+    // Fecha ao clicar fora do conteúdo
+    modalPersonagem.addEventListener('click', (e) => {
+      if (e.target === modalPersonagem) {
+        modalPersonagem.style.display = 'none';
+      }
+    });
+  }
 });

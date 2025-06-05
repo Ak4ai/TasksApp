@@ -308,35 +308,44 @@
   <!-- CONTEÚDO PRINCIPAL -->
   <div class="main-content">
     
-    <!-- QUADRADO PERSONAGEM --> 
-    <!-- ...existing code... -->
-    <div class="top-info-character">
-      <div class="character-box">
-        <div id="status-id">
-            <p>Seu ID: <span id="id-atual">Carregando...</span></p>
-        </div>
-        <img src="" alt="Personagem" />
-        <div class="xp-info">
-          <strong>Nível 1</strong>
-          <div class="xp-bar">
-            <div class="xp-fill" style="width: 20%;"></div>
+    <div id="modal-personagem" class="modal" style="display:none; align-items:center; justify-content:center;">
+      <div class="modal-content" style="max-width:95vw; background:#222; color:#faf0e6; position:relative;">
+        <span id="fechar-modal-personagem" style="position:absolute; top:10px; right:20px; font-size:2rem; cursor:pointer;">&times;</span>
+        <div class="top-info-character">
+          <div class="character-box">
+            <div id="status-id">
+                <p>Seu ID: <span id="id-atual">Carregando...</span></p>
+            </div>
+            <img src="" alt="Personagem" />
+            <div class="xp-info">
+              <strong>Nível 1</strong>
+              <div class="xp-bar">
+                <div class="xp-fill" style="width: 20%;"></div>
+              </div>
+              <span>XP: 0 / 100</span>
+            </div>
+            <div class="classe-info">
+              Classe: <span id="classe-ativa" style="cursor:pointer; text-decoration: underline;"></span>
+            </div>
+            <select id="classe-selector" style="display:none;">
+              <option value="Guerreiro">Guerreiro</option>
+              <option value="Mago">Mago</option>
+              <option value="Ladino">Ladino</option>
+              <option value="Bardo">Bardo</option>
+              <option value="Bruxo">Bruxo</option>
+            </select>
+            <div id="itens-ativos-container" class="itens-ativos-grid">
+            <!-- Cards de itens ativos aparecerão aqui -->
+            </div>
           </div>
-          <span>XP: 0 / 100</span>
         </div>
-        <div class="classe-info">
-          Classe: <span id="classe-ativa" style="cursor:pointer; text-decoration: underline;"></span>
-        </div>
-        <select id="classe-selector" style="display:none;">
-          <option value="Guerreiro">Guerreiro</option>
-          <option value="Mago">Mago</option>
-          <option value="Ladino">Ladino</option>
-          <option value="Bardo">Bardo</option>
-          <option value="Bruxo">Bruxo</option>
-        </select>
-        <div id="itens-ativos-container" class="itens-ativos-grid">
-        <!-- Cards de itens ativos aparecerão aqui -->
-        </div>
+      </div>
+    </div>
 
+    <!-- TABS -->
+    <div class="tabs">
+      <!-- Aba Home -->
+      <div id="tab-enemy" class="tab-content">
         <div id="inimigo-container" style="display: flex; flex-direction: column; align-items: center; margin: 20px 0;">
             <img id="inimigo-img" src="img/goblin.png" alt="Inimigo" style="width: 60px; height: 60px; margin-bottom: 8px;">
             <div id="inimigo-nome" style="font-weight: bold; font-size: 1.2em;">Goblin</div>
@@ -344,15 +353,8 @@
               <div id="inimigo-vida-fill" style="height: 100%; background: #4caf50; width: 100%; transition: width 0.3s;"></div>
             </div>
             <div id="inimigo-vida-text" style="font-size: 0.95em;">100 / 100</div>
-          </div>
-
-        
+        </div>
       </div>
-    </div>
-
-    <!-- TABS -->
-    <div class="tabs">
-      <!-- Aba Home -->
       <div id="tab-home" class="tab-content active">
         <div class="home-layout">
           
@@ -366,7 +368,7 @@
               <span class="tarefas-slider-indicador" data-idx="0"></span>
               <span class="tarefas-slider-indicador" data-idx="1"></span>
             </div>
-            <div class="tarefas-slider-grid">
+            <div class="tarefas-slider-grid carousel-swipe-area">
               <div class="tarefas-slider-card">
                 <div id="tarefas-fixadas" class="card green-card">
                   <span class="card-title">Tarefas Fixadas</span>
@@ -395,7 +397,7 @@
               <span class="grafico-indicador" data-idx="1"></span>
               <span class="grafico-indicador" data-idx="2"></span>
             </div>
-            <div class="grafico-grid">
+            <div class="grafico-grid carousel-swipe-area">
               <div class="grafico-card">
                 <canvas id="graficoDia"></canvas>
               </div>
@@ -756,6 +758,7 @@
   
   <!-- NAVEGAÇÃO INFERIOR -->
   <div class="bottom-nav">
+    <button class="nav-button" data-tab="tab-enemy">⚔️</button>
     <button class="nav-button" data-tab="tab-home">🏠</button>
     <div class="bottom-nav-separator">
       <button class="nav-button" data-tab="tab-tasks">📅</button>
