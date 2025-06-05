@@ -1352,18 +1352,19 @@ textarea:focus {
 .ordenar-buttons {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 5px;
+  margin: 20px 0px;
   flex-wrap: wrap; /* útil em telas pequenas */
 }
 
 .ordenar-buttons button {
-  padding: 6px 12px;
-  background: #444;
-  color: white;
-  border: 1px solid #999;
-  border-radius: 6px;
-  cursor: pointer;
+    padding: 6px 12px;
+    background: #444;
+    color: white;
+    border: 1px solid #999;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 90%;
 }
 .ordenar-buttons button:hover {
   background: #666;
@@ -1388,9 +1389,12 @@ textarea:focus {
 
 
 #lista-tarefas-organizada {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    flex-direction: column;
+    width: 90%;
+    align-self: center;
 }
 
 .grupo-tipo {
@@ -1473,6 +1477,12 @@ textarea:focus {
   opacity: 0;
   transition: opacity 0.5s ease;
   z-index: 1200;
+  pointer-events: none;
+}
+
+span.class-name.icons-info,
+span.next-event.icons-info {
+    cursor: pointer;
 }
 
 .popup-personagem.show {
@@ -1899,7 +1909,7 @@ div#config-buttosn-container {
 }
 
 .itens-ativos-grid {
-  display: flex;
+  display: none;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 10px;
@@ -2499,4 +2509,30 @@ div#ios-notif-info {
 @keyframes slideInLeft {
   from { transform: translateX(-100vw); opacity: 0; }
   to   { transform: translateX(0); opacity: 1; }
+}
+
+ul#amigos-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #1f1f1f;
+    color: white;
+    padding: 10px 1rem;
+    border-radius: 10px;
+    border: 1px solid #343434;
+    margin: 10px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    justify-content: center;
+    align-content: center;
+    flex-wrap: wrap;
+    width: 90%;
+}
+
+body > div.main-content > div.top-info-character > div{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-direction: row;
 }
