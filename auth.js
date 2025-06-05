@@ -1,7 +1,7 @@
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { app } from './firebase-config.js';
 // auth.js
-import { carregarTarefas, atualizarDataAtual } from './tarefas.js';
+import { carregarTarefas, atualizarDataAtual, carregarInventario } from './tarefas.js';
 
 
 const auth = getAuth(app);
@@ -23,6 +23,7 @@ setPersistence(auth, browserLocalPersistence).then(() => {
   
           if (!jaCarregouTarefas) {
               carregarTarefas();
+              carregarInventario(); // Carrega itens ativos no topo
               jaCarregouTarefas = true;
               atualizarDataAtual();
           }
@@ -45,6 +46,8 @@ function loginComGoogle() {
       //document.querySelector('.user-name').textContent = `👤 ${user.displayName}`;
       console.log("Login bem-sucedido:", user);
       carregarTarefas();
+      carregarInventario(); // Carrega itens ativos no topo
+      atualizarDataAtual();
     })
     .catch((error) => {
       console.error("Erro ao logar:", error);

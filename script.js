@@ -970,11 +970,39 @@ function setupTarefasSliderCarousel() {
     }
   });
 
-  if (isMobileTarefasSlider()) scrollToCard(0);
-  else updateIndicadores(0);
-}
-window.addEventListener('DOMContentLoaded', setupTarefasSliderCarousel);
+  // --- NOVO: lógica para abrir o card correto por padrão ---
+  function temTarefas(container) {
+    if (container.querySelector('.task-rect')) return true;
+    if (
+      container.children.length === 1 &&
+      container.children[0].tagName === 'P' &&
+      container.children[0].textContent.trim().toLowerCase().includes('nenhuma')
+    ) {
+      return false;
+    }
+    if (container.children.length === 0) return false;
+    return true;
+  }
 
+  if (isMobileTarefasSlider()) {
+    const fixadas = document.querySelector('#tarefas-fixadas .tasks-container');
+    const proximas = document.querySelector('#tarefas-proximas .tasks-container');
+    if (fixadas && proximas) {
+      const temFixadas = temTarefas(fixadas);
+      const temProximas = temTarefas(proximas);
+      if (!temFixadas && temProximas) {
+        scrollToCard(1); // Abre "Tarefas Próximas"
+      } else {
+        scrollToCard(0); // Abre "Tarefas Fixadas" (padrão)
+      }
+    } else {
+      scrollToCard(0);
+    }
+  } else {
+    updateIndicadores(0);
+  }
+}
+window.setupTarefasSliderCarousel = setupTarefasSliderCarousel;
 // ...existing code...
 window.addEventListener('DOMContentLoaded', () => {
   // ...existing code...
@@ -1011,3 +1039,41 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+function atualizarVisibilidadeTarefasSlider() {
+  const sliderColuna = document.querySelector('.tarefas-slider-coluna');
+  const fixadas = document.querySelector('#tarefas-fixadas .tasks-container');
+  const proximas = document.querySelector('#tarefas-proximas .tasks-container');
+
+  if (!sliderColuna || !fixadas || !proximas) return;
+
+  // Função auxiliar: retorna true se há tarefas reais (elementos que NÃO são só <p> com mensagem)
+  function temTarefas(container) {
+    // Se tem .task-rect, tem tarefa real
+    if (container.querySelector('.task-rect')) return true;
+    // Se só tem 1 filho e é <p> com "nenhuma tarefa", considera vazio
+    if (
+      container.children.length === 1 &&
+      container.children[0].tagName === 'P' &&
+      container.children[0].textContent.trim().toLowerCase().includes('nenhuma')
+    ) {
+      return false;
+    }
+    // Se não tem filhos, está vazio
+    if (container.children.length === 0) return false;
+    // Se tem outros elementos, considera que tem tarefas
+    return true;
+  }
+
+  const temFixadas = temTarefas(fixadas);
+  const temProximas = temTarefas(proximas);
+
+  if (!temFixadas && !temProximas) {
+    sliderColuna.style.display = 'none';
+  } else {
+    sliderColuna.style.display = '';
+  }
+}
+window.atualizarVisibilidadeTarefasSlider = atualizarVisibilidadeTarefasSlider;
+// Chame essa função sempre que atualizar as tarefas fixadas/próximas
+

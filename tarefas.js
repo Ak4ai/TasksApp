@@ -735,6 +735,13 @@ async function carregarTarefas() {
   if (loader) loader.style.display = 'none';
 
   carregandoTarefas = false;
+  // ⬇️ Chame aqui, no final:
+  if (typeof window.setupTarefasSliderCarousel === "function") {
+    window.setupTarefasSliderCarousel();
+  }
+  if (typeof atualizarVisibilidadeTarefasSlider === "function") {
+    atualizarVisibilidadeTarefasSlider();
+  }
 }
 
 
@@ -1170,24 +1177,37 @@ async function atualizarXP() {
   const xpAtual = xpRestante;
   const porcentagem = Math.min(100, (xpAtual / xpParaProximo) * 100);
 
-  // Atualiza apenas a UI
-  const xpInfo = document.querySelector('.xp-info');
-  if (!xpInfo) return;
+  // Atualiza TODOS os .xp-info e imagens de personagem
+  document.querySelectorAll('.top-info-character').forEach(topInfo => {
+    // XP e nível
+    const xpInfo = topInfo.querySelector('.xp-info');
+    if (xpInfo) {
+      const strong = xpInfo.querySelector('strong');
+      const fill = xpInfo.querySelector('.xp-fill');
+      const span = xpInfo.querySelector('span');
+      if (strong) strong.textContent = `Nível ${nivel}`;
+      if (fill) fill.style.width = `${porcentagem}%`;
+      if (span) span.textContent = `XP: ${Math.floor(xpAtual)} / ${xpParaProximo}`;
 
-  xpInfo.querySelector('strong').textContent = `Nível ${nivel}`;
-  xpInfo.querySelector('.xp-fill').style.width = `${porcentagem}%`;
-  xpInfo.querySelector('span').textContent = `XP: ${Math.floor(xpAtual)} / ${xpParaProximo}`;
+      // Cor por classe
+      const corPorClasse = {
+        'Guerreiro': '#FF5733',
+        'Mago': '#33FF57',
+        'Ladino': '#3357FF',
+        'Bardo': '#FF33A1',
+        'Bruxo': '#FF8C33'
+      };
+      let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
+      if (fill) fill.style.backgroundColor = corPorClasse[classeAtiva] || '#ccc';
+    }
 
-  const corPorClasse = {
-    'Guerreiro': '#FF5733',
-    'Mago': '#33FF57',
-    'Ladino': '#3357FF',
-    'Bardo': '#FF33A1',
-    'Bruxo': '#FF8C33'
-  };
-
-  let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
-  xpInfo.querySelector('.xp-fill').style.backgroundColor = corPorClasse[classeAtiva] || '#ccc';
+    // Imagem do personagem
+    const personagemImg = topInfo.querySelector('.character-box img');
+    if (personagemImg) {
+      let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
+      personagemImg.src = avataresPorClasse[classeAtiva] || "default.png";
+    }
+  });
 
   // ATUALIZA O LEVEL NA BARRA SUPERIOR
   const classNameSpan = document.querySelector('.class-name');
@@ -2254,25 +2274,59 @@ export async function carregarInventario() {
     grid.appendChild(card);
   });
 
-  // Renderiza itens ativos
+  // ...dentro de carregarInventario, após renderizar os itens ativos:
   const itensContainer = document.getElementById("itens-ativos-container");
   if (!itensContainer) return;
   itensContainer.innerHTML = "";
-
+  
   itensAtivos.forEach(item => {
     const card = document.createElement("div");
     card.className = "item-ativo-card";
-
     const img = document.createElement("img");
     img.src = `img/${item}.png`;
     img.alt = item;
-
     const nome = document.createElement("span");
     nome.textContent = getNomeItem(item);
-
     card.appendChild(img);
     card.appendChild(nome);
     itensContainer.appendChild(card);
+  });
+  
+  // Ajusta o display dinamicamente
+  if (itensAtivos.length > 0) {
+    itensContainer.style.display = "flex";
+  } else {
+    itensContainer.style.display = "none";
+  }
+
+  // ...dentro de carregarInventario, após renderizar os itens ativos no inventário:
+  
+  // Atualiza TODOS os containers de itens ativos (modal, topo, etc)
+  document.querySelectorAll('.top-info-character .itens-ativos-grid').forEach(itensContainer => {
+    itensContainer.innerHTML = "";
+  
+    itensAtivos.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "item-ativo-card";
+      const img = document.createElement("img");
+      img.src = `img/${item}.png`;
+      img.alt = item;
+      img.onerror = function() {
+        this.src = "img/default.png";
+      };
+      const nome = document.createElement("span");
+      nome.textContent = getNomeItem(item);
+      card.appendChild(img);
+      card.appendChild(nome);
+      itensContainer.appendChild(card);
+    });
+  
+    // Ajusta o display dinamicamente
+    if (itensAtivos.length > 0) {
+      itensContainer.style.display = "flex";
+    } else {
+      itensContainer.style.display = "none";
+    }
   });
 }
 
