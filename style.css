@@ -1316,21 +1316,17 @@ textarea:focus {
     width: 90%;
 }
 
-.character-box img {
-  width: 60px;
-  height: 60px;
-  margin-bottom: 8px;
-}
-
 .xp-info {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+  gap: 3%;
+  width: 100%;
 }
 
 .xp-bar {
   height: 6px;
-  width: 100px;
+  width: 60%;
   background: #444;
   border-radius: 4px;
   margin: 4px 0;
@@ -1909,25 +1905,32 @@ div#config-buttosn-container {
 }
 
 .itens-ativos-grid {
-  display: none;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    height: -webkit-fill-available;
+    align-items: stretch;
+    justify-content: flex-start;
+    align-content: flex-end;
 }
 
 .item-ativo-card {
   border: 1px solid #ccc;
   border-radius: 8px;
-  padding: 5px;
   background: #221d1d;
   text-align: center;
-  width: 60px;
+  height: 80%;
+  max-width: 80px;
+  width: 10%;
+  align-items: center;
+  justify-content: center;
+  display: flex;
 }
 
 .item-ativo-card img {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain;
 }
 
 .btn-wrapper {
@@ -2304,8 +2307,8 @@ div#ios-notif-info {
 }
 
 #status-id p {
-  margin: 8px 0;
   font-size: 16px;
+  margin: 0;
 }
 
 #id-atual {
@@ -2534,5 +2537,76 @@ body > div.main-content > div.top-info-character > div{
     justify-content: center;
     gap: 10px;
     margin-bottom: 10px;
+    flex-direction: column;
+    align-content: center;
+}
+
+#status-id{
+  background-color: transparent;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  border: none;
+  font-weight: 900;
+  color: #ccc;
+}
+
+.character-header {
+    display: flex;
+    gap: 1.8vw;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.character-box img {
+    align-self: center;
+    width: -webkit-fill-available;
+    height: 100%;
+    aspect-ratio: 1;
+    border-radius: 10px;
+}
+
+body > div.main-content > div.top-info-character > div {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
     flex-direction: row;
+    align-content: center;
+    flex-wrap: nowrap;
+}
+
+.item-ativo-card span{
+  display: none;
+}
+
+#itens-ativos-container > img {
+  width: 20%;
+}
+
+div#char-sider {
+    width: 30%;
+    height: -webkit-fill-available;
+}
+
+body > div.main-content > div.top-info-character > div > div.character-info > div.character-header > div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    width: 100%;
+}
+
+.character-info {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
