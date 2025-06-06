@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `Mecanica de Missões`, hash: 'c19e065', date: '2025-06-06 14:46:58' };
+window.APP_VERSION = { msg: `Visual bloco das missões diarias`, hash: '7f8bd47', date: '2025-06-06 15:45:42' };
