@@ -4,8 +4,116 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 import { doc, collection, addDoc, getDocs, Timestamp, deleteDoc, serverTimestamp, setDoc, getDoc, increment } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 // script.js
 import { carregarTarefas,mostrarPopup,carregarInventario, calcularDefesa } from './tarefas.js';
-export { atacarInimigo, inimigoAtaca, darRecompensa };
+export { atacarInimigo, inimigoAtaca, darRecompensa, mostrarMissoesDiarias };
 
+
+const MISSOES_DIARIAS = [
+  {
+    id: 'fisico',
+    descricao: 'Conclua 2 tarefas do tipo Físico',
+    tipo: 'Físico', // <-- igual ao valor da tag
+    quantidade: 2,
+    xp: 50
+  },
+  {
+    id: 'intelecto',
+    descricao: 'Conclua 2 tarefas do tipo Intelecto',
+    tipo: 'Intelecto',
+    quantidade: 2,
+    xp: 50
+  },
+  {
+    id: 'social',
+    descricao: 'Conclua 2 tarefas do tipo Social',
+    tipo: 'Social',
+    quantidade: 2,
+    xp: 50
+  },
+  {
+    id: 'criativo',
+    descricao: 'Conclua 2 tarefas do tipo Criativo',
+    tipo: 'Criativo',
+    quantidade: 2,
+    xp: 50
+  },
+  {
+    id: 'espiritual',
+    descricao: 'Conclua 2 tarefas do tipo Espiritual',
+    tipo: 'Espiritual',
+    quantidade: 2,
+    xp: 50
+  }
+];
+
+// Sorteia e salva as missões do dia
+async function sortearMissoesDiarias(uid) {
+  const missoes = [];
+  const indices = [];
+  while (missoes.length < 2) { // 2 missões por dia
+    const idx = Math.floor(Math.random() * MISSOES_DIARIAS.length);
+    if (!indices.includes(idx)) {
+      indices.push(idx);
+      missoes.push({ ...MISSOES_DIARIAS[idx], progresso: 0, concluida: false });
+    }
+  }
+  const ref = doc(db, "usuarios", uid, "missoes", "diaria");
+  await setDoc(ref, {
+    data: new Date().toDateString(),
+    missoes
+  });
+  return missoes;
+}
+
+// Carrega as missões do dia
+async function carregarMissoesDiarias(uid) {
+  const ref = doc(db, "usuarios", uid, "missoes", "diaria");
+  const snap = await getDoc(ref);
+  const hoje = new Date().toDateString();
+  if (snap.exists() && snap.data().data === hoje) {
+    return snap.data().missoes;
+  } else {
+    return await sortearMissoesDiarias(uid);
+  }
+}
+
+// Mostra as missões na home
+async function mostrarMissoesDiarias(uid) {
+  const missoes = await carregarMissoesDiarias(uid);
+  const container = document.getElementById('missoes-diarias');
+  if (!container) return;
+  container.innerHTML = '<h3>Missões Diárias</h3>';
+  missoes.forEach(missao => {
+    const div = document.createElement('div');
+    div.className = 'missao-diaria';
+    div.innerHTML = `
+      <span>${missao.descricao}</span>
+      <span>${missao.progresso || 0} / ${missao.quantidade}</span>
+      ${missao.concluida ? '<span style="color:green;">✔</span>' : ''}
+    `;
+    container.appendChild(div);
+  });
+}
+
+export async function atualizarProgressoMissoes(uid, tipoTarefa) {
+  const ref = doc(db, "usuarios", uid, "missoes", "diaria");
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+
+  const data = snap.data();
+  let alterou = false;
+  for (const missao of data.missoes) {
+    if (!missao.concluida && missao.tipo === tipoTarefa) {
+      missao.progresso = (missao.progresso || 0) + 1;
+      if (missao.progresso >= missao.quantidade) {
+        missao.concluida = true;
+        await darRecompensa(uid, missao.xp, 0);
+        mostrarPopup(`Missão concluída! +${missao.xp} XP`);
+      }
+      alterou = true;
+    }
+  }
+  if (alterou) await setDoc(ref, data);
+}
 
 const INIMIGOS = [
   // Lista de inimigos
@@ -222,6 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (user) {
       carregarMeuSimpleID();
       atualizarUIInimigo();
+      mostrarMissoesDiarias(user.uid);
   }
   });
   const botao = document.getElementById('botao-criar-tarefa');

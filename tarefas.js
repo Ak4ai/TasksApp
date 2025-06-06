@@ -1,7 +1,7 @@
 import { auth } from './auth.js';
 import { db } from './firebase-config.js';
 import { collection, query, where, getDocs, getDoc, doc, updateDoc, deleteDoc, Timestamp, addDoc, increment, arrayUnion, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
-import { atacarInimigo, inimigoAtaca, darRecompensa } from './script.js';
+import { atacarInimigo, inimigoAtaca, darRecompensa, atualizarProgressoMissoes, mostrarMissoesDiarias } from './script.js';
 export { carregarTarefas, tempoMaisRecente, atualizarDataAtual, calcularDefesa };
 
 let carregandoTarefas = false;
@@ -401,67 +401,74 @@ function renderizarTarefa(t) {
   // Só adiciona o listener do checkbox se ele existir
   const checkbox = div.querySelector('.checkbox-tarefa');
   if (checkbox) {
-  checkbox.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    const usuario = auth.currentUser;
+    checkbox.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const usuario = auth.currentUser;
 
-    await updateDoc(
-      doc(db, "usuarios", usuario.uid, "tarefas", t.id),
-      { finalizada: checkbox.checked }
-    );
+      try {
+        await updateDoc(
+          doc(db, "usuarios", usuario.uid, "tarefas", t.id),
+          { finalizada: checkbox.checked }
+        );
 
-    if (checkbox.checked) {
-      let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
-      personagemFalaAleatoriamente(classeAtiva);
+        if (checkbox.checked) {
+          let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
+          personagemFalaAleatoriamente(classeAtiva);
 
-      // Só chama para personalizadas
-      if (t.tipo === 'personalizado') {
-        await criarRecorrentePersonalizada({
-          ...t,
-          finalizada: true
-        });
-        // Chama ajuste só após concluir personalizada
-        await ajustarRecorrentesPersonalizadas([{
-          ...t,
-          finalizada: true
-        }]);
+          // Só chama para personalizadas
+          if (t.tipo === 'personalizado') {
+            await criarRecorrentePersonalizada({
+              ...t,
+              finalizada: true
+            });
+            await ajustarRecorrentesPersonalizadas([{
+              ...t,
+              finalizada: true
+            }]);
+          }
+
+          const usuarioRef = doc(db, "usuarios", usuario.uid);
+          const usuarioSnap = await getDoc(usuarioRef);
+          const itensAtivos = usuarioSnap.exists() ? usuarioSnap.data().itensAtivos || [] : [];
+          const bonusXP = calcularBonusXP(itensAtivos);
+          const bonusMoedas = calcularBonusMoedas(itensAtivos);
+
+          let xpBase = 10; // Valor base
+          xpBase += xpBase * bonusXP;
+
+          let moedasGanhar = 5; // Valor base
+          moedasGanhar += moedasGanhar * bonusMoedas;
+
+          await darRecompensa(usuario.uid, Math.round(xpBase), moedasGanhar);
+
+          const danoArmas = calcularDanoArmas(itensAtivos);
+          await atacarInimigo(10 + danoArmas);
+
+          if (t.tags && t.tags.length > 0) {
+            const tipoMissao = t.tags[0]; // já está igual ao tipo da missão
+            await atualizarProgressoMissoes(usuario.uid, tipoMissao);
+          }
+        }
+
+        // Processa tarefa periódica se for o caso
+        if (t.tipo === 'periodico' && checkbox.checked) {
+          await processarTarefaPeriodicaAoMarcar({
+            ...t,
+            finalizada: true
+          });
+        }
+
+        // Atualize as missões e tarefas na interface
+        if (usuario) {
+          await mostrarMissoesDiarias(usuario.uid);
+        }
+        await carregarTarefas();
+
+      } catch (err) {
+        console.error("Erro ao concluir tarefa:", err);
+        mostrarPopup("Erro ao concluir tarefa. Tente novamente.", 4000);
       }
-
-      const usuarioRef = doc(db, "usuarios", usuario.uid);
-      const usuarioSnap = await getDoc(usuarioRef);
-      const itensAtivos = usuarioSnap.exists() ? usuarioSnap.data().itensAtivos || [] : [];
-      const bonusXP = calcularBonusXP(itensAtivos);
-      const bonusMoedas = calcularBonusMoedas(itensAtivos);
-
-      let xpBase = 10; // ou outro valor base
-      xpBase += xpBase * bonusXP;
-
-      let moedasGanhar = 5; // valor base
-      moedasGanhar += moedasGanhar * bonusMoedas;
-
-      await darRecompensa(usuario.uid, Math.round(xpBase), moedasGanhar);
-
-      const danoArmas = calcularDanoArmas(itensAtivos);
-      await atacarInimigo(10 + danoArmas);
-
-    }
-
-    // Processa tarefa periódica se for o caso
-    if (t.tipo === 'periodico' && checkbox.checked) {
-      await processarTarefaPeriodicaAoMarcar({
-        ...t,
-        finalizada: true
-      });
-    }
-
-    // ✅ Personagem fala ao concluir a tarefa
-    if (checkbox.checked) {
-      let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
-      personagemFalaAleatoriamente(classeAtiva);
-    }
-
-    await carregarTarefas();
-  });
+    });
   }
 
 
