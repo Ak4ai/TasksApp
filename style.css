@@ -1296,6 +1296,7 @@ textarea:focus {
     display: flex;
     justify-content: center;
     padding: 1rem;
+    padding-bottom: 0;
 }
 
 .character-box {
@@ -1305,7 +1306,7 @@ textarea:focus {
     gap: 32px;
     background-color: #1f1f1f;
     color: white;
-    padding: 10px 1rem;
+    padding: 1rem;
     border-radius: 10px;
     border: 1px solid #343434;
     margin: 10px 0;
@@ -1318,15 +1319,15 @@ textarea:focus {
 
 .xp-info {
   display: flex;
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 3%;
   width: 100%;
 }
 
 .xp-bar {
   height: 6px;
-  width: 60%;
+  width: 100%;
   background: #444;
   border-radius: 4px;
   margin: 4px 0;
@@ -1920,8 +1921,8 @@ div#config-buttosn-container {
   background: #221d1d;
   text-align: center;
   height: 80%;
-  max-width: 80px;
-  width: 10%;
+  width: 13%;
+  aspect-ratio: 1;
   align-items: center;
   justify-content: center;
   display: flex;
@@ -2307,7 +2308,7 @@ div#ios-notif-info {
 }
 
 #status-id p {
-  font-size: 16px;
+  font-size: 6vw;
   margin: 0;
 }
 
@@ -2553,7 +2554,6 @@ body > div.main-content > div.top-info-character > div{
 
 .character-header {
     display: flex;
-    gap: 1.8vw;
     flex-direction: column;
     flex-wrap: wrap;
     justify-content: flex-start;
@@ -2591,7 +2591,9 @@ body > div.main-content > div.top-info-character > div {
 
 div#char-sider {
     width: 30%;
-    height: -webkit-fill-available;
+    max-width: 150px;
+    height: 100%;
+    aspect-ratio: 1;
 }
 
 body > div.main-content > div.top-info-character > div > div.character-info > div.character-header > div {
