@@ -1323,6 +1323,7 @@ textarea:focus {
   align-items: flex-start;
   gap: 3%;
   width: 100%;
+  font-size: clamp(0.1rem, 3.5vw, 17px);
 }
 
 .xp-bar {
@@ -1907,12 +1908,15 @@ div#config-buttosn-container {
 
 .itens-ativos-grid {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 8px;
-    height: -webkit-fill-available;
-    align-items: stretch;
+    height: 100%;
+    max-height: 25px;
+    align-items: flex-end;
     justify-content: flex-start;
     align-content: flex-end;
+    overflow-x: auto;
+    scrollbar-width: none;
 }
 
 .item-ativo-card {
@@ -1922,6 +1926,7 @@ div#config-buttosn-container {
   text-align: center;
   height: 80%;
   width: 13%;
+  max-width: 35px;
   aspect-ratio: 1;
   align-items: center;
   justify-content: center;
@@ -2308,7 +2313,7 @@ div#ios-notif-info {
 }
 
 #status-id p {
-  font-size: 6vw;
+  /* font-size: 6vw; */
   margin: 0;
 }
 
@@ -2550,21 +2555,21 @@ body > div.main-content > div.top-info-character > div{
   border: none;
   font-weight: 900;
   color: #ccc;
+  font-size: clamp(0.1rem, 6vw, 28px);
 }
 
 .character-header {
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
-    justify-content: flex-start;
     align-content: flex-start;
     align-items: flex-start;
     width: 100%;
+    justify-content: flex-start;
 }
 
 .character-box img {
     align-self: center;
-    width: -webkit-fill-available;
     height: 100%;
     aspect-ratio: 1;
     border-radius: 10px;
@@ -2579,6 +2584,7 @@ body > div.main-content > div.top-info-character > div {
     flex-direction: row;
     align-content: center;
     flex-wrap: nowrap;
+    max-height: 100px;
 }
 
 .item-ativo-card span{
@@ -2591,7 +2597,8 @@ body > div.main-content > div.top-info-character > div {
 
 div#char-sider {
     width: 30%;
-    max-width: 150px;
+    max-width: 100px;
+    max-height: 150px;
     height: 100%;
     aspect-ratio: 1;
 }
@@ -2611,4 +2618,6 @@ body > div.main-content > div.top-info-character > div > div.character-info > di
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    padding-left: 7px;
+    overflow: hidden;
 }
