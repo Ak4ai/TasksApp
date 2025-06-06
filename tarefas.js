@@ -2329,7 +2329,3 @@ export async function carregarInventario() {
     }
   });
 }
-
-window.updateDoc = updateDoc;
-window.doc = doc;
-window.increment = increment;

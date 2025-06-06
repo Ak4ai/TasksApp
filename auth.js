@@ -58,7 +58,3 @@ function loginComGoogle() {
 setInterval(atualizarDataAtual, 60 * 60 * 1000);
 
 export { auth };
-
-window.db = db;
-window.auth = auth;
-window.doc = doc;
