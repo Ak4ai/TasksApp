@@ -39,7 +39,7 @@ self.addEventListener('install', function(event) {
           '/img/bardo.jpg',
           '/img/bruxo.jpg',
           '/img/cajado.png',
-          '/img/carnaval.png',
+          '/img/mascara.png',
           '/img/cartola.png',
           '/img/coroa.png',
           '/img/escudo.png',
