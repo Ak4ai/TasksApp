@@ -36,15 +36,19 @@ export async function carregarMeuSimpleID() {
     const ref = doc(db, "usuarios", user.uid);
     const snap = await getDoc(ref);
 
-    const idSpan = document.getElementById("id-atual");
-    const msgMudanca = document.getElementById("msg-mudanca");
+    // Atualiza TODOS os spans com id="id-atual" e id="id-atual-top"
+    const idSpans = [
+        ...document.querySelectorAll('#id-atual'),
+        ...document.querySelectorAll('#id-atual-top')
+    ];
     const idSpanConfig = document.getElementById("id-atual-config");
+    const msgMudanca = document.getElementById("msg-mudanca");
     const msgMudancaConfig = document.getElementById("msg-mudanca-config");
 
     if (snap.exists()) {
         const data = snap.data();
         const simpleID = data.simpleID || "(não definido)";
-        if (idSpan) idSpan.textContent = simpleID;
+        idSpans.forEach(span => span.textContent = simpleID);
         if (idSpanConfig) idSpanConfig.textContent = simpleID;
 
         if (data.lastChange) {
@@ -66,7 +70,7 @@ export async function carregarMeuSimpleID() {
             if (msgMudancaConfig) msgMudancaConfig.textContent = "Você pode escolher seu ID.";
         }
     } else {
-        if (idSpan) idSpan.textContent = "(não definido)";
+        idSpans.forEach(span => span.textContent = "(não definido)");
         if (idSpanConfig) idSpanConfig.textContent = "(não definido)";
         if (msgMudanca) msgMudanca.textContent = "Você pode escolher seu ID.";
         if (msgMudancaConfig) msgMudancaConfig.textContent = "Você pode escolher seu ID.";
