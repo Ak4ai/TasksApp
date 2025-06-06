@@ -376,3 +376,6 @@ window.aceitarPedido = aceitarPedido;
 window.rejeitarPedido = rejeitarPedido;
 window.listarAmigosAceitos = listarAmigosAceitos;
 window.desfazerAmizade = desfazerAmizade;
+
+window.db = db;
+window.doc = doc;
