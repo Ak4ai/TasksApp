@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `92 - Remodelamento Final`, hash: '176a975', date: '2025-06-06 01:16:37' };
+window.APP_VERSION = { msg: `Mecanica de Missões`, hash: 'c19e065', date: '2025-06-06 14:46:58' };
