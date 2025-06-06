@@ -1009,6 +1009,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Atualiza imagem do personagem
     personagemImg.src = avataresPorClasse[classeAtiva] || "default.png";
+    // Atualiza imagem do personagem no modal, se existir
+    const personagemImgModal = document.querySelector('.character-box-modal img');
+    if (personagemImgModal) {
+      personagemImgModal.src = avataresPorClasse[classeAtiva] || "default.png";
+    }
   }
 
   atualizarVisualClasse();
@@ -1111,7 +1116,6 @@ function criarBotoesXP(classeAtiva) {
 
   container.appendChild(divBotoes);
 }
-
 
 function calcularBonusXP(itensAtivos) {
   let bonus = 0;

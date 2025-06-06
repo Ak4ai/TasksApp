@@ -584,6 +584,14 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       document.getElementById(alvo).classList.add('active');
 
+      // Aplica ou remove a classe .show na main-content
+      const mainContent = document.querySelector('.main-content');
+      if (alvo === 'tab-enemy') {
+        mainContent.classList.add('show');
+      } else {
+        mainContent.classList.remove('show');
+      }
+
       // Remove classes ativas nos botões
       document.querySelectorAll('.nav-button').forEach(b => {
         b.classList.remove('active');
