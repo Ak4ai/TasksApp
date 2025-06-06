@@ -312,20 +312,24 @@
       <div class="modal-content" style="max-width:95vw; background:#222; color:#faf0e6; position:relative;">
         <span id="fechar-modal-personagem" style="position:absolute; top:10px; right:20px; font-size:2rem; cursor:pointer;">&times;</span>
         <div class="top-info-character">
-          <div class="character-box">
-            <div id="status-id">
-                <p>Seu ID: <span id="id-atual">Carregando...</span></p>
+          <div class="character-box-modal">
+            <div class="top-info-char-modal">
+              <img src="" alt="Personagem" />
+              <div class="char-modal-info">
+                <div id="status-id-modal">
+                    <p>ID: <span id="id-atual">Carregando...</span></p>
+                </div>
+                <div class="classe-info">
+                  Classe: <span id="classe-ativa" style="cursor:pointer; text-decoration: underline;"></span>
+                </div>
+              </div>
             </div>
-            <img src="" alt="Personagem" />
             <div class="xp-info">
               <strong>Nível 1</strong>
               <div class="xp-bar">
                 <div class="xp-fill" style="width: 20%;"></div>
               </div>
               <span>XP: 0 / 100</span>
-            </div>
-            <div class="classe-info">
-              Classe: <span id="classe-ativa" style="cursor:pointer; text-decoration: underline;"></span>
             </div>
             <select id="classe-selector" style="display:none;">
               <option value="Guerreiro">Guerreiro</option>
@@ -334,7 +338,7 @@
               <option value="Bardo">Bardo</option>
               <option value="Bruxo">Bruxo</option>
             </select>
-            <div id="itens-ativos-container" class="itens-ativos-grid">
+            <div id="itens-ativos-container-modal" class="itens-ativos-grid">
             <!-- Cards de itens ativos aparecerão aqui -->
             </div>
           </div>
@@ -411,6 +415,7 @@
               </div>
             </div>
           </div>
+          <div id="missoes-diarias" class="missoes-diarias-bloco"></div>
 
           <div id="calendario-home" class="card">
             <div style="margin-bottom: 10px;">
@@ -452,8 +457,6 @@
               </div>
             </div>
           </div>
-
-          <div id="missoes-diarias" class="missoes-diarias-bloco"></div>
         </div>
       </div>
     <!-- ...existing code... -->

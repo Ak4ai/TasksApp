@@ -272,6 +272,19 @@ div#calendario-home {
   overflow-y: auto;
   overflow-x: hidden;
   width: 100%;
+  height: 100%;
+}
+
+
+.main-content.show {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-top: 5vw;
 }
 
 .bottom-nav {
@@ -1294,8 +1307,11 @@ textarea:focus {
 
 .top-info-character {
     display: flex;
+    flex: 0 0 auto;
+    min-height: 0;
     justify-content: center;
     padding: 1rem;
+    padding-top: 0;
     padding-bottom: 0;
 }
 
@@ -1314,6 +1330,24 @@ textarea:focus {
     justify-content: center;
     align-content: center;
     flex-wrap: wrap;
+    width: 90%;
+}
+
+.character-box-modal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    background-color: #1f1f1f;
+    color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid #343434;
+    margin: 10px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    justify-content: center;
+    align-content: center;
+    flex-wrap: nowrap;
     width: 90%;
 }
 
@@ -2299,17 +2333,6 @@ div#ios-notif-info {
     padding-bottom: 1rem;
   }
 }
-#status-id {
-  background-color: #252627; /* Fundo suave */
-  border: 1px solid #77787a; /* Borda clara */
-  border-radius: 8px;
-  padding: 15px 20px;
-  max-width: 350px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #ffffff; /* Cor do texto */
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  margin-bottom: 20px;
-}
 
 #status-id p {
   /* font-size: 6vw; */
@@ -2557,6 +2580,21 @@ body > div.main-content > div.top-info-character > div{
   font-size: clamp(0.1rem, 6vw, 28px);
 }
 
+#status-id-modal {
+  background-color: transparent;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  border: none;
+  font-weight: 900;
+  color: #ccc;
+  font-size: clamp(0.1rem, 6vw, 28px);
+}
+
+#status-id-modal p {
+  margin: 0;
+}
+
 .character-header {
     display: flex;
     flex-direction: column;
@@ -2574,12 +2612,20 @@ body > div.main-content > div.top-info-character > div{
     border-radius: 10px;
 }
 
+.character-box-modal img {
+    align-self: center;
+    width: 50%;
+    aspect-ratio: 1;
+    border-radius: 10px;
+}
+
 body > div.main-content > div.top-info-character > div {
     display: flex;
     align-items: center;
     justify-content: flex-start;
     gap: 10px;
     margin-bottom: 10px;
+    margin-top: 0;
     flex-direction: row;
     align-content: center;
     flex-wrap: nowrap;
@@ -2629,16 +2675,12 @@ body > div.main-content > div.top-info-character > div > div.character-info > di
 
 .missoes-diarias-bloco {
   background: #1f1f1f;
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 1rem;
-  margin: 24px 0;
   color: #fff;
   box-shadow: 0 2px 12px #0002;
   width: 100%;
-  max-width: 100%;
-  margin-left: 0;
-  margin-right: 0;
-  box-sizing: border-box;
+  border: 1px solid #343434;
 }
 
 @media (min-width: 600px) {
@@ -2743,4 +2785,79 @@ body > div.main-content > div.top-info-character > div > div.character-info > di
   align-items: center;
   gap: 4px;
   font-size: 1.08em;
+    font-size: clamp(0.1rem, 3vw, 18px);
+}
+
+.top-info-char-modal {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* Espaço entre imagem e textos */
+  width: 100%;
+}
+
+.top-info-char-modal img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  background: #222;
+}
+
+.char-modal-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    justify-content: flex-start;
+    align-content: stretch;
+    align-items: flex-start;
+    height: 100%;
+}
+
+#itens-ativos-container-modal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: stretch; /* <-- faz todos os filhos terem a mesma altura */
+  width: 100% !important;
+  max-height: none;
+  flex-direction: row;
+  align-content: flex-start;
+}
+
+#itens-ativos-container-modal > div {
+  flex: 1 1 120px;      /* cresce igualmente, mínimo 120px */
+  min-width: 12%;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  padding: 10px 2px;
+  box-sizing: border-box;
+}
+
+#itens-ativos-container-modal > div span{
+  font-size: clamp(0.1rem, 1.4vw, 28px);
+  display: block;
+}
+
+.main-content.show {
+  background-image: url('img/battle-bk.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.tabs {
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow:hidden
+}
+
+div#tab-enemy {
+    min-height: 100%;
+    padding-top: 0px;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 0px;
 }
