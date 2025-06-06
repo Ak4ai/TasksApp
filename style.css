@@ -2621,3 +2621,9 @@ body > div.main-content > div.top-info-character > div > div.character-info > di
     padding-left: 7px;
     overflow: hidden;
 }
+
+.classe-info {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
