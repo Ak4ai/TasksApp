@@ -225,7 +225,7 @@ div#tab-loja {
 }
 
 div#calendario-home {
-    width: 90%;
+    width: 100%;
 }
 
 .card {
@@ -2160,7 +2160,6 @@ div#ios-notif-info {
   background-color: #1f1f1f;
   border-radius: 10px;
   border: 1px solid #343434;
-  margin-bottom: 20px;
 }
 .tarefas-slider-header {
   display: flex;

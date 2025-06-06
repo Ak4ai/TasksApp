@@ -384,8 +384,7 @@
         </div>
       </div>
       <div id="tab-home" class="tab-content active">
-        <div class="home-layout">
-          
+        <div class="home-layout">          
           <div class="tarefas-slider-coluna">
             <div class="tarefas-slider-header">
               <button id="tarefas-slider-prev" aria-label="Anterior" class="tarefas-slider-nav-btn">&#8592;</button>
@@ -413,6 +412,22 @@
             </div>
           </div>
 
+          <div id="calendario-home" class="card">
+            <div style="margin-bottom: 10px;">
+              <label class="checkbox-alinhada">
+                <input type="checkbox" id="mostrar-concluidas-expiradas">
+                Mostrar tarefas concluídas e expiradas
+              </label>
+            </div>
+            <span class="card-title">Calendário de Tarefas</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
+              <button id="mes-anterior">&#8592;</button>
+              <h5 id="mes-ano-titulo" style="margin: 0; font-weight: bold;"></h5>
+              <button id="mes-seguinte">&#8594;</button>
+            </div>
+            <div id="calendario-container"></div>
+          </div>
+
           <!-- Coluna da direita: Gráficos -->
           <div class="grafico-coluna">
             <div class="grafico-header">
@@ -437,21 +452,6 @@
               </div>
             </div>
           </div>
-        </div>
-        <div id="calendario-home" class="card">
-          <div style="margin-bottom: 10px;">
-            <label class="checkbox-alinhada">
-              <input type="checkbox" id="mostrar-concluidas-expiradas">
-              Mostrar tarefas concluídas e expiradas
-            </label>
-          </div>
-          <span class="card-title">Calendário de Tarefas</span>
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
-            <button id="mes-anterior">&#8592;</button>
-            <h5 id="mes-ano-titulo" style="margin: 0; font-weight: bold;"></h5>
-            <button id="mes-seguinte">&#8594;</button>
-          </div>
-          <div id="calendario-container"></div>
         </div>
         
 
