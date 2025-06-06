@@ -84,15 +84,33 @@ async function mostrarMissoesDiarias(uid) {
   container.innerHTML = '<h3>Missões Diárias</h3>';
   missoes.forEach(missao => {
     const div = document.createElement('div');
-    div.className = 'missao-diaria';
+    div.className = 'missao-diaria' + (missao.concluida ? ' concluida' : '');
+    const cores = {
+      "Físico": "#4fc3f7",
+      "Intelecto": "#9575cd",
+      "Social": "#ffb74d",
+      "Criativo": "#81c784",
+      "Espiritual": "#f06292"
+    };
+    div.style.borderLeft = `5px solid ${cores[missao.tipo] || "#90caf9"}`;
+    // Progresso com ícone
     div.innerHTML = `
-      <span>${missao.descricao}</span>
-      <span>${missao.progresso || 0} / ${missao.quantidade}</span>
-      ${missao.concluida ? '<span style="color:green;">✔</span>' : ''}
+      <span class="missao-desc">${missao.descricao}</span>
+      <span class="missao-info-lateral">
+        <span class="missao-progresso">
+          ${missao.concluida
+            ? '<span class="missao-check">✔️</span>'
+            : '<span class="missao-tempo">⏳</span>'}
+          ${missao.progresso || 0} / ${missao.quantidade}
+        </span>
+        <span class="missao-xp" title="XP da missão">
+          <span class="estrela-xp">⭐</span> ${missao.xp} XP
+        </span>
+      </span>
     `;
     container.appendChild(div);
   });
-}
+} 
 
 export async function atualizarProgressoMissoes(uid, tipoTarefa) {
   const ref = doc(db, "usuarios", uid, "missoes", "diaria");
