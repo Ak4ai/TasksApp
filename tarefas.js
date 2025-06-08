@@ -1361,7 +1361,7 @@ async function atualizarXP() {
   // ATUALIZA O LEVEL NA BARRA SUPERIOR
   const classNameSpan = document.querySelector('.class-name');
   if (classNameSpan) {
-    classNameSpan.textContent = `👤 ${Math.floor(xpAtual)} / ${xpParaProximo}`;
+    classNameSpan.textContent = `⭐ ${Math.floor(xpAtual)} / ${xpParaProximo}`;
   }
 
   return nivel;
