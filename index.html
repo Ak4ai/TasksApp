@@ -74,6 +74,9 @@
           <option value="Social">Social</option>
           <option value="Criativo">Criativo</option>
           <option value="Espiritual">Espiritual</option>
+          <option value="Profissional">Profissional</option>
+          <option value="Emocional">Emocional</option>
+          <option value="Doméstico">Doméstico</option>
         </select>
 
         <select id="tagSecundaria" disabled>
@@ -331,13 +334,20 @@
               </div>
               <span>XP: 0 / 100</span>
             </div>
-            <select id="classe-selector" style="display:none;">
+            <p id="cooldown-info" style="margin-top: 10px; color: #ccc;"></p>
+            <select id="classe-selector">
               <option value="Guerreiro">Guerreiro</option>
               <option value="Mago">Mago</option>
               <option value="Ladino">Ladino</option>
               <option value="Bardo">Bardo</option>
               <option value="Bruxo">Bruxo</option>
+              <option value="Paladino">Paladino</option>
+              <option value="Alquimista">Alquimista</option>
+              <option value="Druida">Druida</option>
+              <option value="Mercador">Mercador</option>
+              <option value="Artífice">Artífice</option>
             </select>
+
             <div id="itens-ativos-container-modal" class="itens-ativos-grid">
             <!-- Cards de itens ativos aparecerão aqui -->
             </div>
@@ -724,6 +734,12 @@
             <span class="item-nome">Coroa Brilhante</span>
             <span class="item-preco">💰 120</span>
             <button class="btn-comprar" onclick="comprarItem('coroa', 120)">Comprar</button>
+          </div>
+          <div class="item-card" data-funcao="Remove o Cooldown de Troca de Classe">
+            <img src="img/pocao.png" alt="Poção" class="item-imagem">
+            <span class="item-nome">Poção de Classe</span>
+            <span class="item-preco">💰 200</span>
+            <button class="btn-comprar" onclick="comprarItem('removerCooldown', 200)">Comprar</button>
           </div>
         </div>
       </div>

@@ -11,12 +11,48 @@ let tarefasFuturas = [];
 let tarefasExpiradas = [];
 let tarefasConcluidas = [];
 const subTagsPorCategoria = {
-  "Físico": ["Corrida", "Treino", "Alongamento", "Natação", "Ciclismo"],
-  "Intelecto": ["Leitura", "Prova", "Pesquisa", "Programação", "Estudo"],
-  "Social": ["Reunião", "Networking", "Festa", "Voluntariado"],
-  "Criativo": ["Desenho", "Escrita", "Música", "Fotografia"],
-  "Espiritual": ["Meditação", "Yoga", "Orações"]
+  "Físico": [
+    "Corrida", "Treino", "Alongamento", "Natação", "Ciclismo", 
+    "Caminhada", "Academia", "Artes Marciais", "Dança", "Escalada", 
+    "Pular corda", "Esportes coletivos", "HIIT"
+  ],
+  "Intelecto": [
+    "Leitura", "Prova", "Pesquisa", "Programação", "Estudo", 
+    "Redação", "Curso Online", "Lógica", "Palestra", "Matemática",
+    "Idiomas", "Debate", "Xadrez"
+  ],
+  "Social": [
+    "Reunião", "Networking", "Festa", "Voluntariado", 
+    "Almoço em grupo", "Chamada de vídeo", "Apoio emocional", "Mentoria", 
+    "Conversa informal", "Evento comunitário", "Clube social"
+  ],
+  "Criativo": [
+    "Desenho", "Escrita", "Música", "Fotografia", "Pintura", 
+    "DIY", "Edição de vídeo", "Design gráfico", "Culinária criativa", 
+    "Teatro", "Moda", "Criação de conteúdo", "Cerâmica"
+  ],
+  "Espiritual": [
+    "Meditação", "Yoga", "Orações", "Leitura espiritual", 
+    "Reflexão", "Retiros", "Visualização", "Gratidão", 
+    "Journaling espiritual", "Silêncio consciente"
+  ],
+  "Profissional": [
+    "Trabalho", "E-mails", "Planejamento", "Revisão de metas", 
+    "Reunião de equipe", "Feedback", "Entrevistas", "Desenvolvimento de carreira"
+  ],
+  "Emocional": [
+    "Terapia", "Diário", "Autoavaliação", "Tempo sozinho", 
+    "Relaxamento", "Assistir filme", "Música relaxante", 
+    "Cuidar da saúde mental", "Agradecimento", "Desabafo"
+  ],
+  "Doméstico": [
+    "Limpeza", "Cozinhar", "Organizar", "Lavanderia", "Manutenção", 
+    "Lista de compras", "Arrumar armários", "Cuidar de plantas", 
+    "Reparos", "Descarte de lixo"
+  ]
 };
+
+
 
 const ITENS_CONFIG = {
   // Cosméticos
@@ -61,7 +97,7 @@ const ITENS_CONFIG = {
     nome: "Espada Lendária",
     efeito: { dano: 10 }
   },
-  escudo: {
+  escudoArma: {
     tipo: "arma",
     nome: "Escudo Resistente",
     efeito: { defesa: 5 }
@@ -108,7 +144,26 @@ const ITENS_CONFIG = {
     nome: "Anel do Herói",
     efeito: { moedasExtra: 5 } // +3 moedas por tarefa
   },
+  removerCooldown: {
+    tipo: "consumivel",
+    nome: "Poção do Tempo",
+    efeito: { removeCooldown: true }
+  },
 };
+
+function usarItem(itemId) {
+  const item = ITENS_CONFIG[itemId];
+  if (!item) return;
+
+  if (item.tipo === "consumivel") {
+    if (item.efeito.removeCooldown) {
+      localStorage.removeItem('ultimaTrocaClasse');
+      atualizarInfoCooldown(); // Atualiza visual
+      alert("Cooldown de mudança de classe removido!");
+    }
+  }
+}
+
 
 function getNomeItem(id) {
   const NOMES_ITENS = {
@@ -150,12 +205,19 @@ const VALORES_ITENS = {
 };
 
 const classesJogador = {
-  "Guerreiro": { bonusCategorias: ["Físico"], bonusXP: 0.5 },        // +50% XP em tarefas Físicas
-  "Mago": { bonusCategorias: ["Intelecto"], bonusXP: 0.5 }, // +50% XP em tarefas Intelecto
-  "Ladino": { bonusCategorias: ["Social"], bonusXP: 0.5 },  // +50% XP em tarefas Social
-  "Bardo": { bonusCategorias: ["Criativo"], bonusXP: 0.5 },    // +50% XP em tarefas Criativo
-  "Bruxo": { bonusCategorias: ["Espiritual"], bonusXP: 0.5 }   // +50% XP em tarefas Espiritual
+  "Guerreiro": { bonusCategorias: ["Físico"], bonusXP: 0.5 },
+  "Mago": { bonusCategorias: ["Intelecto"], bonusXP: 0.5 },
+  "Ladino": { bonusCategorias: ["Social"], bonusXP: 0.5 },
+  "Bardo": { bonusCategorias: ["Criativo"], bonusXP: 0.5 },
+  "Bruxo": { bonusCategorias: ["Espiritual"], bonusXP: 0.5 },
+
+  "Paladino": { bonusCategorias: ["Físico", "Espiritual"], bonusXP: 0.4 },
+  "Alquimista": { bonusCategorias: ["Intelecto", "Criativo"], bonusXP: 0.4 },
+  "Druida": { bonusCategorias: ["Espiritual", "Doméstico"], bonusXP: 0.4 },
+  "Mercador": { bonusCategorias: ["Social", "Profissional"], bonusXP: 0.4 },
+  "Artífice": { bonusCategorias: ["Criativo", "Profissional"], bonusXP: 0.4 }
 };
+
 
 const avataresPorClasse = {
   Guerreiro: "img/guerreiro.jpg",
@@ -163,7 +225,14 @@ const avataresPorClasse = {
   Ladino: "img/ladino.jpg",
   Bardo: "img/bardo.jpg",
   Bruxo: "img/bruxo.jpg",
+
+  Paladino: "img/paladino.png",
+  Alquimista: "img/alquimista.png",
+  Druida: "img/druida.png",
+  Mercador: "img/mercador.png",
+  Artífice: "img/artifice.png"
 };
+
 const frasesPorClasse = {
   Guerreiro: [
     "Hora de batalhar!",
@@ -189,8 +258,34 @@ const frasesPorClasse = {
     "O pacto exige progresso.",
     "Tarefa feita, energia recuperada.",
     "As sombras aprovam sua dedicação."
+  ],
+  Paladino: [
+    "Luz e disciplina me guiam.",
+    "Pelo bem maior, mais uma tarefa concluída!",
+    "Dever sagrado cumprido com honra."
+  ],
+  Alquimista: [
+    "Transformar tarefas em ouro!",
+    "Misture foco com esforço e... sucesso!",
+    "Cada passo é uma fórmula para a excelência."
+  ],
+  Druida: [
+    "Equilíbrio em tudo, até nas tarefas.",
+    "A natureza nunca procrastina.",
+    "O ciclo da produtividade continua."
+  ],
+  Mercador: [
+    "Tempo é lucro, tarefa é investimento.",
+    "Negócio fechado, meta batida!",
+    "Trabalhar é negociar com o futuro."
+  ],
+  Artífice: [
+    "Criei algo novo... outra tarefa concluída!",
+    "Engrenagens giram, ideias fluem.",
+    "Construa sua lenda, um item por vez."
   ]
 };
+
 
 function mostrarPopupPersonagem(frase, classe) {
   const popup = document.getElementById('popup-personagem');
@@ -435,6 +530,14 @@ function renderizarTarefa(t) {
 
           let xpBase = 10; // Valor base
           xpBase += xpBase * bonusXP;
+
+          const categoriaTarefa = t.categoria || null;
+          const dadosClasse = classesJogador[classeAtiva] || {};
+
+          if (categoriaTarefa && dadosClasse.bonusCategorias?.includes(categoriaTarefa)) {
+            xpBase += xpBase * dadosClasse.bonusXP;
+          }
+
 
           let moedasGanhar = 5; // Valor base
           moedasGanhar += moedasGanhar * bonusMoedas;
@@ -989,27 +1092,47 @@ document.getElementById('mes-seguinte').addEventListener('click', () => {
 
 
 
+function atualizarInfoCooldown() {
+  const cooldownInfo = document.getElementById('cooldown-info');
+  const diasCooldown = 14;
+  const MS_POR_DIA = 24 * 60 * 60 * 1000;
+
+  const agora = new Date();
+  const ultimaTrocaStr = localStorage.getItem('ultimaTrocaClasse');
+  const ultimaTroca = ultimaTrocaStr ? new Date(ultimaTrocaStr) : null;
+
+  if (ultimaTroca) {
+    const diasPassados = Math.floor((agora - ultimaTroca) / MS_POR_DIA);
+    const diasRestantes = diasCooldown - diasPassados;
+
+    if (diasRestantes > 0) {
+      cooldownInfo.textContent = `Você poderá mudar de classe novamente em ${diasRestantes} dia(s).`;
+      return;
+    }
+  }
+
+  cooldownInfo.textContent = `Você pode mudar de classe agora.`;
+}
 
 
 document.addEventListener('DOMContentLoaded', () => {
   const classeAtivaSpan = document.getElementById('classe-ativa');
   const classeSelector = document.getElementById('classe-selector');
   const personagemImg = document.querySelector('.character-box img');
-  
 
-  // Classe salva ou padrão
+  const diasCooldown = 14;
+  const MS_POR_DIA = 24 * 60 * 60 * 1000;
+
   let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
 
-  // Atualiza UI com a classe e imagem
   function atualizarVisualClasse() {
     classeAtivaSpan.textContent = classeAtiva;
     classeSelector.value = classeAtiva;
     classeSelector.style.display = 'none';
     classeAtivaSpan.style.display = 'inline';
 
-    // Atualiza imagem do personagem
     personagemImg.src = avataresPorClasse[classeAtiva] || "default.png";
-    // Atualiza imagem do personagem no modal, se existir
+
     const personagemImgModal = document.querySelector('.character-box-modal img');
     if (personagemImgModal) {
       personagemImgModal.src = avataresPorClasse[classeAtiva] || "default.png";
@@ -1017,29 +1140,44 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   atualizarVisualClasse();
+  atualizarInfoCooldown();
 
-  // Ativa edição ao clicar no nome da classe
   classeAtivaSpan.addEventListener('click', () => {
     classeAtivaSpan.style.display = 'none';
     classeSelector.style.display = 'inline';
     classeSelector.focus();
   });
 
-  // Quando a classe mudar
   classeSelector.addEventListener('change', () => {
+    const agora = new Date();
+    const ultimaTrocaStr = localStorage.getItem('ultimaTrocaClasse');
+    const ultimaTroca = ultimaTrocaStr ? new Date(ultimaTrocaStr) : null;
+
+    if (ultimaTroca) {
+      const diasPassados = Math.floor((agora - ultimaTroca) / MS_POR_DIA);
+
+      if (diasPassados < diasCooldown) {
+        alert(`Você só pode mudar de classe a cada ${diasCooldown} dias. Faltam ${diasCooldown - diasPassados} dias.`);
+        atualizarVisualClasse();
+        return;
+      }
+    }
+
     classeAtiva = classeSelector.value;
     localStorage.setItem('classeAtiva', classeAtiva);
+    localStorage.setItem('ultimaTrocaClasse', agora.toISOString());
     atualizarVisualClasse();
-    atualizarXP(tarefasConcluidas, classeAtiva); // Recalcula XP ao trocar classe
+    atualizarXP(tarefasConcluidas, classeAtiva);
   });
 
-  // Fecha seletor ao perder o foco
   classeSelector.addEventListener('blur', () => {
     atualizarVisualClasse();
   });
-  personagemFalaAleatoriamente(classeAtiva); // Fala aleatória ao carregar
-  atualizarXP(tarefasConcluidas, classeAtiva); // Inicializa XP
+
+  personagemFalaAleatoriamente(classeAtiva);
+  atualizarXP(tarefasConcluidas, classeAtiva);
 });
+
 
 // Função para salvar o XP atual (lido da interface) no Firestore
 async function salvarXPNoFirestore(classeAtiva) {
@@ -2128,17 +2266,29 @@ window.comprarItem = async function comprarItem(itemId, preco) {
     return;
   }
 
-  // Atualiza as moedas
+  // Atualiza as moedas (desconta o preço)
   await updateDoc(usuarioRef, {
     moedas: increment(-preco),
-    // Adiciona o item ao inventário, por exemplo:
-    inventario: arrayUnion(itemId)
   });
 
-  mostrarPopup(`Item comprado com sucesso: ${itemId}`);
+  const item = ITENS_CONFIG[itemId];
+
+  if (item && item.tipo === "consumivel") {
+    // Usa imediatamente se for consumível
+    usarItem(itemId);  // função definida por você
+    mostrarPopup(`Item consumível usado: ${item.nome}`);
+  } else {
+    // Caso contrário, adiciona ao inventário
+    await updateDoc(usuarioRef, {
+      inventario: arrayUnion(itemId)
+    });
+    mostrarPopup(`Item comprado com sucesso: ${item.nome}`);
+  }
+
   atualizarInventarioUI();
   atualizarMoedas();
-}
+};
+
 
 async function atualizarInventarioUI() {
   const usuario = auth.currentUser;

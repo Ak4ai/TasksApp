@@ -260,60 +260,83 @@ function abrirModalAmigo(nome, uid) {
   modal.dataset.uid = uid;
 }
 
+let carregandoAmigos = false;
+
 export async function listarAmigosAceitos() {
-  const auth = getAuth();
-  const user = auth.currentUser;
-  if (!user) return;
+  if (carregandoAmigos) {
+    return;
+  }
 
-  const container = document.getElementById("amigos-container");
-  container.innerHTML = "";
+  carregandoAmigos = true;
 
-  // Busca amizades onde o usuário é FROM ou TO e status é accepted
-  const q1 = query(collection(db, "amizades"), where("from", "==", user.uid), where("status", "==", "accepted"));
-  const q2 = query(collection(db, "amizades"), where("to", "==", user.uid), where("status", "==", "accepted"));
+  try {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) return;
 
-  const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+    const container = document.getElementById("amigos-container");
+    container.innerHTML = "";
 
-  // Usar Set de pares ordenados para evitar duplicidade
-  const paresAmizade = new Set();
+    // Busca amizades onde o usuário é FROM ou TO e status é accepted
+    const q1 = query(collection(db, "amizades"), where("from", "==", user.uid), where("status", "==", "accepted"));
+    const q2 = query(collection(db, "amizades"), where("to", "==", user.uid), where("status", "==", "accepted"));
 
-  snap1.forEach(doc => {
-    const uid1 = user.uid;
-    const uid2 = doc.data().to;
-    const chave = [uid1, uid2].sort().join('-');
-    paresAmizade.add(chave);
-  });
-  snap2.forEach(doc => {
-    const uid1 = doc.data().from;
-    const uid2 = user.uid;
-    const chave = [uid1, uid2].sort().join('-');
-    paresAmizade.add(chave);
-  });
+    const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
 
-  // Garante que cada UID de amigo só aparece uma vez
-  const amigosUIDsSet = new Set();
-  Array.from(paresAmizade).forEach(chave => {
-    const [uid1, uid2] = chave.split('-');
-    if (uid1 === user.uid) amigosUIDsSet.add(uid2);
-    else amigosUIDsSet.add(uid1);
-  });
-  const amigosUnicos = Array.from(amigosUIDsSet);
+    // Usar Set de pares ordenados para evitar duplicidade
+    const paresAmizade = new Set();
 
-  for (const uid of amigosUnicos) {
-    const userDoc = await getDoc(doc(db, "usuarios", uid));
-    const data = userDoc.exists() ? userDoc.data() : null;
+    snap1.forEach(doc => {
+      const uid1 = user.uid;
+      const uid2 = doc.data().to;
+      const chave = [uid1, uid2].sort().join('-');
+      paresAmizade.add(chave);
+    });
 
-    if (data) {
-      const li = document.createElement("li");
-      li.innerHTML = `
-        <span class="amigo-nome" style="cursor:pointer;font-weight:bold;">${data.simpleID}</span>
-       <small>UID: ${uid}</small>
-      `;
-      li.addEventListener('click', () => {
-        abrirModalAmigo(data.simpleID, uid);
-      });
-      container.appendChild(li);
+    snap2.forEach(doc => {
+      const uid1 = doc.data().from;
+      const uid2 = user.uid;
+      const chave = [uid1, uid2].sort().join('-');
+      paresAmizade.add(chave);
+    });
+
+    // Garante que cada UID de amigo só aparece uma vez
+    const amigosUIDsSet = new Set();
+    Array.from(paresAmizade).forEach(chave => {
+      const [uid1, uid2] = chave.split('-');
+      if (uid1 === user.uid) amigosUIDsSet.add(uid2);
+      else amigosUIDsSet.add(uid1);
+    });
+
+    const amigosUnicos = Array.from(amigosUIDsSet);
+
+    for (const uid of amigosUnicos) {
+      const userDoc = await getDoc(doc(db, "usuarios", uid));
+      const data = userDoc.exists() ? userDoc.data() : null;
+
+      if (data) {
+        const li = document.createElement("li");
+        console.log("Amigo encontrado:", data);
+        li.innerHTML = `
+          <div class="amigo-detalhes" style="margin-bottom: 12px; border: 1px solid #ccc; border-radius: 8px; padding: 10px;">
+            <span class="amigo-nome" style="cursor:pointer;font-weight:bold; font-size: 1.1em;">${data.simpleID}</span><br>
+            <small><strong>Nível:</strong> ${data.nivel || 0}</small><br>
+            <small><strong>XP:</strong> ${data.xp || 0}</small><br>
+            <small><strong>Moedas:</strong> ${data.moedas || 0}</small><br>
+            <small><strong>Inventário:</strong> ${Array.isArray(data.inventario) ? data.inventario.join(", ") : 'Vazio'}</small>
+          </div>
+        `;
+
+        li.addEventListener('click', () => {
+          abrirModalAmigo(data.simpleID, uid);
+        });
+        container.appendChild(li);
+      }
     }
+  } catch (error) {
+    console.error("Erro ao listar amigos:", error);
+  } finally {
+    carregandoAmigos = false;
   }
 }
 
