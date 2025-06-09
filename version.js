@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `commit mt específico`, hash: 'ddc428d', date: '2025-06-08 16:10:46' };
+window.APP_VERSION = { msg: `93_1`, hash: '676abe0', date: '2025-06-09 01:40:32' };

@@ -389,12 +389,19 @@
       <!-- Aba Home -->
       <div id="tab-enemy" class="tab-content">
         <div id="inimigo-container" style="display: flex; flex-direction: column; align-items: center; margin: 20px 0;">
-            <img id="inimigo-img" src="img/goblin.png" alt="Inimigo" style="width: 60px; height: 60px; margin-bottom: 8px;">
-            <div id="inimigo-nome" style="font-weight: bold; font-size: 1.2em;">Goblin</div>
-            <div id="inimigo-vida-bar" style="width: 120px; height: 18px; background: #333; border-radius: 9px; margin: 8px 0; overflow: hidden;">
-              <div id="inimigo-vida-fill" style="height: 100%; background: #4caf50; width: 100%; transition: width 0.3s;"></div>
+            <div id="inimigo-img">
+              <img class="inimigo-sombra" src="img/mago_sombrio.png" alt="Sombra do Inimigo">
+              <img src="img/mago_sombrio.png" alt="Inimigo">
+            </div>         
+            <div id="inimigo-nome" style="font-weight: bold; font-size: 1.2em; z-index:1;">Goblin</div>
+            <div id="inimigo-vida-bar" style="width: 200px;height: 8px;z-index:1;background: #333;border: 1px solid;border-radius: 9px;margin: 8px 0;overflow: hidden;">
+              <div id="inimigo-vida-fill" style="height: 100%; z-index:1; background: rgb(124, 51, 51); width: 100%; transition: width 0.3s;"></div>
             </div>
-            <div id="inimigo-vida-text" style="font-size: 0.95em;">100 / 100</div>
+            <div id="inimigo-vida-text" style="font-size: 0.95em; z-index:1;">100 / 100</div>
+        </div>
+        <div class="enemy-actions">
+          <button id="atacar-inimigo" class="action-button">Atacar</button>
+          <button id="especial-inimigo" class="action-button">Especial</button>
         </div>
       </div>
       <div id="tab-home" class="tab-content active">
@@ -528,7 +535,7 @@
 
           <div id="simpleid-container">
             <input type="text" id="meu-id-simples" placeholder="Escolha seu ID público (ex: joao123)">
-            <button onclick="definirMeuID()">Salvar ID</button>
+            <button id="btn-salvar-id" onclick="definirMeuID()">SalvarID</button>
           </div>
           <h3>Adicionar Amigo</h3>
           <div id="friend-request-container">
@@ -611,6 +618,7 @@
       </div>
       <!-- Aba Loja -->
       <div id="tab-loja" class="tab-content">
+      <h2>Loja</h2>
       <div class="LojaSection">
         <h3 class="loja-titulo loja-titulo-cosmeticos">Cosméticos</h3>
         <div class="loja-grid loja-cosmeticos">
@@ -747,7 +755,7 @@
       
 
     <div id="tab-inventario" class="tab-content">
-      <h3 style="text-align:center;">Inventário</h3>
+      <h2 style="text-align:center;">Inventário</h2>
       <div class="inventario-grid" id="inventario-grid">
         <!-- Cards dos itens ativados/comprados aparecem aqui via JS -->
       </div>
