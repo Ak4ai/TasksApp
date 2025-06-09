@@ -255,6 +255,17 @@ div#calendario-home {
     overflow: auto;
     border: none;
     box-shadow: none;
+    padding: 0;
+    margin: 0;
+}
+
+#lista-amigos {
+    width: 100%;
+    display: flex
+;
+    flex-direction: column;
+    align-content: center;
+    align-items: center;
 }
 
 .purple-card {
@@ -285,7 +296,7 @@ div#calendario-home {
   min-height: 0;
   flex: 1 1 auto;
   overflow-y: auto;
-  padding: 5vw 0;
+  padding: 20px 0;
 }
 
 .bottom-nav {
@@ -1332,6 +1343,7 @@ textarea:focus {
     align-content: center;
     flex-wrap: wrap;
     width: 90%;
+    max-width: 1050px;
 }
 
 .character-box-modal {
@@ -2706,7 +2718,7 @@ body > div.main-content > div.top-info-character > div > div.character-info > di
   .missoes-diarias-bloco {
     width: 100%;
     max-width: 100%;
-    padding: 18px 28px;
+    padding: 1rem;
   }
 }
 
@@ -2927,13 +2939,13 @@ div#tab-enemy {
 }
 
 #inimigo-img .inimigo-sombra {
-    position: absolute; 
+    position: absolute;
     left: -49px;
     bottom: -59%;
     width: 100%;
     height: 100%;
     z-index: 0;
-    filter: blur(9px) brightness(0.22) grayscale(1) opacity(0.8);
+    filter: blur(4px) brightness(0.22) grayscale(1) opacity(0.8);
     transform: scaleY(-0.38) scaleX(1.18) skewX(13deg);
     pointer-events: none;
     mask-image: linear-gradient(to bottom, transparent 10%, black 90%);
@@ -2961,6 +2973,7 @@ div#tab-enemy {
     align-content: stretch;
     flex-wrap: nowrap;
     width: 90%;
+    max-width: 1050px;
     justify-content: space-evenly;
 }
 
