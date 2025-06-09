@@ -1022,7 +1022,11 @@ function setupGraficoCarousel() {
   function scrollToCard(idx) {
     if (!isMobile()) return;
     current = Math.max(0, Math.min(idx, cards.length - 1));
-    cards[current].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    if (isMobile()) {
+      // Calcula o offset manualmente
+      grid.scrollLeft = cards[current].offsetLeft;
+      updateIndicadores(current);
+    }
     updateIndicadores(current);
     // Desabilita botões nas extremidades
     if (prevBtn && nextBtn) {
@@ -1095,7 +1099,11 @@ function setupTarefasSliderCarousel() {
   function scrollToCard(idx) {
     if (!isMobileTarefasSlider()) return;
     current = Math.max(0, Math.min(idx, cards.length - 1));
-    cards[current].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    if (isMobile()) {
+      // Calcula o offset manualmente
+      grid.scrollLeft = cards[current].offsetLeft;
+      updateIndicadores(current);
+    }  
     updateIndicadores(current);
     if (prevBtn && nextBtn) {
       prevBtn.disabled = current === 0;

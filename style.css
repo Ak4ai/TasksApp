@@ -1540,8 +1540,7 @@ span.next-event.icons-info {
 
 /* Layout principal lado a lado */
 .home-layout {
-    display: flex
-;
+    display: flex;
     justify-content: center;
     align-items: center;
     align-content: center;
@@ -1549,6 +1548,7 @@ span.next-event.icons-info {
     flex-wrap: wrap;
     width: 90%;
     padding: 1rem;
+    padding-top: 0px;
 }
 
 /* Tarefas fixadas */
@@ -1560,6 +1560,8 @@ span.next-event.icons-info {
     overflow: auto;
     border: none;
     box-shadow: none;
+    padding: 0px;
+    margin-bottom: 0;
 }
 
 .tarefas-slider-divider {
@@ -2195,6 +2197,7 @@ div#ios-notif-info {
   background-color: #1f1f1f;
   border-radius: 10px;
   border: 1px solid #343434;
+  margin-bottom: 1rem;
 }
 .tarefas-slider-header {
   display: flex;
@@ -2305,7 +2308,6 @@ div#ios-notif-info {
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     gap: 0;
-    padding-bottom: 16px;
     background: none;
     border: none;
     scrollbar-width: none;
@@ -2331,7 +2333,6 @@ div#ios-notif-info {
     justify-content: center;
     align-items: center;
     display: flex;
-    padding-bottom: 1rem;
   }
 }
 
@@ -2988,4 +2989,9 @@ button#logout-button {
 body.tab-home-active .top-info-character,
 body.tab-settings-active .top-info-character {
   display: none !important;
+}
+
+body.tab-home-active #modal-personagem > div > div,
+body.tab-settings-active #modal-personagem > div > div {
+  display: flex !important;
 }
