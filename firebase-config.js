@@ -378,7 +378,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const abrirBtn = document.getElementById("btn-pedidos-amizade");
 
   abrirBtn.addEventListener("click", () => {
-    modal.style.display = "block";
+    modal.style.display = "flex";
     listarPedidosDeAmizade();
   });
 
