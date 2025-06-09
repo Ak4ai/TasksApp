@@ -1097,18 +1097,16 @@ textarea:focus {
 }
 
 .modal-content {
-  margin: 35px;
   display: flex;
   flex-direction: column;
   background-color: #1e1f25;
   color: white;
-  padding: 20px;
   border-radius: 12px;
   width: 90%;
   max-width: 500px;
   max-height: none; /* Remova a limitação */
   height: auto;     /* Permite crescer conforme o conteúdo */
-  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+  /* box-shadow: 0 0 15px rgba(0,0,0,0.5); */
   position: relative;
   overflow-y: auto;
   overflow-x: hidden;
@@ -1999,7 +1997,8 @@ div#config-buttosn-container {
   min-width: 180px;
   box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
   z-index: 1;
-  border-radius: 4px;
+  border-radius: 10px;
+  border: 1px solid #343434;
   overflow: hidden;
 }
 
@@ -2994,4 +2993,8 @@ body.tab-settings-active .top-info-character {
 body.tab-home-active #modal-personagem > div > div,
 body.tab-settings-active #modal-personagem > div > div {
   display: flex !important;
+}
+
+div#tab-home {
+    padding-top: 0px;
 }
