@@ -1091,6 +1091,7 @@ window.addEventListener('DOMContentLoaded', setupGraficoCarousel);
 function isMobileTarefasSlider() {
   return window.innerWidth <= 1040;
 }
+
 function setupTarefasSliderCarousel() {
   const grid = document.querySelector('.tarefas-slider-grid');
   const cards = Array.from(document.querySelectorAll('.tarefas-slider-card'));
@@ -1110,11 +1111,10 @@ function setupTarefasSliderCarousel() {
   function scrollToCard(idx) {
     if (!isMobileTarefasSlider()) return;
     current = Math.max(0, Math.min(idx, cards.length - 1));
-    if (isMobile()) {
-      // Calcula o offset manualmente
+    if (isMobileTarefasSlider()) {
       grid.scrollLeft = cards[current].offsetLeft;
       updateIndicadores(current);
-    }  
+    }
     updateIndicadores(current);
     if (prevBtn && nextBtn) {
       prevBtn.disabled = current === 0;
@@ -1154,6 +1154,7 @@ function setupTarefasSliderCarousel() {
 
   // --- NOVO: lógica para abrir o card correto por padrão ---
   function temTarefas(container) {
+    if (!container) return false;
     if (container.querySelector('.task-rect')) return true;
     if (
       container.children.length === 1 &&
@@ -1166,10 +1167,11 @@ function setupTarefasSliderCarousel() {
     return true;
   }
 
-  if (isMobileTarefasSlider()) {
-    const fixadas = document.querySelector('#tarefas-fixadas .tasks-container');
-    const proximas = document.querySelector('#tarefas-proximas .tasks-container');
-    if (fixadas && proximas) {
+  // Aguarda o carregamento das tarefas antes de decidir qual card abrir
+  setTimeout(() => {
+    if (isMobileTarefasSlider()) {
+      const fixadas = document.querySelector('#tarefas-fixadas .tasks-container');
+      const proximas = document.querySelector('#tarefas-proximas .tasks-container');
       const temFixadas = temTarefas(fixadas);
       const temProximas = temTarefas(proximas);
       if (!temFixadas && temProximas) {
@@ -1178,11 +1180,9 @@ function setupTarefasSliderCarousel() {
         scrollToCard(0); // Abre "Tarefas Fixadas" (padrão)
       }
     } else {
-      scrollToCard(0);
+      updateIndicadores(0);
     }
-  } else {
-    updateIndicadores(0);
-  }
+  }, 100); // Pequeno delay para garantir que as tarefas já estejam no DOM
 }
 window.setupTarefasSliderCarousel = setupTarefasSliderCarousel;
 // ...existing code...
