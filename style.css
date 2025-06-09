@@ -114,11 +114,12 @@ div#tab-loja {
       flex-direction: column;
       align-items: center;
       background-color: #1f1f1f;
-      max-width: 90%;
-      padding: 50px 1rem;
+      width: 90%;
+      padding: 0px 1rem;
       border: solid 1px #343434;
       border-radius: 10px;
       margin-bottom: 1rem;
+      padding-bottom: 3rem;
   }
 }
 
@@ -284,7 +285,7 @@ div#calendario-home {
   min-height: 0;
   flex: 1 1 auto;
   overflow-y: auto;
-  padding-top: 5vw;
+  padding: 5vw 0;
 }
 
 .bottom-nav {
@@ -2471,6 +2472,7 @@ div#ios-notif-info {
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
+  margin-top: 0px;
 }
 
 #friend-request-container button:hover {
@@ -2580,6 +2582,20 @@ body > div.main-content > div.top-info-character > div{
   font-size: clamp(0.1rem, 6vw, 28px);
 }
 
+.status-id-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90% !important;
+  padding: 1rem !important;
+  background-color: #3b3b3b !important;
+  border-radius: 10px;
+  border: 1px solid #343434 !important;
+  font-size: medium !important;
+  gap: 10px;
+  margin: 10px !important;
+}
+
 #status-id-modal {
   background-color: transparent;
   box-shadow: none;
@@ -2671,6 +2687,7 @@ body > div.main-content > div.top-info-character > div > div.character-info > di
     width: 100%;
     display: flex;
     justify-content: space-between;
+    font-size: clamp(0.1rem, 3.8vw, 17px);
 }
 
 .missoes-diarias-bloco {
@@ -2825,17 +2842,17 @@ body > div.main-content > div.top-info-character > div > div.character-info > di
 }
 
 #itens-ativos-container-modal > div {
-  flex: 1 1 120px;      /* cresce igualmente, mínimo 120px */
-  min-width: 12%;
-  display: flex;
-  flex-direction: column;
-  height: auto;
-  padding: 10px 2px;
-  box-sizing: border-box;
+    flex: 1 1 120px;
+    min-width: 13vw;
+    display: flex;
+    flex-direction: column;
+    height: 27vw;
+    padding: 5px 5px;
+    box-sizing: border-box;
 }
 
 #itens-ativos-container-modal > div span{
-  font-size: clamp(0.1rem, 1.4vw, 28px);
+  font-size: clamp(0.1rem, 2.3vw, 28px);
   display: block;
 }
 
@@ -2857,7 +2874,118 @@ body > div.main-content > div.top-info-character > div > div.character-info > di
 div#tab-enemy {
     min-height: 100%;
     padding-top: 0px;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
     padding-bottom: 0px;
+}
+
+#inimigo-img {
+  width: 80vw;
+  height: 80vw;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+#inimigo-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+#inimigo-img .inimigo-sombra {
+    position: absolute;
+    left: -49px;
+    bottom: -59%;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    filter: blur(9px) brightness(0.22) grayscale(1) opacity(0.8);
+    transform: scaleY(-0.38) scaleX(1.18) skewX(13deg);
+    pointer-events: none;
+    mask-image: linear-gradient(to bottom, transparent 10%, black 90%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 10%, black 90%);
+}
+
+#inimigo-img img:not(.inimigo-sombra) {
+  position: relative;
+  z-index: 2;
+}
+
+.enemy-actions {
+    display: flex;
+    z-index: 1;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 12px;
+    background-color: #1f1f1f;
+    color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid #343434;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    align-content: stretch;
+    flex-wrap: nowrap;
+    width: 90%;
+    justify-content: space-evenly;
+}
+
+.enemy-actions button:first-child {
+    flex: 2 1 0;
+    min-width: 0;
+    margin: 0;
+}
+
+.enemy-actions button:last-child {
+    flex: 8 1 0;
+    min-width: 0;
+    margin: 0;
+}
+
+div#simpleid-container {
+    display: flex;
+    gap: 10px;
+    max-width: 400px;
+    margin: 20px 0;
+    align-items: center;
+}
+
+button#btn-salvar-id{
+    padding: 12px 30px;
+    background-color: #22c55e;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 0px;
+}
+
+button#logout-button {
+    max-width: 186px;
+    width: 85%;
+}
+
+#simpleid-container,
+#friend-request-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+#simpleid-container button,
+#friend-request-container button {
+  width: 180px; /* ou ajuste conforme desejar */
+  text-align: center;
+  margin: 0 auto;
+  display: block;
+}
+
+body.tab-home-active .top-info-character,
+body.tab-settings-active .top-info-character {
+  display: none !important;
 }

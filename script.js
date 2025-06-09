@@ -241,7 +241,17 @@ async function atualizarUIInimigo() {
   if (!usuario) return;
   const inimigo = await carregarInimigoFirestore(usuario.uid);
 
-  document.getElementById('inimigo-img').src = inimigo.imagem;
+  // Corrigido: troca as imagens dentro da div
+  const inimigoImgDiv = document.getElementById('inimigo-img');
+  if (inimigoImgDiv) {
+    // Sombra (primeira imagem)
+    const sombraImg = inimigoImgDiv.querySelector('.inimigo-sombra');
+    if (sombraImg) sombraImg.src = inimigo.imagem;
+    // Imagem principal (segunda imagem)
+    const mainImg = Array.from(inimigoImgDiv.querySelectorAll('img')).find(img => !img.classList.contains('inimigo-sombra'));
+    if (mainImg) mainImg.src = inimigo.imagem;
+  }
+
   document.getElementById('inimigo-nome').textContent = inimigo.nome;
   document.getElementById('inimigo-vida-text').textContent = `${inimigo.vidaAtual} / ${inimigo.vidaMaxima}`;
   const recompensaDiv = document.getElementById('inimigo-recompensa');
@@ -619,7 +629,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'tab-tasks-active',
         'tab-tasks-nao-periodicas-active',
         'tab-tasks-personalizadas-active',
-        'tab-amigos-active'
+        'tab-amigos-active',
+        'tab-settings-active',
       );
 
       if (alvo === 'tab-home') document.body.classList.add('tab-home-active');
@@ -627,6 +638,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (alvo === 'tab-tasks-nao-periodicas') document.body.classList.add('tab-tasks-nao-periodicas-active');
       if (alvo === 'tab-tasks-personalizadas') document.body.classList.add('tab-tasks-personalizadas-active');
       if (alvo === 'tab-amigos') document.body.classList.add('tab-amigos-active');
+            // ...dentro do eventListener das nav-buttons...
+      if (alvo === 'tab-settings') document.body.classList.add('tab-settings-active');
 
       atualizarVisibilidadeAppBody();
     });
@@ -705,12 +718,27 @@ function handleSwipe() {
       'tab-home-active',
       'tab-tasks-active',
       'tab-tasks-nao-periodicas-active',
-      'tab-tasks-personalizadas-active'
+      'tab-tasks-personalizadas-active',
+      'tab-enemy-active',
+      'tab-settings-active',
     );
     if (nextTabId === 'tab-home') document.body.classList.add('tab-home-active');
     if (nextTabId === 'tab-tasks') document.body.classList.add('tab-tasks-active');
     if (nextTabId === 'tab-tasks-nao-periodicas') document.body.classList.add('tab-tasks-nao-periodicas-active');
     if (nextTabId === 'tab-tasks-personalizadas') document.body.classList.add('tab-tasks-personalizadas-active');
+    if (nextTabId === 'tab-enemy') document.body.classList.add('tab-enemy-active');
+    if (nextTabId === 'tab-settings') document.body.classList.add('tab-settings-active');
+    
+
+    // Adiciona ou remove a classe show em main-content igual aos botões
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      if (nextTabId === 'tab-enemy') {
+        mainContent.classList.add('show');
+      } else {
+        mainContent.classList.remove('show');
+      }
+    }
 
     atualizarVisibilidadeAppBody();
   });
