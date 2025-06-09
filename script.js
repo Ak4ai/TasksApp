@@ -214,7 +214,7 @@ const INIMIGOS = [
 function getNovoInimigo(indice = 0) {
   const idx = Math.max(0, Math.min(indice, INIMIGOS.length - 1));
   const base = INIMIGOS[idx];
-  return { ...base, indice: idx, vidaAtual: base.vidaMaxima };  
+  return { ...base, indice: idx, vidaAtual: base.vidaMaxima, ataquesDisponiveis: 0 };  
 }
 
 // Carrega o inimigo do Firestore (ou cria um novo se não existir)
@@ -262,6 +262,14 @@ async function atualizarUIInimigo() {
   // Atualiza barra de vida
   const percent = Math.max(0, Math.round((inimigo.vidaAtual / inimigo.vidaMaxima) * 100));
   document.getElementById('inimigo-vida-fill').style.width = percent + "%";
+
+  // Atualiza botão de ataque extra
+  const btn = document.getElementById('atacar-inimigo');
+  if (btn) {
+    const ataques = inimigo.ataquesDisponiveis || 0;
+    btn.textContent = ataques > 0 ? `Atacar (${ataques})` : 'Atacar (0)';
+    btn.disabled = ataques <= 0;
+  }
 }
 
 async function atacarInimigo(dano = 10) {
@@ -271,6 +279,9 @@ async function atacarInimigo(dano = 10) {
 
   // Subtrai o dano da vida atual
   inimigo.vidaAtual = Math.max(0, inimigo.vidaAtual - dano);
+
+  // Sempre que der dano automático, adiciona 1 ataque extra
+  inimigo.ataquesDisponiveis = (inimigo.ataquesDisponiveis || 0) + 1;
 
   // Salva o inimigo atualizado
   await salvarInimigoFirestore(usuario.uid, inimigo);
@@ -1247,4 +1258,82 @@ function atualizarVisibilidadeTarefasSlider() {
 }
 window.atualizarVisibilidadeTarefasSlider = atualizarVisibilidadeTarefasSlider;
 // Chame essa função sempre que atualizar as tarefas fixadas/próximas
+// Adiciona ataques extras ao inimigo do usuário
+export async function adicionarAtaqueExtra(uid, quantidade = 1) {
+  const ref = doc(db, "usuarios", uid, "inimigo", "atual");
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+  const inimigo = snap.data();
+  inimigo.ataquesDisponiveis = (inimigo.ataquesDisponiveis || 0) + quantidade;
+  await setDoc(ref, inimigo);
+  await atualizarUIInimigo();
+}
 
+// Atacar usando ataque extra (consome 1 ataque extra)
+export async function atacarInimigoExtra(dano = 10) {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+  let inimigo = await carregarInimigoFirestore(usuario.uid);
+
+  if ((inimigo.ataquesDisponiveis || 0) <= 0) {
+    mostrarPopup("Você não possui ataques extras disponíveis!");
+    return;
+  }
+
+  // --- ANIMAÇÃO DE ATAQUE ---
+  const inimigoImgDiv = document.getElementById('inimigo-img');
+  if (inimigoImgDiv) {
+    inimigoImgDiv.classList.remove('inimigo-anim-ataque'); // remove se já tiver
+    // Força reflow para reiniciar animação se clicar rápido
+    void inimigoImgDiv.offsetWidth;
+    inimigoImgDiv.classList.add('inimigo-anim-ataque');
+    // Remove a classe após a animação para poder repetir depois
+    setTimeout(() => inimigoImgDiv.classList.remove('inimigo-anim-ataque'), 400);
+  }
+  // --- FIM ANIMAÇÃO ---
+
+  inimigo.ataquesDisponiveis -= 1;
+  inimigo.vidaAtual = Math.max(0, inimigo.vidaAtual - dano);
+
+  await salvarInimigoFirestore(usuario.uid, inimigo);
+  await atualizarUIInimigo();
+
+  if (inimigo.vidaAtual <= 0) {
+    mostrarPopup(`Você derrotou ${inimigo.nome}! Ganhou ${inimigo.recompensaXP} XP e ${inimigo.recompensaMoedas} moedas!`);
+    await darRecompensa(usuario.uid, inimigo.recompensaXP, inimigo.recompensaMoedas);
+
+    // Próximo inimigo
+    const proximoIndice = (inimigo.indice ?? 0) + 1;
+    inimigo = getNovoInimigo(proximoIndice < INIMIGOS.length ? proximoIndice : 0);
+    await salvarInimigoFirestore(usuario.uid, inimigo);
+    await atualizarUIInimigo();
+  }
+}
+
+// Adicione o listener para ataque extra
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('atacar-inimigo');
+  if (btn) {
+    btn.onclick = () => atacarInimigoExtra(10); // ou outro valor de dano
+  }
+});
+
+function ajustarTamanhoInimigoImg() {
+  const container = document.getElementById('tab-enemy');
+  const img = document.getElementById('inimigo-img');
+  if (!container || !img) return;
+
+  const { width, height } = container.getBoundingClientRect();
+  const size = Math.min(width, height - 186); // subtrai 86 do height
+
+  img.style.width = size + 'px';
+  img.style.height = size + 'px';
+}
+
+const container = document.getElementById('tab-enemy'); // alterado de 'inimigo-container' para 'tab-enemy'
+if (container) {
+  const ro = new ResizeObserver(ajustarTamanhoInimigoImg);
+  ro.observe(container);
+  window.addEventListener('resize', ajustarTamanhoInimigoImg);
+  ajustarTamanhoInimigoImg();
+}
