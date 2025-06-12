@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `94`, hash: 'f32f736', date: '2025-06-12 01:11:40' };
+window.APP_VERSION = { msg: `94_1 testte de ajuste periodico`, hash: 'a51a083', date: '2025-06-12 01:19:32' };
