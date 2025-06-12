@@ -551,6 +551,8 @@ function renderizarTarefa(t) {
 
           await darRecompensa(usuario.uid, Math.round(xpBase), moedasGanhar);
 
+          await atualizarMoedas();
+
           const danoArmas = calcularDanoArmas(itensAtivos);
           await atacarInimigo(10 + danoArmas);
 
