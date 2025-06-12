@@ -268,7 +268,7 @@ async function atualizarUIInimigo() {
   if (btn) {
     const ataques = inimigo.ataquesDisponiveis || 0;
     btn.textContent = ataques > 0 ? `Atacar (${ataques})` : 'Atacar (0)';
-    btn.disabled = ataques <= 0;
+    //btn.disabled = ataques <= 0;
   }
 }
 
@@ -1275,10 +1275,10 @@ export async function atacarInimigoExtra(dano = 10) {
   if (!usuario) return;
   let inimigo = await carregarInimigoFirestore(usuario.uid);
 
-  if ((inimigo.ataquesDisponiveis || 0) <= 0) {
-    mostrarPopup("Você não possui ataques extras disponíveis!");
-    return;
-  }
+  //if ((inimigo.ataquesDisponiveis || 0) <= 0) {
+    //mostrarPopup("Você não possui ataques extras disponíveis!");
+    //return;
+  //}
 
   // --- ANIMAÇÃO DE ATAQUE ---
   const inimigoImgDiv = document.getElementById('inimigo-img');
@@ -1310,11 +1310,23 @@ export async function atacarInimigoExtra(dano = 10) {
   }
 }
 
-// Adicione o listener para ataque extra
+// Adicione o listener para ataque extra e animação de ataque inimigo
+
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('atacar-inimigo');
   if (btn) {
-    btn.onclick = () => atacarInimigoExtra(10); // ou outro valor de dano
+    btn.onclick = async () => {
+      // Buscar itens ativos do usuário antes de chamar a animação
+      const usuario = auth.currentUser;
+      let itensAtivos = [];
+      if (usuario) {
+        const usuarioRef = doc(db, "usuarios", usuario.uid);
+        const usuarioSnap = await getDoc(usuarioRef);
+        itensAtivos = usuarioSnap.exists() ? (usuarioSnap.data().itensAtivos || []) : [];
+      }
+      playEnemyAttackAnimation('enemy-attack-canvas', itensAtivos);
+      atacarInimigoExtra(10); // ou outro valor de dano
+    };
   }
 });
 
