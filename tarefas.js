@@ -2033,78 +2033,88 @@ export async function ajustarRecurrentes(tarefas) {
   }
 }
 
+let criandoTarefaPeriodica = false;
+
 export async function processarTarefaPeriodicaAoMarcar(t) {
-  const usuario = auth.currentUser;
-  if (!usuario) return;
+  if (criandoTarefaPeriodica) return;
+  criandoTarefaPeriodica = true;
+  try {
+    const usuario = auth.currentUser;
+    if (!usuario) return;
 
-  // só tarefas periódicas recém-concluídas
-  if (t.tipo !== 'periodico' || !t.finalizada) {
-    return;
+    if (t.tipo !== 'periodico' || !t.finalizada) return;
+
+    const next = new Date(t.dataLimite);
+    switch (t.frequencia) {
+      case 'diario':
+        next.setDate(next.getDate() + 1);
+        break;
+      case 'semanal':
+        next.setDate(next.getDate() + 7);
+        break;
+      case 'mensal':
+        next.setMonth(next.getMonth() + 1);
+        break;
+      default:
+        if (typeof t.frequencia === 'number') {
+          next.setDate(next.getDate() + t.frequencia);
+        }
+    }
+
+    const tarefasColecao = collection(db, "usuarios", usuario.uid, "tarefas");
+    // Checa duplicidade logo antes do addDoc
+    const q = query(
+      tarefasColecao,
+      where("tarefaOriginal", "==", t.tarefaOriginal || t.id),
+      where("dataLimite", "==", Timestamp.fromDate(next))
+    );
+    const snap = await getDocs(q);
+    if (!snap.empty) return;
+
+    // Pequeno delay para garantir que não há concorrência
+    await new Promise(res => setTimeout(res, 300));
+
+    // Checa de novo antes de criar (dupla verificação)
+    const snap2 = await getDocs(q);
+    if (!snap2.empty) return;
+
+    const notificacoes = Array.isArray(t.notificacoes) ? t.notificacoes : [];
+    const novaTarefa = {
+      nome: t.nome,
+      descricao: t.descricao,
+      tipo: t.tipo,
+      frequencia: t.frequencia,
+      dataLimite: Timestamp.fromDate(next),
+      finalizada: false,
+      tags: Array.isArray(t.tags) ? [...t.tags] : [],
+      notificacoes,
+      tarefaOriginal: t.tarefaOriginal || t.id,
+      repetida: true
+    };
+    if (t.padraoPersonalizado != null) {
+      novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
+    }
+    const novaTarefaRef = await addDoc(tarefasColecao, novaTarefa);
+
+    // Agendar notificações...
+    for (const minutosAntes of notificacoes) {
+      const dataNotificacao = new Date(next.getTime() - minutosAntes * 60000);
+      await addDoc(collection(db, "scheduledNotifications"), {
+        uid: usuario.uid,
+        tarefaId: novaTarefaRef.id,
+        title: `Tarefa: ${novaTarefa.nome}`,
+        body: `Sua tarefa "${novaTarefa.nome}" está chegando!\nData limite: ${next.toLocaleString()}`,
+        badge: "https://raw.githubusercontent.com/Ak4ai/TasksApp/e38ef409e5a90d423d1b5034e2229433d85cd538/badge.png",
+        scheduledAt: dataNotificacao,
+        sent: false,
+        createdAt: serverTimestamp()
+      });
+    }
+  } finally {
+    criandoTarefaPeriodica = false;
   }
-
-  // calcula a próxima data **uma única vez**
-  const next = new Date(t.dataLimite);
-  switch (t.frequencia) {
-    case 'diario':
-      next.setDate(next.getDate() + 1);
-      break;
-    case 'semanal':
-      next.setDate(next.getDate() + 7);
-      break;
-    case 'mensal':
-      next.setMonth(next.getMonth() + 1);
-      break;
-    default:
-      if (typeof t.frequencia === 'number') {
-        next.setDate(next.getDate() + t.frequencia);
-      }
-  }
-
-  // ⬇️ VERIFICA SE JÁ EXISTE UMA TAREFA PARA ESSA DATA
-  const tarefasColecao = collection(db, "usuarios", usuario.uid, "tarefas");
-  const q = query(
-    tarefasColecao,
-    where("tarefaOriginal", "==", t.tarefaOriginal || t.id),
-    where("dataLimite", "==", Timestamp.fromDate(next))
-  );
-  const snap = await getDocs(q);
-  if (!snap.empty) return; // Já existe, não cria de novo
-
-  // 1) cria a nova tarefa com a próxima data
-  const notificacoes = Array.isArray(t.notificacoes) ? t.notificacoes : [];
-  const novaTarefa = {
-    nome: t.nome,
-    descricao: t.descricao,
-    tipo: t.tipo,
-    frequencia: t.frequencia,
-    dataLimite: Timestamp.fromDate(next),
-    finalizada: false,
-    tags: Array.isArray(t.tags) ? [...t.tags] : [],
-    notificacoes // <-- copia as notificações
-  };
-  if (t.padraoPersonalizado != null) {
-    novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
-  }
-  const novaTarefaRef = await addDoc(tarefasColecao, novaTarefa);
-
-  // 2) agenda as notificações para a nova tarefa periódica
-  for (const minutosAntes of notificacoes) {
-    const dataNotificacao = new Date(next.getTime() - minutosAntes * 60000);
-    await addDoc(collection(db, "scheduledNotifications"), {
-      uid: usuario.uid,
-      tarefaId: novaTarefaRef.id,
-      title: `Tarefa: ${novaTarefa.nome}`,
-      body: `Sua tarefa "${novaTarefa.nome}" está chegando!\nData limite: ${next.toLocaleString()}`,
-      badge: "https://raw.githubusercontent.com/Ak4ai/TasksApp/e38ef409e5a90d423d1b5034e2229433d85cd538/badge.png",
-      scheduledAt: dataNotificacao,
-      sent: false,
-      createdAt: serverTimestamp()
-    });
-  }
-
-  // 3) marca a tarefa original como finalizada (já feito pelo listener)
-  // nada mais necessário aqui pois já foi atualizada antes de chamar esta função
 }
+// ...existing code...
 
 document.querySelector('.next-event').addEventListener('click', () => {
     const modalNextEvent = document.getElementById('modal-next-event');
