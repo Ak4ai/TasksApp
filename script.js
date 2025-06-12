@@ -42,6 +42,27 @@ const MISSOES_DIARIAS = [
     tipo: 'Espiritual',
     quantidade: 2,
     xp: 50
+  },
+  {
+    id: 'dois-tipos',
+    descricao: 'Conclua uma tarefa de dois tipos diferentes',
+    tipo: 'dois-tipos',
+    quantidade: 2,
+    xp: 60
+  },
+  {
+    id: 'dano-inimigo',
+    descricao: 'Dê 15 de dano no inimigo hoje',
+    tipo: 'dano-inimigo',
+    quantidade: 15,
+    xp: 60
+  },
+  {
+    id: 'ganhe-xp',
+    descricao: 'Ganhe 20 de XP hoje',
+    tipo: 'ganhe-xp',
+    quantidade: 20,
+    xp: 60
   }
 ];
 
@@ -112,15 +133,17 @@ async function mostrarMissoesDiarias(uid) {
   });
 } 
 
-export async function atualizarProgressoMissoes(uid, tipoTarefa) {
+export async function atualizarProgressoMissoes(uid, tipoTarefa, xpGanho = 0) {
   const ref = doc(db, "usuarios", uid, "missoes", "diaria");
   const snap = await getDoc(ref);
   if (!snap.exists()) return;
 
   const data = snap.data();
   let alterou = false;
+
   for (const missao of data.missoes) {
-    if (!missao.concluida && missao.tipo === tipoTarefa) {
+    // Missões padrão por tipo
+    if (!missao.concluida && ['Físico','Intelecto','Social','Criativo','Espiritual'].includes(missao.tipo) && missao.tipo === tipoTarefa) {
       missao.progresso = (missao.progresso || 0) + 1;
       if (missao.progresso >= missao.quantidade) {
         missao.concluida = true;
@@ -129,7 +152,34 @@ export async function atualizarProgressoMissoes(uid, tipoTarefa) {
       }
       alterou = true;
     }
+
+    // Missão "conclua uma tarefa de dois tipos diferentes"
+    if (!missao.concluida && missao.tipo === 'dois-tipos') {
+      if (!missao.tipos) missao.tipos = [];
+      if (!missao.tipos.includes(tipoTarefa)) {
+        missao.tipos.push(tipoTarefa);
+        missao.progresso = missao.tipos.length;
+        if (missao.progresso >= missao.quantidade) {
+          missao.concluida = true;
+          await darRecompensa(uid, missao.xp, 0);
+          mostrarPopup(`Missão concluída! +${missao.xp} XP`);
+        }
+        alterou = true;
+      }
+    }
+
+    // Missão "ganhe 20 de XP hoje"
+    if (!missao.concluida && missao.tipo === 'ganhe-xp' && xpGanho > 0) {
+      missao.progresso = (missao.progresso || 0) + xpGanho;
+      if (missao.progresso >= missao.quantidade) {
+        missao.concluida = true;
+        await darRecompensa(uid, missao.xp, 0);
+        mostrarPopup(`Missão concluída! +${missao.xp} XP`);
+      }
+      alterou = true;
+    }
   }
+
   if (alterou) await setDoc(ref, data);
 }
 
@@ -272,6 +322,26 @@ async function atualizarUIInimigo() {
   }
 }
 
+async function atualizarProgressoDanoInimigo(uid, dano) {
+  const ref = doc(db, "usuarios", uid, "missoes", "diaria");
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+  const data = snap.data();
+  let alterou = false;
+  for (const missao of data.missoes) {
+    if (!missao.concluida && missao.tipo === 'dano-inimigo') {
+      missao.progresso = (missao.progresso || 0) + dano;
+      if (missao.progresso >= missao.quantidade) {
+        missao.concluida = true;
+        await darRecompensa(uid, missao.xp, 0);
+        mostrarPopup(`Missão concluída! +${missao.xp} XP`);
+      }
+      alterou = true;
+    }
+  }
+  if (alterou) await setDoc(ref, data);
+}
+
 async function atacarInimigo(dano = 10) {
   const usuario = auth.currentUser;
   if (!usuario) return;
@@ -289,10 +359,14 @@ async function atacarInimigo(dano = 10) {
   // Atualiza a UI
   atualizarUIInimigo();
 
+  await atualizarProgressoDanoInimigo(usuario.uid, dano);
+
   // Se morreu, processa derrota e troca de inimigo
   if (inimigo.vidaAtual <= 0) {
     mostrarPopup(`Você derrotou ${inimigo.nome}! Ganhou ${inimigo.recompensaXP} XP e ${inimigo.recompensaMoedas} moedas!`);
     await darRecompensa(usuario.uid, inimigo.recompensaXP, inimigo.recompensaMoedas);
+
+    await atualizarProgressoMissoes(usuario.uid, null, inimigo.recompensaXP);
 
     // Avança para o próximo inimigo
     const proximoIndice = (inimigo.indice ?? 0) + 1;
@@ -1298,9 +1372,13 @@ export async function atacarInimigoExtra(dano = 10) {
   await salvarInimigoFirestore(usuario.uid, inimigo);
   await atualizarUIInimigo();
 
+  await atualizarProgressoDanoInimigo(usuario.uid, dano);
+
   if (inimigo.vidaAtual <= 0) {
     mostrarPopup(`Você derrotou ${inimigo.nome}! Ganhou ${inimigo.recompensaXP} XP e ${inimigo.recompensaMoedas} moedas!`);
     await darRecompensa(usuario.uid, inimigo.recompensaXP, inimigo.recompensaMoedas);
+
+    await atualizarProgressoMissoes(usuario.uid, null, inimigo.recompensaXP);
 
     // Próximo inimigo
     const proximoIndice = (inimigo.indice ?? 0) + 1;

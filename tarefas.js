@@ -556,7 +556,7 @@ function renderizarTarefa(t) {
 
           if (t.tags && t.tags.length > 0) {
             const tipoMissao = t.tags[0];
-            await atualizarProgressoMissoes(usuario.uid, tipoMissao);
+            await atualizarProgressoMissoes(usuario.uid, tipoMissao, Math.round(xpBase));
           }
         }
 
