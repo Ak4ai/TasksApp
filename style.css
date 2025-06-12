@@ -3054,3 +3054,70 @@ div#tab-home {
   40%, 60% { transform: translateX(8px); }
   100% { transform: translateX(0); }
 }
+
+/* Adicione ao seu style.css */
+#enemy-attack-canvas {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 90vw;
+  height: 90vw;
+  z-index: 1010;
+  pointer-events: none;
+  display: none;
+}
+
+.task-loading-spinner {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  pointer-events: none;  
+  border-radius: #ccc;
+  border-top-color: #000000;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+}
+.task-loading-spinner .spinner {
+  width: 200%;
+  height: 200%;
+  aspect-ratio: 1 / 1;
+  border-width: 8px;
+  border-style: solid;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  box-sizing: border-box;
+  background: none;
+  display: block;
+  margin: 0 auto;
+}
+.task-rect.loading .task-content {
+  opacity: 0.2;
+  filter: blur(1.15px);
+}
+.task-rect.loading {
+  /* Remova opacity e blur daqui! */
+  pointer-events: none;
+}
+/* ...existing code... */
+
+/* Spinner animado - cor dinâmica por tipo de tarefa */
+.task-rect[data-tipo="periodico"] .task-loading-spinner .spinner {
+  border-color: #cfe3ff;
+  border-top-color: #5390d9;
+}
+.task-rect[data-tipo="nao-periodico"] .task-loading-spinner .spinner {
+  border-color: #ffe6c9;
+  border-top-color: #d99453;
+}
+.task-rect[data-tipo="personalizado"] .task-loading-spinner .spinner {
+  border-color: #e6ffcf;
+  border-top-color: #94d953;
+}
+
+/* ...mantenha o restante do CSS do spinner... */

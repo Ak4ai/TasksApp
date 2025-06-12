@@ -321,6 +321,10 @@ function renderizarTarefa(t) {
   div.setAttribute('data-id', t.id);
   div.setAttribute('data-tipo', t.tipo || 'personalizado');
 
+  // Cria um wrapper para o conteúdo da tarefa
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'task-content';
+
   const isConcluivel = t.tipo !== 'personalizado' || t.permitirConclusao;
   const dataLimite = new Date(t.dataLimite);
   const agora = new Date();
@@ -336,7 +340,7 @@ function renderizarTarefa(t) {
   const idSelect = `select-tempo-${t.id}`;
   const idSpan = `span-tempo-${t.id}`;
 
-  div.innerHTML = `
+  contentDiv.innerHTML = `
     <div class="titulo-tarefa">
       ${isConcluivel ? `<input type="checkbox" class="checkbox-tarefa" title="Marcar como feita" ${t.finalizada ? 'checked' : ''}>` : ''}
       <strong>${t.nome}</strong>
@@ -383,20 +387,17 @@ function renderizarTarefa(t) {
         span.textContent = texto;
       });
 
-      // Aqui, para evitar abrir modal ao clicar no select:
       select.addEventListener('click', (e) => {
         e.stopPropagation();
       });
     }
   }, 0);
 
-
   // Adiciona visualização de tags se existirem
   if (t.tags && t.tags.length) {
     const wrapper = document.createElement("div");
     wrapper.className = "tag-list-wrapper";
 
-    // Cria uma lista com todas as tags padrão, já em lowercase
     const tagsPadrao = Object.values(subTagsPorCategoria)
       .flat()
       .map(tag => tag.toLowerCase());
@@ -405,7 +406,6 @@ function renderizarTarefa(t) {
       const tagElem = document.createElement("span");
       tagElem.classList.add("tag");
 
-      // Verifica se é personalizada comparando em lowercase
       if (!tagsPadrao.includes(tag.toLowerCase())) {
         tagElem.classList.add("tag-personalizada");
       } else {
@@ -416,9 +416,8 @@ function renderizarTarefa(t) {
       wrapper.appendChild(tagElem);
     });
 
-    div.appendChild(wrapper);
+    contentDiv.appendChild(wrapper);
   }
-
 
   // Verifica se existe anexo no localStorage
   const anexoRaw = localStorage.getItem(`anexos_${t.id}`);
@@ -436,20 +435,16 @@ function renderizarTarefa(t) {
     link.className = 'anexo-link';
     link.target = '_blank';
 
-    // Impede que o clique no link abra o modal
     link.addEventListener('click', (e) => {
       e.stopPropagation();
       const nome = anexo.nome.toLowerCase();
 
-      // Modal para imagens
       if (nome.match(/\.(png|jpg|jpeg|gif)$/)) {
         abrirModalVisualizacaoAnexo(`<img src="${anexo.base64}" alt="${anexo.nome}" />`);
         e.preventDefault();
         return;
       }
-      // Modal para texto
       if (nome.endsWith('.txt')) {
-        // Carrega o texto do base64
         const base64Data = anexo.base64.split(',')[1];
         const decoded = atob(base64Data);
         abrirModalVisualizacaoAnexo(`<pre>${decoded.replace(/[<>&]/g, c => ({
@@ -458,7 +453,6 @@ function renderizarTarefa(t) {
         e.preventDefault();
         return;
       }
-      // PDF: exibe no modal usando iframe
       if (nome.endsWith('.pdf')) {
         abrirModalVisualizacaoAnexo(`
           <iframe src="${anexo.base64}" style="width:80vw; height:70vh; border:none; background:#222;"></iframe>
@@ -466,7 +460,6 @@ function renderizarTarefa(t) {
         e.preventDefault();
         return;
       }
-      // Outros tipos: força download
       e.preventDefault();
       let mime = '';
       const match = anexo.base64.match(/^data:(.*?);base64,/);
@@ -490,15 +483,31 @@ function renderizarTarefa(t) {
       URL.revokeObjectURL(url);
     });
 
-    div.appendChild(link);
+    contentDiv.appendChild(link);
   }
 
+  // Adiciona o conteúdo principal antes do spinner
+  div.appendChild(contentDiv);
+
   // Só adiciona o listener do checkbox se ele existir
-  const checkbox = div.querySelector('.checkbox-tarefa');
+  const checkbox = contentDiv.querySelector('.checkbox-tarefa');
   if (checkbox) {
     checkbox.addEventListener('click', async (e) => {
       e.stopPropagation();
       const usuario = auth.currentUser;
+
+      // Adiciona loading visual apenas ao conteúdo, não à borda nem ao spinner
+      div.classList.add('loading');
+      contentDiv.style.opacity = '0.2';
+      contentDiv.style.filter = 'blur(1.15px)';
+
+      let spinner = div.querySelector('.task-loading-spinner');
+      if (!spinner) {
+        spinner = document.createElement('div');
+        spinner.className = 'task-loading-spinner';
+        spinner.innerHTML = `<div class="spinner"></div>`;
+        div.appendChild(spinner);
+      }
 
       try {
         await updateDoc(
@@ -510,7 +519,6 @@ function renderizarTarefa(t) {
           let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
           personagemFalaAleatoriamente(classeAtiva);
 
-          // Só chama para personalizadas
           if (t.tipo === 'personalizado') {
             await criarRecorrentePersonalizada({
               ...t,
@@ -528,7 +536,7 @@ function renderizarTarefa(t) {
           const bonusXP = calcularBonusXP(itensAtivos);
           const bonusMoedas = calcularBonusMoedas(itensAtivos);
 
-          let xpBase = 10; // Valor base
+          let xpBase = 10;
           xpBase += xpBase * bonusXP;
 
           const categoriaTarefa = t.categoria || null;
@@ -538,8 +546,7 @@ function renderizarTarefa(t) {
             xpBase += xpBase * dadosClasse.bonusXP;
           }
 
-
-          let moedasGanhar = 5; // Valor base
+          let moedasGanhar = 5;
           moedasGanhar += moedasGanhar * bonusMoedas;
 
           await darRecompensa(usuario.uid, Math.round(xpBase), moedasGanhar);
@@ -548,12 +555,11 @@ function renderizarTarefa(t) {
           await atacarInimigo(10 + danoArmas);
 
           if (t.tags && t.tags.length > 0) {
-            const tipoMissao = t.tags[0]; // já está igual ao tipo da missão
+            const tipoMissao = t.tags[0];
             await atualizarProgressoMissoes(usuario.uid, tipoMissao);
           }
         }
 
-        // Processa tarefa periódica se for o caso
         if (t.tipo === 'periodico' && checkbox.checked) {
           await processarTarefaPeriodicaAoMarcar({
             ...t,
@@ -561,7 +567,6 @@ function renderizarTarefa(t) {
           });
         }
 
-        // Atualize as missões e tarefas na interface
         if (usuario) {
           await mostrarMissoesDiarias(usuario.uid);
         }
@@ -570,10 +575,17 @@ function renderizarTarefa(t) {
       } catch (err) {
         console.error("Erro ao concluir tarefa:", err);
         mostrarPopup("Erro ao concluir tarefa. Tente novamente.", 4000);
+      } finally {
+        div.classList.remove('loading');
+        contentDiv.style.opacity = '';
+        contentDiv.style.filter = '';
+        const spinner = div.querySelector('.task-loading-spinner');
+        if (spinner) {
+          spinner.remove();
+        }
       }
     });
   }
-
 
   div.addEventListener('click', () => abrirModalDetalhe(t));
 
@@ -752,9 +764,11 @@ async function carregarTarefas() {
   });
 
   // Renderiza futuras que não estão fixadas (para evitar duplicação)
-  tarefasFuturas.forEach(t => {
-    const div = renderizarTarefa(t);
-    containers[t.tipo].appendChild(div);
+  tarefasFuturas
+    .filter(t => !idsFixadas.has(t.id))
+    .forEach(t => {
+      const div = renderizarTarefa(t);
+      containers[t.tipo].appendChild(div);
   });
   
 
@@ -1637,9 +1651,30 @@ function abrirModalDetalhe(tarefa) {
 
   // Excluir
   document.getElementById('excluir-tarefa').onclick = async () => {
+    // Localiza o card da tarefa na tela
+    const card = document.querySelector(`.task-rect[data-id="${tarefa.id}"]`);
+    const contentDiv = card?.querySelector('.task-content');
+  
+    // Adiciona loading visual
+    if (card && contentDiv) {
+      card.classList.add('loading');
+      contentDiv.style.opacity = '0.2';
+      contentDiv.style.filter = 'blur(1.15px)';
+      let spinner = card.querySelector('.task-loading-spinner');
+      if (!spinner) {
+        spinner = document.createElement('div');
+        spinner.className = 'task-loading-spinner';
+        spinner.innerHTML = `<div class="spinner"></div>`;
+        card.appendChild(spinner);
+      }
+    }
+  
     await excluirTarefaDoFirestore(tarefa.id, true); // exclusão total
     modal.style.display = 'none';
-    setTimeout(() => carregarTarefas(), 500);
+  
+    // Aguarda a tarefa sumir da tela (após recarregar)
+    await carregarTarefas();
+    // O card será removido do DOM, então não precisa remover o loading manualmente
   };
 
   // Fechar
@@ -1933,64 +1968,68 @@ export async function ajustarRecurrentes(tarefas) {
     const dados = snap.data();
     if (dados.excluida || dados.finalizada) continue;
     if (t.repetida) continue;
-
-    let dataProxima = null;
+  
     const dataLimiteAnterior = t.dataLimite.toDate ? t.dataLimite.toDate() : new Date(t.dataLimite);
     const hoje = new Date();
-
-    // Só recria para tarefas periódicas!
-    if (t.tipo === 'periodico' && t.finalizada) {
-      const proxima = new Date(dataLimiteAnterior);
+  
+    // Só recria para tarefas periódicas expiradas (não finalizadas e já passaram do prazo)
+    if (t.tipo === 'periodico' && !t.finalizada && t.dataLimite < hoje) {
+      // Calcula a próxima data
+      let dataProxima = new Date(dataLimiteAnterior);
       switch (t.frequencia) {
         case 'diario':
-          proxima.setDate(proxima.getDate() + 1);
+          dataProxima.setDate(dataProxima.getDate() + 1);
           break;
         case 'semanal':
-          proxima.setDate(proxima.getDate() + 7);
+          dataProxima.setDate(dataProxima.getDate() + 7);
           break;
         case 'mensal':
-          proxima.setMonth(proxima.getMonth() + 1);
+          dataProxima.setMonth(dataProxima.getMonth() + 1);
           break;
         default:
           if (typeof t.frequencia === 'number') {
-            proxima.setDate(proxima.getDate() + t.frequencia);
+            dataProxima.setDate(dataProxima.getDate() + t.frequencia);
           } else {
             continue;
           }
       }
-      dataProxima = proxima;
-    } else {
-     continue;
+  
+      // Verifica duplicidade antes de criar
+      const jaExiste = await existeTarefaRepetida(tarefasColecao, t.descricao, dataProxima);
+      if (jaExiste) continue;
+      const q = query(
+        tarefasColecao,
+        where("tarefaOriginal", "==", t.tarefaOriginal || t.id),
+        where("dataLimite", "==", Timestamp.fromDate(dataProxima))
+      );
+      const snapRecurrent = await getDocs(q);
+      if (!snapRecurrent.empty) continue;
+  
+      // Cria nova tarefa com os mesmos dados
+      const novaTarefa = {
+        nome: t.nome,
+        descricao: t.descricao,
+        tipo: t.tipo,
+        dataLimite: Timestamp.fromDate(dataProxima),
+        finalizada: false,
+        repetida: true,
+        tags: Array.isArray(t.tags) ? [...t.tags] : [],
+        tarefaOriginal: t.id
+      };
+      if (t.frequencia !== undefined) novaTarefa.frequencia = t.frequencia;
+      if (t.modoPersonalizado !== undefined) novaTarefa.modoPersonalizado = t.modoPersonalizado;
+      if (t.padraoPersonalizado !== undefined) novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
+      if (t.permitirConclusao !== undefined) novaTarefa.permitirConclusao = t.permitirConclusao;
+      if (t.diasSemana !== undefined) novaTarefa.diasSemana = t.diasSemana;
+      if (t.horaSemanal !== undefined) novaTarefa.horaSemanal = t.horaSemanal;
+  
+      await addDoc(tarefasColecao, novaTarefa);
+      mostrarPopup(`Nova tarefa criada: ${t.descricao} para ${dataProxima.toLocaleDateString('pt-BR')}`);
+      personagemFalaAleatoriamente();
+      await carregarTarefas();
+  
+      await updateDoc(refDoc, { finalizada: true });
     }
-
-    // Verifica duplicidade antes de criar
-    const jaExiste = await existeTarefaRepetida(tarefasColecao, t.descricao, dataProxima);
-    if (jaExiste) continue;
-
-    // Cria nova tarefa com os mesmos dados
-    const novaTarefa = {
-      nome: t.nome,
-      descricao: t.descricao,
-      tipo: t.tipo,
-      dataLimite: Timestamp.fromDate(dataProxima),
-      finalizada: false,
-      repetida: true,
-      tags: Array.isArray(t.tags) ? [...t.tags] : [],
-      tarefaOriginal: t.id
-    };
-    if (t.frequencia !== undefined) novaTarefa.frequencia = t.frequencia;
-    if (t.modoPersonalizado !== undefined) novaTarefa.modoPersonalizado = t.modoPersonalizado;
-    if (t.padraoPersonalizado !== undefined) novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
-    if (t.permitirConclusao !== undefined) novaTarefa.permitirConclusao = t.permitirConclusao;
-    if (t.diasSemana !== undefined) novaTarefa.diasSemana = t.diasSemana;
-    if (t.horaSemanal !== undefined) novaTarefa.horaSemanal = t.horaSemanal;
-
-    await addDoc(tarefasColecao, novaTarefa);
-    mostrarPopup(`Nova tarefa criada: ${t.descricao} para ${dataProxima.toLocaleDateString('pt-BR')}`);
-    personagemFalaAleatoriamente();
-    await carregarTarefas();
-
-    await updateDoc(refDoc, { finalizada: true });
   }
 }
 
@@ -2021,8 +2060,18 @@ export async function processarTarefaPeriodicaAoMarcar(t) {
       }
   }
 
-  // 1) cria a nova tarefa com a próxima data
+  // ⬇️ VERIFICA SE JÁ EXISTE UMA TAREFA PARA ESSA DATA
   const tarefasColecao = collection(db, "usuarios", usuario.uid, "tarefas");
+  const q = query(
+    tarefasColecao,
+    where("tarefaOriginal", "==", t.tarefaOriginal || t.id),
+    where("dataLimite", "==", Timestamp.fromDate(next))
+  );
+  const snap = await getDocs(q);
+  if (!snap.empty) return; // Já existe, não cria de novo
+
+  // 1) cria a nova tarefa com a próxima data
+  const notificacoes = Array.isArray(t.notificacoes) ? t.notificacoes : [];
   const novaTarefa = {
     nome: t.nome,
     descricao: t.descricao,
@@ -2030,14 +2079,30 @@ export async function processarTarefaPeriodicaAoMarcar(t) {
     frequencia: t.frequencia,
     dataLimite: Timestamp.fromDate(next),
     finalizada: false,
-    tags: Array.isArray(t.tags) ? [...t.tags] : []
+    tags: Array.isArray(t.tags) ? [...t.tags] : [],
+    notificacoes // <-- copia as notificações
   };
   if (t.padraoPersonalizado != null) {
     novaTarefa.padraoPersonalizado = t.padraoPersonalizado;
   }
-  await addDoc(tarefasColecao, novaTarefa);
+  const novaTarefaRef = await addDoc(tarefasColecao, novaTarefa);
 
-  // 2) marca a tarefa original como finalizada (já feito pelo listener)
+  // 2) agenda as notificações para a nova tarefa periódica
+  for (const minutosAntes of notificacoes) {
+    const dataNotificacao = new Date(next.getTime() - minutosAntes * 60000);
+    await addDoc(collection(db, "scheduledNotifications"), {
+      uid: usuario.uid,
+      tarefaId: novaTarefaRef.id,
+      title: `Tarefa: ${novaTarefa.nome}`,
+      body: `Sua tarefa "${novaTarefa.nome}" está chegando!\nData limite: ${next.toLocaleString()}`,
+      badge: "https://raw.githubusercontent.com/Ak4ai/TasksApp/e38ef409e5a90d423d1b5034e2229433d85cd538/badge.png",
+      scheduledAt: dataNotificacao,
+      sent: false,
+      createdAt: serverTimestamp()
+    });
+  }
+
+  // 3) marca a tarefa original como finalizada (já feito pelo listener)
   // nada mais necessário aqui pois já foi atualizada antes de chamar esta função
 }
 
