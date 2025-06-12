@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `Imagens sem fundo dos inimigos`, hash: '2891de4', date: '2025-06-12 18:31:43' };
+window.APP_VERSION = { msg: `Modal com botão de trocar tarefa`, hash: 'a228c9f', date: '2025-06-12 19:44:20' };

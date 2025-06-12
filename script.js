@@ -97,13 +97,56 @@ async function carregarMissoesDiarias(uid) {
   }
 }
 
+function abrirModalTrocarMissao(missao, idx, uid) {
+  const modal = document.getElementById('modal-trocar-missao');
+  const fechar = document.getElementById('fechar-modal-trocar-missao');
+  const btnTrocar = document.getElementById('btn-trocar-missao-modal');
+  const texto = document.getElementById('texto-troca-missao');
+
+  // Verifica se já foi trocada hoje
+  const jaTrocou = missao.dataTroca === new Date().toDateString();
+  btnTrocar.disabled = jaTrocou || missao.concluida;
+  texto.textContent = jaTrocou
+    ? 'Você já trocou esta missão hoje.'
+    : 'Só é possível trocar cada missão uma vez por dia.';
+
+  modal.style.display = 'flex';
+
+  fechar.onclick = () => { modal.style.display = 'none'; };
+  btnTrocar.onclick = async () => {
+    btnTrocar.disabled = true;
+    await trocarMissaoDiaria(uid, missao.id);
+    modal.style.display = 'none';
+    mostrarMissoesDiarias(uid);
+  };
+}
+
+async function trocarMissaoDiaria(uid, missaoId) {
+  const ref = doc(db, "usuarios", uid, "missoes", "diaria");
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+  const data = snap.data();
+  const idx = data.missoes.findIndex(m => m.id === missaoId);
+  if (idx === -1) return;
+
+  // Sorteia uma missão diferente das atuais
+  const idsAtuais = data.missoes.map(m => m.id);
+  const opcoes = MISSOES_DIARIAS.filter(m => !idsAtuais.includes(m.id));
+  if (opcoes.length === 0) return;
+  const nova = opcoes[Math.floor(Math.random() * opcoes.length)];
+
+  // Troca e marca data da troca
+  data.missoes[idx] = { ...nova, progresso: 0, concluida: false, dataTroca: new Date().toDateString() };
+  await setDoc(ref, data);
+}
+
 // Mostra as missões na home
 async function mostrarMissoesDiarias(uid) {
   const missoes = await carregarMissoesDiarias(uid);
   const container = document.getElementById('missoes-diarias');
   if (!container) return;
   container.innerHTML = '<h3>Missões Diárias</h3>';
-  missoes.forEach(missao => {
+  missoes.forEach((missao, idx) => {
     const div = document.createElement('div');
     div.className = 'missao-diaria' + (missao.concluida ? ' concluida' : '');
     const cores = {
@@ -129,6 +172,8 @@ async function mostrarMissoesDiarias(uid) {
         </span>
       </span>
     `;
+    div.style.cursor = 'pointer';
+    div.onclick = () => abrirModalTrocarMissao(missao, idx, uid);
     container.appendChild(div);
   });
 } 
