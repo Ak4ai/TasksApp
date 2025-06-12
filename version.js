@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `Adicionando mais missões`, hash: '404acda', date: '2025-06-12 08:11:21' };
+window.APP_VERSION = { msg: `Ajuste bug nas moedas`, hash: '4d62bcd', date: '2025-06-12 08:45:12' };
