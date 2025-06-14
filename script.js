@@ -229,7 +229,6 @@ export async function atualizarProgressoMissoes(uid, tipoTarefa, xpGanho = 0) {
 }
 
 const INIMIGOS = [
-  // Lista de inimigos
   {
     nome: "Slime",
     vidaAtual: 30,
@@ -237,7 +236,8 @@ const INIMIGOS = [
     imagem: "img/slime.png",
     recompensaXP: 60,
     recompensaMoedas: 20,
-    danoPorExpirada: 5
+    danoPorExpirada: 5,
+    tags: ["selvagem"]
   },
   {
     nome: "Goblin",
@@ -246,7 +246,8 @@ const INIMIGOS = [
     imagem: "img/goblin.png",
     recompensaXP: 100,
     recompensaMoedas: 50,
-    danoPorExpirada: 10
+    danoPorExpirada: 10,
+    tags: ["selvagem"]
   },
   {
     nome: "Esqueleto",
@@ -255,7 +256,8 @@ const INIMIGOS = [
     imagem: "img/esqueleto.png",
     recompensaXP: 120,
     recompensaMoedas: 60,
-    danoPorExpirada: 12
+    danoPorExpirada: 12,
+    tags: ["sombrio", "morto-vivo"]
   },
   {
     nome: "Orc",
@@ -264,7 +266,8 @@ const INIMIGOS = [
     imagem: "img/orc.png",
     recompensaXP: 150,
     recompensaMoedas: 80,
-    danoPorExpirada: 15
+    danoPorExpirada: 15,
+    tags: ["selvagem"]
   },
   {
     nome: "Mago Sombrio",
@@ -273,7 +276,8 @@ const INIMIGOS = [
     imagem: "img/mago_sombrio.png",
     recompensaXP: 180,
     recompensaMoedas: 100,
-    danoPorExpirada: 18
+    danoPorExpirada: 18,
+    tags: ["sombrio", "mágico"]
   },
   {
     nome: "Cavaleiro Negro",
@@ -282,7 +286,8 @@ const INIMIGOS = [
     imagem: "img/cavaleiro_negro.png",
     recompensaXP: 220,
     recompensaMoedas: 120,
-    danoPorExpirada: 20
+    danoPorExpirada: 20,
+    tags: ["sombrio", "guerreiro"]
   },
   {
     nome: "Dragão",
@@ -291,7 +296,8 @@ const INIMIGOS = [
     imagem: "img/dragao.png",
     recompensaXP: 300,
     recompensaMoedas: 150,
-    danoPorExpirada: 25
+    danoPorExpirada: 25,
+    tags: ["lendário", "selvagem"]
   },
   {
     nome: "Rei Demônio",
@@ -300,9 +306,10 @@ const INIMIGOS = [
     imagem: "img/rei_demonio.png",
     recompensaXP: 500,
     recompensaMoedas: 300,
-    danoPorExpirada: 35
+    danoPorExpirada: 35,
+    tags: ["sombrio", "lendário"]
   }
-  // Adicionar mais inimigos aqui
+  // Adicione mais inimigos aqui
 ];
 
 
@@ -364,6 +371,25 @@ async function atualizarUIInimigo() {
     const ataques = inimigo.ataquesDisponiveis || 0;
     btn.textContent = ataques > 0 ? `Atacar (${ataques})` : 'Atacar (0)';
     //btn.disabled = ataques <= 0;
+  }
+
+  // Troca o background da main-content.show conforme a tag do inimigo
+  const mainContent = document.querySelector('.main-content');
+  if (mainContent) {
+    // Remove todas as classes de fundo possíveis
+    mainContent.classList.remove(
+      'bg-inimigo-sombrio',
+      'bg-inimigo-selvagem',
+      'bg-inimigo-magico',
+      'bg-inimigo-lendario'
+    );
+    // Define prioridade: lendário > sombrio > magico > selvagem
+    let bgClass = '';
+    if (inimigo.tags?.includes('lendário')) bgClass = 'bg-inimigo-lendario';
+    else if (inimigo.tags?.includes('sombrio')) bgClass = 'bg-inimigo-sombrio';
+    else if (inimigo.tags?.includes('mágico')) bgClass = 'bg-inimigo-magico';
+    else if (inimigo.tags?.includes('selvagem')) bgClass = 'bg-inimigo-selvagem';
+    if (bgClass) mainContent.classList.add(bgClass);
   }
 }
 
