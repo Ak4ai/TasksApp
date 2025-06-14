@@ -3206,3 +3206,9 @@ div#tab-home {
   90%  { transform: scale(1.02) rotate(-2deg);}
   100% { transform: scale(1) rotate(0deg);}
 }
+
+#classe-ativa small {
+  color: #4ce00de3;
+  font-size: 0.85rem;
+  font-style: normal;
+}
