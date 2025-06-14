@@ -2870,8 +2870,21 @@ body > div.main-content > div.top-info-character > div > div.character-info > di
   display: block;
 }
 
-.main-content.show {
-  background-image: url('img/battle-bk.jpg');
+.main-content.show.bg-inimigo-sombrio {
+  background-image: url('img/bk/Dark.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.main-content.show.bg-inimigo-selvagem {
+  background-image: url('img/bk/Selva.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.main-content.show.bg-inimigo-magico,
+.main-content.show.bg-inimigo-lendario {
+  background-image: url('img/bk/Vulcao.png');
   background-size: cover;
   background-position: center;
 }
