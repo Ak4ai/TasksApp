@@ -310,6 +310,7 @@
   
   <!-- CONTEÚDO PRINCIPAL -->
   <div class="main-content">
+    <canvas id="especial-attack-canvas"></canvas>
     <canvas id="enemy-attack-canvas" width="1000" height="1000"></canvas> 
     <div id="modal-personagem" class="modal" style="display:none; align-items:center; justify-content:center;">
       <div class="modal-content" style="max-width:95vw; background:#222; color:#faf0e6; position:relative;">
@@ -401,8 +402,11 @@
         </div>
         <div class="enemy-actions">
           <button id="atacar-inimigo" class="action-button">Atacar</button>
-          <button id="especial-inimigo" class="action-button">Especial</button>
-        </div>
+          <button id="especial-inimigo" class="action-button" style="position: relative; overflow: hidden;">
+            <span class="especial-label">Especial</span>
+            <span class="especial-progress-text"></span>
+            <div class="especial-progress-bar"></div>
+          </button>        </div>
       </div>
       <div id="tab-home" class="tab-content active">
         <div class="home-layout">          

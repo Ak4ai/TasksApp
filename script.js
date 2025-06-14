@@ -1428,17 +1428,18 @@ export async function atacarInimigoExtra(dano = 10) {
   // --- ANIMAÇÃO DE ATAQUE ---
   const inimigoImgDiv = document.getElementById('inimigo-img');
   if (inimigoImgDiv) {
-    inimigoImgDiv.classList.remove('inimigo-anim-ataque'); // remove se já tiver
-    // Força reflow para reiniciar animação se clicar rápido
+    inimigoImgDiv.classList.remove('inimigo-anim-ataque');
     void inimigoImgDiv.offsetWidth;
     inimigoImgDiv.classList.add('inimigo-anim-ataque');
-    // Remove a classe após a animação para poder repetir depois
     setTimeout(() => inimigoImgDiv.classList.remove('inimigo-anim-ataque'), 400);
   }
   // --- FIM ANIMAÇÃO ---
 
   inimigo.ataquesDisponiveis -= 1;
   inimigo.vidaAtual = Math.max(0, inimigo.vidaAtual - dano);
+
+  // 1.1. Conta ataques normais
+  inimigo.ataquesNormaisDados = (inimigo.ataquesNormaisDados || 0) + 1;
 
   await salvarInimigoFirestore(usuario.uid, inimigo);
   await atualizarUIInimigo();
@@ -1457,7 +1458,109 @@ export async function atacarInimigoExtra(dano = 10) {
     await salvarInimigoFirestore(usuario.uid, inimigo);
     await atualizarUIInimigo();
   }
+  // Atualiza botão especial
+  atualizarBotaoEspecial();
 }
+
+// 2. Função de ataque especial
+export async function ataqueEspecialInimigo() {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+  let inimigo = await carregarInimigoFirestore(usuario.uid);
+
+  if ((inimigo.ataquesNormaisDados || 0) < 10) {
+    mostrarPopup("Você precisa dar 10 ataques normais para usar o ataque especial!");
+    return;
+  }
+
+  // --- ANIMAÇÃO DE ATAQUE ESPECIAL ---
+  window.playEspecialSpriteAnimation;
+  playEspecialSpriteAnimation('especial-attack-canvas');
+
+  // Balanço forte no inimigo
+  const inimigoImgDiv = document.getElementById('inimigo-img');
+  if (inimigoImgDiv) {
+    inimigoImgDiv.classList.remove('inimigo-anim-especial');
+    void inimigoImgDiv.offsetWidth; // força reflow
+    inimigoImgDiv.classList.add('inimigo-anim-especial');
+    setTimeout(() => inimigoImgDiv.classList.remove('inimigo-anim-especial'), 600);
+  }
+  // --- FIM ANIMAÇÃO ---
+
+  const danoEspecial = 10 * 10;
+  inimigo.vidaAtual = Math.max(0, inimigo.vidaAtual - danoEspecial);
+  inimigo.ataquesNormaisDados = 0;
+
+  await salvarInimigoFirestore(usuario.uid, inimigo);
+  await atualizarUIInimigo();
+  await atualizarProgressoDanoInimigo(usuario.uid, danoEspecial);
+
+  mostrarPopup("Ataque especial realizado! 💥");
+
+  if (inimigo.vidaAtual <= 0) {
+    mostrarPopup(`Você derrotou ${inimigo.nome}! Ganhou ${inimigo.recompensaXP} XP e ${inimigo.recompensaMoedas} moedas!`);
+    await darRecompensa(usuario.uid, inimigo.recompensaXP, inimigo.recompensaMoedas);
+    await atualizarProgressoMissoes(usuario.uid, null, inimigo.recompensaXP);
+    const proximoIndice = (inimigo.indice ?? 0) + 1;
+    inimigo = getNovoInimigo(proximoIndice < INIMIGOS.length ? proximoIndice : 0);
+    await salvarInimigoFirestore(usuario.uid, inimigo);
+    await atualizarUIInimigo();
+  }
+  atualizarBotaoEspecial();
+}
+
+// 4. Atualize o estado do botão especial:
+function atualizarBotaoEspecial() {
+  const usuario = auth.currentUser;
+  if (!usuario) return;
+  carregarInimigoFirestore(usuario.uid).then(inimigo => {
+    const btnEspecial = document.getElementById('especial-inimigo');
+    if (btnEspecial) {
+      // Cria elementos se não existirem
+      let bar = btnEspecial.querySelector('.especial-progress-bar');
+      let label = btnEspecial.querySelector('.especial-label');
+      let text = btnEspecial.querySelector('.especial-progress-text');
+      if (!bar) {
+        bar = document.createElement('div');
+        bar.className = 'especial-progress-bar';
+        btnEspecial.appendChild(bar);
+      }
+      if (!label) {
+        label = document.createElement('span');
+        label.className = 'especial-label';
+        label.textContent = 'Especial';
+        btnEspecial.appendChild(label);
+      }
+      if (!text) {
+        text = document.createElement('span');
+        text.className = 'especial-progress-text';
+        btnEspecial.appendChild(text);
+      }
+
+      const valor = inimigo.ataquesNormaisDados || 0;
+      const max = 10;
+      const percent = Math.min(100, Math.round((valor / max) * 100));
+      bar.style.width = percent + '%';
+      text.textContent = `(${valor}/${max})`;
+
+      btnEspecial.disabled = valor < max;
+      if (valor >= max) {
+        btnEspecial.classList.add('carregado');
+      } else {
+        btnEspecial.classList.remove('carregado');
+      }
+    }
+  });
+}
+
+// 5. Adicione o listener para o botão especial:
+document.addEventListener('DOMContentLoaded', () => {
+  const btnEspecial = document.getElementById('especial-inimigo'); // <-- id correto
+  if (btnEspecial) {
+    btnEspecial.onclick = ataqueEspecialInimigo;
+    atualizarBotaoEspecial();
+  }
+});
 
 // Adicione o listener para ataque extra e animação de ataque inimigo
 
@@ -1497,4 +1600,133 @@ if (container) {
   ro.observe(container);
   window.addEventListener('resize', ajustarTamanhoInimigoImg);
   ajustarTamanhoInimigoImg();
+}
+
+
+function playEspecialAttackAnimation(canvasId = 'especial-attack-canvas') {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  canvas.style.display = 'block';
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  const ctx = canvas.getContext('2d');
+
+  // Partículas para explosão
+  const particles = [];
+  const particleCount = 32;
+  for (let i = 0; i < particleCount; i++) {
+    const angle = (2 * Math.PI * i) / particleCount;
+    particles.push({
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      vx: Math.cos(angle) * (2 + Math.random() * 2),
+      vy: Math.sin(angle) * (2 + Math.random() * 2),
+      alpha: 1,
+      radius: 6 + Math.random() * 6,
+      color: i % 2 === 0 ? '#ff00dd' : '#b700ff'
+    });
+  }
+
+  let frame = 0;
+  const maxFrames = 40;
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const progress = frame / maxFrames;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const maxRadius = Math.min(canvas.width, canvas.height) * 0.38;
+
+    // Flash de tela rápido no início
+    if (frame < 5) {
+      ctx.save();
+      ctx.globalAlpha = 0.18 * (1 - frame / 5);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.restore();
+    }
+
+    // Círculo pulsante (camada 1)
+    ctx.save();
+    ctx.globalAlpha = 0.7 * (1 - progress);
+    const grad1 = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, maxRadius * 0.9);
+    grad1.addColorStop(0, '#fff0');
+    grad1.addColorStop(0.2, '#ff00dd88');
+    grad1.addColorStop(0.6, '#b700ffcc');
+    grad1.addColorStop(1, '#fff0');
+    ctx.fillStyle = grad1;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, maxRadius * (0.7 + 0.3 * progress), 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.restore();
+
+    // Círculo pulsante (camada 2)
+    ctx.save();
+    ctx.globalAlpha = 0.4 * (1 - progress);
+    const grad2 = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, maxRadius * 0.6);
+    grad2.addColorStop(0, '#fff0');
+    grad2.addColorStop(0.3, '#fff');
+    grad2.addColorStop(0.7, '#ff00dd44');
+    grad2.addColorStop(1, '#fff0');
+    ctx.fillStyle = grad2;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, maxRadius * (0.4 + 0.5 * progress), 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.restore();
+
+    // Explosão de linhas (burst)
+    ctx.save();
+    ctx.strokeStyle = '#fff';
+    ctx.globalAlpha = 0.5 * (1 - progress);
+    ctx.lineWidth = 2 + 4 * (1 - progress);
+    for (let i = 0; i < 12; i++) {
+      const angle = (2 * Math.PI * i) / 12;
+      const len = maxRadius * (0.7 + 0.5 * progress);
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(centerX + Math.cos(angle) * len, centerY + Math.sin(angle) * len);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Partículas voando para fora
+    particles.forEach(p => {
+      ctx.save();
+      ctx.globalAlpha = p.alpha * (1 - progress);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius * (1 - progress * 0.7), 0, 2 * Math.PI);
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 10;
+      ctx.fill();
+      ctx.restore();
+
+      // Move partículas
+      p.x += p.vx * (1 + progress * 1.5);
+      p.y += p.vy * (1 + progress * 1.5);
+      p.alpha *= 0.96;
+    });
+
+    // Flash central
+    if (progress > 0.25 && progress < 0.7) {
+      ctx.save();
+      ctx.globalAlpha = 0.18 * (1 - Math.abs(0.5 - progress) * 2);
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, maxRadius * 0.22, 0, 2 * Math.PI);
+      ctx.fillStyle = '#fff';
+      ctx.shadowColor = '#fff';
+      ctx.shadowBlur = 20;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    frame++;
+    if (frame <= maxFrames) {
+      requestAnimationFrame(animate);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      canvas.style.display = 'none';
+    }
+  }
+  animate();
 }
