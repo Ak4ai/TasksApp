@@ -218,6 +218,30 @@ const classesJogador = {
   "Artífice": { bonusCategorias: ["Criativo", "Profissional"], bonusXP: 0.4 }
 };
 
+function preencherClasseSelectorComBonus() {
+  const select = document.getElementById('classe-selector');
+  if (!select) return;
+
+  // Limpa opções existentes
+  select.innerHTML = '';
+
+  // Cria as opções
+  Object.entries(classesJogador).forEach(([classe, dados]) => {
+    const option = document.createElement('option');
+    option.value = classe;
+
+    // Mostra o nome + bônus visual
+    const bonusTexto = dados.bonusCategorias.join(', ');
+    option.text = `${classe} – 🏅 ${bonusTexto}`;
+
+    select.appendChild(option);
+  });
+
+  if (classeAtiva && classesJogador[classeAtiva]) {
+    select.value = classeAtiva;
+  }
+}
+
 
 const avataresPorClasse = {
   Guerreiro: "img/guerreiro.jpg",
@@ -1141,19 +1165,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
 
-  function atualizarVisualClasse() {
-    classeAtivaSpan.textContent = classeAtiva;
-    classeSelector.value = classeAtiva;
-    classeSelector.style.display = 'none';
-    classeAtivaSpan.style.display = 'inline';
+function atualizarVisualClasse() {
+  classeSelector.value = classeAtiva;
+  classeSelector.style.display = 'none';
+  classeAtivaSpan.style.display = 'inline';
 
-    personagemImg.src = avataresPorClasse[classeAtiva] || "default.png";
+  const bonus = classesJogador[classeAtiva]?.bonusCategorias || [];
 
-    const personagemImgModal = document.querySelector('.character-box-modal img');
-    if (personagemImgModal) {
-      personagemImgModal.src = avataresPorClasse[classeAtiva] || "default.png";
-    }
+  classeAtivaSpan.innerHTML = `
+    <strong>${classeAtiva}</strong>
+    <br>
+    <small>Bônus: ${bonus.join(', ')}</small>
+  `;
+
+  personagemImg.src = avataresPorClasse[classeAtiva] || "default.png";
+
+  const personagemImgModal = document.querySelector('.character-box-modal img');
+  if (personagemImgModal) {
+    personagemImgModal.src = avataresPorClasse[classeAtiva] || "default.png";
   }
+}
 
   atualizarVisualClasse();
   atualizarInfoCooldown();
@@ -2567,3 +2598,8 @@ export async function carregarInventario() {
     }
   });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  preencherClasseSelectorComBonus();
+  atualizarVisualClasse(); 
+}); // Essa função atualiza a barra de rolagem do selecionador de classe
