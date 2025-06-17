@@ -516,8 +516,20 @@
           <button class="criar-button">Criar Tarefa</button>
         </div>
       </div>
+
       <div id="tab-amigos" class="tab-content">
         <div class="app">
+          <div id="adicionar-amigo-bloco"
+            style="width:100%;max-width:350px;margin:0 auto 18px auto;display:flex;flex-direction:column;align-items:center;gap:10px;">
+            <h3 style="margin-bottom:7px;">Adicionar Amigo</h3>
+            <div id="friend-request-container" style="width:100%;display:flex;gap:8px;align-items:center;">
+              <input type="text" id="buscar-amigo" placeholder="Digite o ID do amigo" list="lista-ids"
+                style="flex:1;min-width:0;" />
+              <datalist id="lista-ids"></datalist>
+              <button id="btn-adicionar-amigo" style="padding:8px 18px;">Adicionar</button>
+            </div>
+            <button id="btn-pedidos-amizade" style="background:#1976d2;color:white;width:100%;margin-top:6px;">📨 Pedidos de Amizade</button>
+          </div>
           <div id="lista-amigos" class="task-group">
             <h2>Amigos</h2>
             <ul id="amigos-container"></ul>
@@ -525,13 +537,12 @@
         </div>
       </div>
 
-
       <!-- Aba Configurações -->
       <div id="tab-settings" class="tab-content">
         <h2>Configurações</h2>
         <!-- Exemplo: botão de logout, tema, etc. -->
         <div class="settings-container">
-          <h3>Configurações do Usuário</h3>
+          <h3>Usuário</h3>
 
           <div id="status-id" class="status-id-container">
             <p>ID atual: <span id="id-atual-config">Carregando...</span></p>
@@ -542,22 +553,11 @@
             <input type="text" id="meu-id-simples" placeholder="Escolha seu ID público (ex: joao123)">
             <button id="btn-salvar-id" onclick="definirMeuID()">SalvarID</button>
           </div>
-          <h3>Adicionar Amigo</h3>
-          <div id="friend-request-container">
-            <input type="text" id="buscar-amigo" placeholder="Digite o ID do amigo" list="lista-ids" />
-            <datalist id="lista-ids"></datalist>
-            <button id="btn-adicionar-amigo">Adicionar</button>
-          </div>
-          <button id="btn-pedidos-amizade">📨 Pedidos de Amizade</button>
+          
           <button id="logout-button">Logout</button>
         </div>
         <div class="settings-container">
-          
-
-
-
-
-
+          <h3>Teste</h3>
           <div id="config-buttosn-container">
             <button id="clear-cache-button">Limpar Cache</button>
             <button id="delete-all-tasks-button" style="color: red;">Excluir Todas as Tarefas</button>

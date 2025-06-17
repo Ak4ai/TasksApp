@@ -2506,16 +2506,26 @@ div#ios-notif-info {
   }
 }
 
-#friend-request-container {
+#adicionar-amigo-bloco {
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto 18px auto;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 10px;
-  max-width: 400px;
-  margin: 20px 0;
+}
+
+#friend-request-container {
+  width: 100%;
+  display: flex;
+  gap: 8px;
   align-items: center;
 }
 
 #friend-request-container input {
-  flex-grow: 1;
+  flex: 1;
+  min-width: 0;
   padding: 10px;
   border: 2px solid #94a3b8;
   border-radius: 6px;
@@ -2523,7 +2533,7 @@ div#ios-notif-info {
 }
 
 #friend-request-container button {
-  padding: 12px 30px;
+  padding: 8px 18px;
   background-color: #22c55e;
   color: white;
   border: none;
@@ -2535,6 +2545,16 @@ div#ios-notif-info {
 
 #friend-request-container button:hover {
   background-color: #16a34a;
+}
+
+#btn-pedidos-amizade {
+  background: #1976d2;
+  color: white;
+  width: 100%;
+  margin-top: 6px;
+  border-radius: 6px;
+  padding: 8px 0;
+  font-size: 1em;
 }
 
 #amigos-container li {
