@@ -1730,3 +1730,84 @@ function playEspecialAttackAnimation(canvasId = 'especial-attack-canvas') {
   }
   animate();
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const ajudaBtn = document.getElementById('ajuda-btn');
+  const modalAjuda = document.getElementById('modal-ajuda');
+  const fecharAjuda = document.getElementById('fechar-modal-ajuda');
+  const conteudoAjuda = document.getElementById('conteudo-ajuda');
+
+  const textosAjuda = {
+    'tab-home': `
+      <strong>Visão Geral</strong><br>
+      - Veja suas missões diárias e progresso.<br>
+      - Complete missões para ganhar XP extra.<br>
+      - Calendário mostra tarefas por dia.<br>
+      - Gráficos mostram seu desempenho.<br>
+    `,
+    'tab-enemy': `
+      <strong>Inimigos</strong><br>
+      - Ataque o inimigo ao concluir tarefas.<br>
+      - Derrote inimigos para ganhar recompensas.<br>
+      - Se tarefas vencerem, o inimigo te ataca e você perde XP.<br>
+      - Use ataques especiais quando carregados.<br>
+    `,
+    'tab-tasks': `
+      <strong>Tarefas Periódicas</strong><br>
+      - Tarefas que se repetem diariamente, semanalmente ou mensalmente.<br>
+      - Marque como concluída para ganhar XP e moedas.<br>
+      - Tarefas vencidas fazem o inimigo te atacar.<br>
+    `,
+    'tab-tasks-nao-periodicas': `
+      <strong>Tarefas Não Periódicas</strong><br>
+      - Tarefas importantes, mas sem repetição automática.<br>
+      - Marque como concluída para ganhar recompensas.<br>
+    `,
+    'tab-tasks-personalizadas': `
+      <strong>Tarefas Personalizadas</strong><br>
+      - Crie tarefas únicas ou com regras de repetição personalizadas.<br>
+      - Use tags para organizar.<br>
+    `,
+    'tab-inventario': `
+      <strong>Inventário</strong><br>
+      - Veja e gerencie seus itens comprados.<br>
+      - Ative, desative ou venda itens.<br>
+      - Itens ativos dão bônus em tarefas e batalhas.<br>
+    `,
+    'tab-loja': `
+      <strong>Loja</strong><br>
+      - Compre itens cosméticos, armas, bônus e consumíveis.<br>
+      - Itens dão vantagens em tarefas e batalhas.<br>
+      - Use moedas ganhas ao concluir tarefas.<br>
+    `,
+    'tab-amigos': `
+      <strong>Amigos</strong><br>
+      - Adicione amigos pelo ID.<br>
+      - Veja sua lista de amigos.<br>
+      - Envie e aceite pedidos de amizade.<br>
+    `,
+    'tab-settings': `
+      <strong>Configurações</strong><br>
+      - Altere seu ID público.<br>
+      - Gerencie notificações, cache e tarefas.<br>
+      - Veja informações do app e versão.<br>
+    `
+  };
+
+  ajudaBtn.onclick = () => {
+    // Descobre a aba ativa
+    const abaAtiva = document.querySelector('.tab-content.active');
+    let id = abaAtiva ? abaAtiva.id : '';
+    conteudoAjuda.innerHTML = textosAjuda[id] || 'Ajuda não disponível para esta aba.';
+    modalAjuda.style.display = 'flex';
+  };
+
+  fecharAjuda.onclick = () => {
+    modalAjuda.style.display = 'none';
+  };
+
+  // Fecha ao clicar fora do conteúdo
+  modalAjuda.addEventListener('click', (e) => {
+    if (e.target === modalAjuda) modalAjuda.style.display = 'none';
+  });
+});
