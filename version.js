@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `Mudança do modal de adicionar amigos e pedidos para a aba de amigos`, hash: 'f52c07b', date: '2025-06-17 15:12:59' };
+window.APP_VERSION = { msg: `Melhoria visual no modal de edição`, hash: '0d797cb', date: '2025-06-17 15:36:07' };
