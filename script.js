@@ -1739,58 +1739,87 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const textosAjuda = {
     'tab-home': `
-      <strong>Visão Geral</strong><br>
-      - Veja suas missões diárias e progresso.<br>
-      - Complete missões para ganhar XP extra.<br>
-      - Calendário mostra tarefas por dia.<br>
-      - Gráficos mostram seu desempenho.<br>
+      <h3>Missões Diárias</h3>
+      <ul>
+        <li>Todo dia você recebe 2 missões aleatórias.</li>
+        <li>Complete missões para ganhar XP extra.</li>
+        <li>Você pode trocar cada missão uma vez por dia (clique na missão para trocar).</li>
+      </ul>
+      <h3>Calendário</h3>
+      <ul>
+        <li>Veja todas as tarefas agendadas para cada dia.</li>
+        <li>Marque tarefas como concluídas diretamente pelo calendário.</li>
+        <li>Use os botões para navegar entre os meses.</li>
+      </ul>
+      <h3>Gráficos</h3>
+      <ul>
+        <li>Acompanhe seu desempenho diário, semanal e mensal.</li>
+        <li>Veja quantas tarefas concluiu em cada período.</li>
+      </ul>
     `,
     'tab-enemy': `
-      <strong>Inimigos</strong><br>
-      - Ataque o inimigo ao concluir tarefas.<br>
-      - Derrote inimigos para ganhar recompensas.<br>
-      - Se tarefas vencerem, o inimigo te ataca e você perde XP.<br>
-      - Use ataques especiais quando carregados.<br>
+      <h3>Inimigos</h3>
+      <ul>
+        <li>Ao concluir tarefas, você ataca o inimigo automaticamente.</li>
+        <li>Concluir tarefas dá direito a um ataque extra manual.</li>
+        <li>Após 10 ataques extras, você pode usar um ataque especial.</li>
+        <li>Derrote inimigos para ganhar XP e moedas.</li>
+        <li>Se tarefas vencerem, o inimigo te ataca e você perde XP.</li>
+      </ul>
     `,
     'tab-tasks': `
-      <strong>Tarefas Periódicas</strong><br>
-      - Tarefas que se repetem diariamente, semanalmente ou mensalmente.<br>
-      - Marque como concluída para ganhar XP e moedas.<br>
-      - Tarefas vencidas fazem o inimigo te atacar.<br>
+      <h3>Tarefas Periódicas</h3>
+      <ul>
+        <li>Tarefas que se repetem diariamente, semanalmente ou mensalmente.</li>
+        <li>Marque como concluída para ganhar XP e moedas.</li>
+      </ul>
     `,
     'tab-tasks-nao-periodicas': `
-      <strong>Tarefas Não Periódicas</strong><br>
-      - Tarefas importantes, mas sem repetição automática.<br>
-      - Marque como concluída para ganhar recompensas.<br>
+      <h3>Tarefas Não Periódicas</h3>
+      <ul>
+        <li>Tarefas importantes, mas sem repetição automática.</li>
+        <li>Marque como concluída para ganhar recompensas.</li>
+      </ul>
     `,
     'tab-tasks-personalizadas': `
-      <strong>Tarefas Personalizadas</strong><br>
-      - Crie tarefas únicas ou com regras de repetição personalizadas.<br>
-      - Use tags para organizar.<br>
+      <h3>Tarefas Personalizadas</h3>
+      <ul>
+        <li>Crie tarefas únicas ou com regras de repetição personalizadas.</li>
+        <li>Use tags para organizar.</li>
+        <li>Adicione anotações e notificações personalizadas.</li>
+      </ul>
     `,
     'tab-inventario': `
-      <strong>Inventário</strong><br>
-      - Veja e gerencie seus itens comprados.<br>
-      - Ative, desative ou venda itens.<br>
-      - Itens ativos dão bônus em tarefas e batalhas.<br>
+      <h3>Inventário</h3>
+      <ul>
+        <li>Veja e gerencie seus itens comprados.</li>
+        <li>Ative, desative ou venda itens.</li>
+        <li>Itens ativos dão bônus em tarefas e batalhas.</li>
+      </ul>
     `,
     'tab-loja': `
-      <strong>Loja</strong><br>
-      - Compre itens cosméticos, armas, bônus e consumíveis.<br>
-      - Itens dão vantagens em tarefas e batalhas.<br>
-      - Use moedas ganhas ao concluir tarefas.<br>
+      <h3>Loja</h3>
+      <ul>
+        <li>Compre itens cosméticos, armas, bônus e consumíveis.</li>
+        <li>Itens dão vantagens em tarefas e batalhas (clique em um item para ver o que ele faz).</li>
+        <li>Use moedas ganhas ao concluir tarefas.</li>
+      </ul>
     `,
     'tab-amigos': `
-      <strong>Amigos</strong><br>
-      - Adicione amigos pelo ID.<br>
-      - Veja sua lista de amigos.<br>
-      - Envie e aceite pedidos de amizade.<br>
+      <h3>Amigos</h3>
+      <ul>
+        <li>Adicione amigos pelo ID.</li>
+        <li>Veja sua lista de amigos.</li>
+        <li>Envie e aceite pedidos de amizade.</li>
+      </ul>
     `,
     'tab-settings': `
-      <strong>Configurações</strong><br>
-      - Altere seu ID público.<br>
-      - Gerencie notificações, cache e tarefas.<br>
-      - Veja informações do app e versão.<br>
+      <h3>Configurações</h3>
+      <ul>
+        <li>Altere seu ID público.</li>
+        <li>Gerencie notificações, cache e tarefas.</li>
+        <li>Veja informações do app e versão.</li>
+      </ul>
     `
   };
 
