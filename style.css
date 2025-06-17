@@ -367,6 +367,50 @@ div#calendario-home {
   white-space: nowrap;
 }
 
+.ajuda-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #232232;
+  color: #fff;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  border: 1.5px solid #444;
+  box-shadow: 0 1px 4px #0004;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+  position: relative;
+  margin-left: 5px;
+}
+
+.ajuda-btn::before {
+  content: "?";
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: bold;
+  color: #fff;
+  display: block;
+  line-height: 1;
+}
+
+.ajuda-btn:hover, .ajuda-btn:focus {
+  background: #4fc3f7;
+  color: #232232;
+  border-color: #4fc3f7;
+  transform: scale(1.08);
+}
+
+.top-info-bar .ajuda-btn {
+  min-width: 22px;
+  min-height: 22px;
+  max-width: 22px;
+  max-height: 22px;
+  margin: 0 5px;
+}
+
 /* ESTILOS NAO USADOS */
 
 /* Estilos para caixas de entrada de texto */
