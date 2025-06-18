@@ -4,6 +4,7 @@ import { collection, query, where, getDocs, getDoc, doc, updateDoc, deleteDoc, T
 import { atacarInimigo, inimigoAtaca, darRecompensa, atualizarProgressoMissoes, mostrarMissoesDiarias } from './script.js';
 export { carregarTarefas, tempoMaisRecente, atualizarDataAtual, calcularDefesa };
 
+let dropdownAcoesAberto = null;
 let carregandoTarefas = false;
 let tempoMaisRecente = null;
 let intervaloContador = null;
@@ -2533,8 +2534,67 @@ export async function carregarInventario() {
     btnWrapper.appendChild(dropdown);
 
     // Exibir/ocultar menu
-    btnAcoes.onclick = () => {
-      dropdown.classList.toggle("visivel");
+    btnAcoes.onclick = function (e) {
+      e.stopPropagation();
+
+      // Fecha qualquer outro menu aberto
+      if (dropdownAcoesAberto && dropdownAcoesAberto !== dropdown) {
+        dropdownAcoesAberto.classList.remove("visivel");
+      }
+
+      // Alterna o menu atual
+      const jaAberto = dropdown.classList.contains("visivel");
+      if (jaAberto) {
+        dropdown.classList.remove("visivel");
+        dropdownAcoesAberto = null;
+      } else {
+        dropdown.classList.add("visivel");
+        dropdownAcoesAberto = dropdown;
+
+        // Centralização e ajuste vertical
+        dropdown.classList.remove("para-cima");
+        dropdown.style.top = "";
+        dropdown.style.bottom = "";
+        dropdown.style.marginTop = "";
+        dropdown.style.marginBottom = "";
+        dropdown.style.left = "";
+        dropdown.style.right = "";
+
+        setTimeout(() => {
+          const rect = dropdown.getBoundingClientRect();
+          const btnRect = btnAcoes.getBoundingClientRect();
+          const windowWidth =
+            window.innerWidth || document.documentElement.clientWidth;
+          const windowHeight =
+            window.innerHeight || document.documentElement.clientHeight;
+
+          // Ajuste vertical
+          if (rect.bottom > windowHeight) {
+            dropdown.classList.add("para-cima");
+            dropdown.style.top = "auto";
+            dropdown.style.bottom = "100%";
+            dropdown.style.marginBottom = "8px";
+            dropdown.style.marginTop = "0";
+          } else {
+            dropdown.classList.remove("para-cima");
+            dropdown.style.top = "100%";
+            dropdown.style.bottom = "auto";
+            dropdown.style.marginTop = "8px";
+            dropdown.style.marginBottom = "0";
+          }
+
+          // Centralizar horizontalmente em relação ao botão
+          const dropdownWidth = rect.width;
+          const btnWidth = btnRect.width;
+          let left = (btnWidth - dropdownWidth) / 2;
+          let absLeft = btnRect.left + left;
+          if (absLeft < 8) left += 8 - absLeft;
+          if (absLeft + dropdownWidth > windowWidth - 8)
+            left -= absLeft + dropdownWidth - windowWidth + 8;
+          dropdown.style.left = `${left}px`;
+          dropdown.style.right = "auto";
+        }, 10);
+      }
     };
 
     card.appendChild(img);
@@ -2603,3 +2663,10 @@ document.addEventListener('DOMContentLoaded', () => {
   preencherClasseSelectorComBonus();
   atualizarVisualClasse(); 
 }); // Essa função atualiza a barra de rolagem do selecionador de classe
+
+document.addEventListener("click", function () {
+  if (dropdownAcoesAberto) {
+    dropdownAcoesAberto.classList.remove("visivel");
+    dropdownAcoesAberto = null;
+  }
+});

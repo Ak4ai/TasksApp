@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `Melhoria visual no modal de edição`, hash: '0d797cb', date: '2025-06-17 15:36:07' };
+window.APP_VERSION = { msg: `Correção de bug e ajuste no menu de ações do inventario`, hash: 'cf1cdf1', date: '2025-06-18 15:37:34' };
