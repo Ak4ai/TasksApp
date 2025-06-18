@@ -255,8 +255,35 @@ div#calendario-home {
     overflow: auto;
     border: none;
     box-shadow: none;
-    padding: 0;
-    margin: 0;
+    padding: 0px;
+    margin-bottom: 0;
+}
+
+.tasks-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.tasks-container .task-rect {
+  width: 80%;
+  max-width: 420px;
+  box-sizing: border-box;
+  word-break: break-word;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+@media (max-width: 600px) {
+  .tasks-container .task-rect {
+    width: 78vw;
+    max-width: 85vw;
+    min-width: 0;
+  }
 }
 
 #lista-amigos {
