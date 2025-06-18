@@ -103,12 +103,18 @@ function abrirModalTrocarMissao(missao, idx, uid) {
   const btnTrocar = document.getElementById('btn-trocar-missao-modal');
   const texto = document.getElementById('texto-troca-missao');
 
+  // NOVO: Se já está concluída, mostra mensagem especial e desabilita botão
+  if (missao.concluida) {
+    texto.textContent = 'Você já concluiu essa tarefa. Não é possível trocá-la.';
+    btnTrocar.disabled = true;
+  } else {
   // Verifica se já foi trocada hoje
   const jaTrocou = missao.dataTroca === new Date().toDateString();
   btnTrocar.disabled = jaTrocou || missao.concluida;
   texto.textContent = jaTrocou
     ? 'Você já trocou esta missão hoje.'
     : 'Só é possível trocar cada missão uma vez por dia.';
+  }
 
   modal.style.display = 'flex';
 
@@ -1748,7 +1754,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <h3>Calendário</h3>
       <ul>
         <li>Veja todas as tarefas agendadas para cada dia.</li>
-        <li>Marque tarefas como concluídas diretamente pelo calendário.</li>
+        <li>Você pode ver dias em que foram tarefas foram concluídas ou expiradas. Basta marcar a checkbox.</li>
         <li>Use os botões para navegar entre os meses.</li>
       </ul>
       <h3>Gráficos</h3>
