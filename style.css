@@ -1186,15 +1186,16 @@ textarea:focus {
   background-color: #1e1f25;
   color: white;
   border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
+  width: 100%;
+  max-width: 98vw;
   max-height: none; /* Remova a limitação */
   height: auto;     /* Permite crescer conforme o conteúdo */
   box-shadow: 0 0 15px rgba(0,0,0,0.5);
   position: relative;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
   max-height: 85%;
+  box-sizing: border-box;
 }
 
 
@@ -1685,12 +1686,16 @@ span.next-event.icons-info {
 
 /* Estilo padrão dos gráficos */
 .grafico-card {
+  max-width: 100%;
+  width: 100%;
   background-color: #1f1f1f;
   padding: 10px;
   border-radius: 12px;
   text-align: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   aspect-ratio: 1;
+  overflow-x: auto;
+  box-sizing: border-box;
 }
 
 
@@ -3497,4 +3502,38 @@ div#tab-home {
   color: #232232;
   border-color: #ffd600;
   transform: scale(1.04);
+}
+
+@media (max-width: 600px) {
+  .modal-content {
+    max-width: 99vw;
+    padding: 8px;
+  }
+  .tasks-container .task-rect,
+  .grafico-card {
+    width: 99vw;
+    max-width: 99vw;
+    min-width: 0;
+  }
+}
+
+/* Garante que o conteúdo interno nunca ultrapasse o modal */
+.tasks-container,
+.grafico-card,
+#lista-tarefas-organizada,
+#calendario-container {
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+
+/* Cards de tarefa nunca maiores que o modal */
+.tasks-container .task-rect {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-left: 0;
+  margin-right: 0;
+  word-break: break-word;
 }

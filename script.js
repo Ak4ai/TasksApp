@@ -1754,7 +1754,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <h3>Calendário</h3>
       <ul>
         <li>Veja todas as tarefas agendadas para cada dia.</li>
-        <li>Você pode ver dias em que foram tarefas foram concluídas ou expiradas. Basta marcar a checkbox.</li>
+        <li>Você pode ver dias em que tarefas foram concluídas ou expiradas. Basta marcar a checkbox.</li>
         <li>Use os botões para navegar entre os meses.</li>
       </ul>
       <h3>Gráficos</h3>
