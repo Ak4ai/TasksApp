@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `Ajuste no modal de tarefas fixadas e proximas 24hrs`, hash: 'e428f2e', date: '2025-06-18 15:53:21' };
+window.APP_VERSION = { msg: `Ajuste modal de trocar missão`, hash: 'd5e71b8', date: '2025-06-18 16:03:33' };
