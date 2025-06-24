@@ -395,28 +395,33 @@ div#calendario-home {
 }
 
 .ajuda-btn {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #232232;
+  width: 32px;
+  height: 45px;
+  border-radius: 30px 0 0 30px; /* Apenas lado direito arredondado */
+  background: #1f1f1f;
   color: #fff;
-  font-size: 1em;
+  font-size: 1.2em;
   font-weight: bold;
   cursor: pointer;
-  border: 1.5px solid #444;
-  box-shadow: 0 1px 4px #0004;
-  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
-  position: relative;
-  margin-left: 5px;
+  border: 2px solid #343434;
+  border-right: none;
+  transition: border-color 0.2s, color 0.8s, transform 0.15s, height 0.15s, width 0.15s, border-radius 0.25s, right 0.15s;
+  position: fixed;
+  top: 74px;        /* Centralizado verticalmente */
+  right: 0;        /* Grudado na direita */
+  left: auto;
+  margin: 0;
+  z-index: 4000;
+  transform: translateY(-50%);
 }
 
 .ajuda-btn::before {
   content: "?";
   font-family: inherit;
-  font-size: 1em;
+  font-size: 1.2em;
   font-weight: bold;
   color: #fff;
   display: block;
@@ -424,19 +429,15 @@ div#calendario-home {
 }
 
 .ajuda-btn:hover, .ajuda-btn:focus {
-  background: #4fc3f7;
+  background: #1f1f1f;
   color: #232232;
-  border-color: #4fc3f7;
-  transform: scale(1.08);
+  right: 10px;
+  border: 1.5px solid #4fc3f7;
+  height: 35px;
+  width: 35px;
+  border-radius: 30px; /* Apenas lado direito arredondado */
 }
 
-.top-info-bar .ajuda-btn {
-  min-width: 22px;
-  min-height: 22px;
-  max-width: 22px;
-  max-height: 22px;
-  margin: 0 5px;
-}
 
 /* ESTILOS NAO USADOS */
 
@@ -3329,7 +3330,7 @@ div#tab-home {
 }
 
 #modal-ajuda .modal-content {
-  background: linear-gradient(135deg, #232232 80%, #292940 100%);
+  background: #1f1f1f;
   color: #faf0e6;
   border-radius: 18px;
   box-shadow: 0 8px 32px #0008;
@@ -3341,6 +3342,28 @@ div#tab-home {
   border: 1.5px solid #4fc3f7;
   position: relative;
   animation: modalAjudaFadeIn 0.25s;
+}
+
+#modal-ajuda .nao-mostrar-novamente-btn {
+  display: block;
+  margin: 28px auto 0 auto;
+  padding: 10px 22px;
+  background: #292940;
+  color: #faf0e6;
+  border: 1.5px solid #4fc3f7;
+  border-radius: 8px;
+  font-size: 1.08em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
+  box-shadow: 0 2px 8px #0002;
+}
+
+#modal-ajuda .nao-mostrar-novamente-btn:hover {
+  background: #4fc3f7;
+  color: #232232;
+  border-color: #ffd600;
+  transform: scale(1.04);
 }
 
 @keyframes modalAjudaFadeIn {

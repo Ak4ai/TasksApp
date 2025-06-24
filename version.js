@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `Mais ajustes nas tarefas da home`, hash: '4e4c07a', date: '2025-06-18 16:13:58' };
+window.APP_VERSION = { msg: `ajuste visual 97`, hash: '32083c6', date: '2025-06-24 01:48:21' };

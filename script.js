@@ -1846,3 +1846,41 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === modalAjuda) modalAjuda.style.display = 'none';
   });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+  const ajudaBtn = document.getElementById('ajuda-btn');
+  const modalAjuda = document.getElementById('modal-ajuda');
+  const naoMostrarBtn = document.querySelector('.nao-mostrar-novamente-btn');
+  const checkAjuda = document.getElementById('check-nao-mostrar-ajuda');
+
+  // Função para atualizar o estado do checkbox e do botão
+  function syncAjudaCheck() {
+    const escondido = localStorage.getItem('naoMostrarAjuda') === '1';
+    if (checkAjuda) checkAjuda.checked = escondido;
+    if (ajudaBtn) ajudaBtn.style.display = escondido ? 'none' : '';
+  }
+
+  // Inicializa o estado ao carregar
+  syncAjudaCheck();
+
+  // Quando clicar no botão do modal
+  if (naoMostrarBtn) {
+    naoMostrarBtn.addEventListener('click', function() {
+      localStorage.setItem('naoMostrarAjuda', '1');
+      syncAjudaCheck();
+      if (modalAjuda) modalAjuda.style.display = 'none';
+    });
+  }
+
+  // Quando mudar o checkbox na aba de configurações
+  if (checkAjuda) {
+    checkAjuda.addEventListener('change', function() {
+      if (checkAjuda.checked) {
+        localStorage.setItem('naoMostrarAjuda', '1');
+      } else {
+        localStorage.removeItem('naoMostrarAjuda');
+      }
+      syncAjudaCheck();
+    });
+  }
+});

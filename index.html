@@ -302,7 +302,6 @@
   <span class="current-day icons-info">📅</span>
   <span class="next-event icons-info">⏰</span>
   <span class="moedas-info icons-info">🪙 0 moedas</span>
-  <span id="ajuda-btn" class="icons-info ajuda-btn" title="Ajuda"></span>
  </div>
   <button id="refresh-btn" class="refresh-button">
     Recarregar Tarefas
@@ -311,6 +310,7 @@
   
   <!-- CONTEÚDO PRINCIPAL -->
   <div class="main-content">
+    <span id="ajuda-btn" class="icons-info ajuda-btn" title="Ajuda"></span>
     <canvas id="especial-attack-canvas"></canvas>
     <canvas id="enemy-attack-canvas" width="1000" height="1000"></canvas> 
     <div id="modal-personagem" class="modal" style="display:none; align-items:center; justify-content:center;">
@@ -577,7 +577,23 @@
               </div>
             </div>
             <button id="ativar-notificacoes-btn" style="background:#1976d2; color:white;">Ativar Notificações</button>
-          </div>  
+          </div> 
+        </div>
+        <div class="settings-container">
+          <h3>Checks</h3>
+          <div style="margin: 18px 0; width: 80%;">
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <label style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <span>Nunca mostrar o botão de ajuda</span>
+                <input type="checkbox" id="check-nao-mostrar-ajuda" />
+              </label>
+              <div style="border-bottom: 1.5px solid #343434; margin: 8px 0 8px 0; width: 100%;"></div>
+              <label style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <span>Outra opção</span>
+                <input type="checkbox" />
+              </label>
+            </div>
+          </div>
         </div>
         <div class="settings-container">
           <h3>Versionamento</h3>
@@ -1027,6 +1043,7 @@
     <div id="conteudo-ajuda" style="max-height:60vh; overflow:auto; text-align:left; font-size:1.08em; color:#eee;">
       <!-- O texto é preenchido pelo JS -->
     </div>
+    <button class="nao-mostrar-novamente-btn">Nunca mostrar esta ajuda novamente</button>
   </div>
 </div>
 
