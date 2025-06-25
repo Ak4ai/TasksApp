@@ -1994,3 +1994,28 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+function esconderBotaoAjuda() {
+  const btn = document.getElementById('ajuda-btn');
+  if (btn) btn.style.display = 'none';
+}
+function mostrarBotaoAjuda() {
+  const btn = document.getElementById('ajuda-btn');
+  if (btn) btn.style.display = '';
+}
+
+// Esconde ao abrir qualquer modal principal
+['modal-criar-tarefa', 'modal-tarefa', 'modal-ajuda', 'modal-trocar-missao', 'modal-funcao-item', 'modal-amizades', 'modal-amigo', 'modal-tarefas-custom', 'modal-next-event', 'modal-visualizacao-anexo'].forEach(id => {
+  const modal = document.getElementById(id);
+  if (modal) {
+    // Observe mudanças de display
+    const observer = new MutationObserver(() => {
+      if (modal.style.display !== 'none') {
+        esconderBotaoAjuda();
+      } else {
+        mostrarBotaoAjuda();
+      }
+    });
+    observer.observe(modal, { attributes: true, attributeFilter: ['style'] });
+  }
+});

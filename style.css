@@ -3540,3 +3540,106 @@ div#tab-home {
   margin-right: 0;
   word-break: break-word;
 }
+
+#modal-criar-tarefa .modal-content {
+  background: #1f1f1f;
+  color: #faf0e6;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px #0008;
+  padding: 36px 28px 28px 28px;
+  max-width: 420px;
+  width: 96vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  border: 1.5px solid #4fc3f7;
+  position: relative;
+  animation: modalAjudaFadeIn 0.25s;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+#modal-criar-tarefa .close-button {
+  position: absolute;
+  right: 18px;
+  top: 12px;
+  font-size: 1.5em;
+  color: #a87ef0;
+  cursor: pointer;
+  transition: color 0.2s, transform 0.2s;
+  z-index: 10;
+}
+#modal-criar-tarefa .close-button:hover {
+  color: #4fc3f7;
+  transform: scale(1.15) rotate(8deg);
+}
+
+#modal-criar-tarefa h2, #modal-criar-tarefa h3 {
+  color: #a87ef0;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+#modal-criar-tarefa label {
+  color: #4fc3f7;
+  font-weight: 600;
+  margin-bottom: 4px;
+  margin-top: 12px;
+  display: block;
+  font-size: 1em;
+}
+
+#modal-criar-tarefa input,
+#modal-criar-tarefa select,
+#modal-criar-tarefa textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1.5px solid #343434;
+  background: #232232;
+  color: #faf0e6;
+  font-size: 1em;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#modal-criar-tarefa input:focus,
+#modal-criar-tarefa select:focus,
+#modal-criar-tarefa textarea:focus {
+  border-color: #4fc3f7;
+  outline: none;
+  box-shadow: 0 0 0 2px #4fc3f799;
+}
+
+#modal-criar-tarefa button[type="submit"] {
+  width: 100%;
+  padding: 14px 0;
+  background: #4fc3f7;
+  color: #232232;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.08em;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 0;
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+  box-shadow: 0 2px 8px #0002;
+  cursor: pointer;
+}
+
+#modal-criar-tarefa button[type="submit"]:hover {
+  background: #ffd600;
+  color: #232232;
+  transform: scale(1.04);
+}
+
+@media (max-width: 600px) {
+  #modal-criar-tarefa .modal-content {
+    max-width: 99vw;
+    padding: 12px 4vw;
+  }
+}
