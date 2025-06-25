@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `missão com amigos, correção, modal de edição corrigido`, hash: '99f0fdc', date: '2025-06-25 14:31:19' };
+window.APP_VERSION = { msg: `Ajuste do botão de ajuda no IOS`, hash: '91a2e96', date: '2025-06-25 17:56:38' };

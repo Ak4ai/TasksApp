@@ -716,12 +716,16 @@ function esconderBlurBackground() {
 
 
 
+// Detecta iOS e adiciona classe ao body para ajuste do botão de ajuda
 function isIOSDevice() {
     const ua = navigator.userAgent.toLowerCase();
     return /iphone|ipod|ipad/.test(ua) || 
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
 
+if (isIOSDevice()) {
+    document.body.classList.add('ios');
+}
 
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
@@ -791,6 +795,7 @@ async function adicionarTarefa(nome, descricao, dataLimite) {
     if (modo === 'semanal') {
       const checkboxes = document.querySelectorAll('input[name="diasSemana"]:checked');
       const diasSemana = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
       const horaSemanal = document.getElementById('horaSemanal').value;
 
       if (diasSemana.length === 0 || !horaSemanal) {

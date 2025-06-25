@@ -438,6 +438,17 @@ div#calendario-home {
   border-radius: 30px; /* Apenas lado direito arredondado */
 }
 
+/* Ajuste para o botão de ajuda em iOS usando safe-area */
+@supports(padding: max(0px)) {
+  #ajuda-btn {
+    top: env(safe-area-inset-top, 20px) !important;
+  }
+}
+
+.ios #ajuda-btn {
+  top: 40px !important; /* fallback para iOS antigo */
+}
+
 
 /* ESTILOS NAO USADOS */
 
