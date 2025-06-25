@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `Ainda testando`, hash: 'd76b66e', date: '2025-06-25 19:29:32' };
+window.APP_VERSION = { msg: `...`, hash: '88b8940', date: '2025-06-25 19:32:13' };
