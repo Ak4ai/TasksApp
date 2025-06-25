@@ -438,17 +438,17 @@ div#calendario-home {
   border-radius: 30px; /* Apenas lado direito arredondado */
 }
 
-/* Ajuste para o botão de ajuda em iOS usando safe-area */
+/* Ajuste para o botão de ajuda em iOS: abaixo da topbar */
 @supports(padding: max(0px)) {
   #ajuda-btn {
-    top: env(safe-area-inset-top, 20px) !important;
+    /* Supondo que a topbar tenha altura de 56px, ajuste conforme necessário */
+    top: calc(env(safe-area-inset-top, 0px) + 56px) !important;
   }
 }
 
 .ios #ajuda-btn {
-  top: 40px !important; /* fallback para iOS antigo */
+  top: 56px !important; /* fallback para iOS antigo, ajuste se a topbar for maior/menor */
 }
-
 
 /* ESTILOS NAO USADOS */
 
@@ -2518,7 +2518,7 @@ div#ios-notif-info {
   font-size: 1.08em;
   font-weight: 500;
   padding: 18px 22px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   max-width: 340px;
   width: 60%;
   letter-spacing: 0.01em;
