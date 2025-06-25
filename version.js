@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `ajuste visual 97`, hash: '32083c6', date: '2025-06-24 01:48:21' };
+window.APP_VERSION = { msg: `missão com amigos, correção, modal de edição corrigido`, hash: '99f0fdc', date: '2025-06-25 14:31:19' };

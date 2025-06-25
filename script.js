@@ -1,7 +1,7 @@
 import { auth } from './auth.js';
 import { db, carregarMeuSimpleID, listarAmigosAceitos } from './firebase-config.js';
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import { doc, collection, addDoc, getDocs, Timestamp, deleteDoc, serverTimestamp, setDoc, getDoc, increment } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { query, where, doc, collection, addDoc, getDocs, Timestamp, deleteDoc, serverTimestamp, setDoc, getDoc, increment } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 // script.js
 import { carregarTarefas,mostrarPopup,carregarInventario, calcularDefesa } from './tarefas.js';
 export { atacarInimigo, inimigoAtaca, darRecompensa, mostrarMissoesDiarias };
@@ -66,24 +66,92 @@ const MISSOES_DIARIAS = [
   }
 ];
 
+const MISSOES_COMPARTILHADAS = [
+  {
+    id: 'coop-fisico',
+    descricao: 'Junto com um amigo, concluam 3 tarefas do tipo Físico cada um',
+    tipo: 'Físico',
+    quantidade: 3,
+    xp: 100
+  },
+  {
+    id: 'coop-social',
+    descricao: 'Você e um amigo devem completar 2 tarefas Sociais cada',
+    tipo: 'Social',
+    quantidade: 2,
+    xp: 100
+  }
+  // você pode adicionar mais tipos
+];
+
+
 // Sorteia e salva as missões do dia
 async function sortearMissoesDiarias(uid) {
   const missoes = [];
   const indices = [];
-  while (missoes.length < 2) { // 2 missões por dia
+
+  // Sorteia 2 missões comuns
+  while (missoes.length < 2) {
     const idx = Math.floor(Math.random() * MISSOES_DIARIAS.length);
     if (!indices.includes(idx)) {
       indices.push(idx);
       missoes.push({ ...MISSOES_DIARIAS[idx], progresso: 0, concluida: false });
     }
   }
+
+  // Tenta sortear missão compartilhada se houver amigos
+  const amigos = await obterAmigosUID(uid);
+  if (amigos.length > 0) {
+    const amigoSorteado = amigos[Math.floor(Math.random() * amigos.length)];
+    const missaoCoop = MISSOES_COMPARTILHADAS[Math.floor(Math.random() * MISSOES_COMPARTILHADAS.length)];
+
+    const missaoComAmigo = {
+      ...missaoCoop,
+      progresso: 0,
+      concluida: false,
+      tipo: "compartilhada",
+      com: amigoSorteado // UID do amigo
+    };
+
+    missoes.push(missaoComAmigo);
+
+    // Salva também a missão para o amigo
+    const refAmigo = doc(db, "usuarios", amigoSorteado, "missoes", "diaria");
+    const snapAmigo = await getDoc(refAmigo);
+    const hoje = new Date().toDateString();
+    const missoesAmigo = snapAmigo.exists() && snapAmigo.data().data === hoje
+      ? snapAmigo.data().missoes
+      : [];
+
+    await setDoc(refAmigo, {
+      data: hoje,
+      missoes: [...missoesAmigo, { ...missaoComAmigo, com: uid }]
+    });
+  }
+
+  // Salva missões do usuário
   const ref = doc(db, "usuarios", uid, "missoes", "diaria");
   await setDoc(ref, {
     data: new Date().toDateString(),
     missoes
   });
+
   return missoes;
 }
+
+async function obterAmigosUID(uid) {
+  const q1 = query(collection(db, "amizades"), where("from", "==", uid), where("status", "==", "accepted"));
+  const q2 = query(collection(db, "amizades"), where("to", "==", uid), where("status", "==", "accepted"));
+  const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+
+  const amigosUIDsSet = new Set();
+
+  snap1.forEach(doc => amigosUIDsSet.add(doc.data().to));
+  snap2.forEach(doc => amigosUIDsSet.add(doc.data().from));
+
+  return Array.from(amigosUIDsSet);
+}
+
 
 // Carrega as missões do dia
 async function carregarMissoesDiarias(uid) {
@@ -204,7 +272,7 @@ export async function atualizarProgressoMissoes(uid, tipoTarefa, xpGanho = 0) {
       alterou = true;
     }
 
-    // Missão "conclua uma tarefa de dois tipos diferentes"
+    // Missão "dois tipos"
     if (!missao.concluida && missao.tipo === 'dois-tipos') {
       if (!missao.tipos) missao.tipos = [];
       if (!missao.tipos.includes(tipoTarefa)) {
@@ -219,7 +287,7 @@ export async function atualizarProgressoMissoes(uid, tipoTarefa, xpGanho = 0) {
       }
     }
 
-    // Missão "ganhe 20 de XP hoje"
+    // Missão "ganhe xp"
     if (!missao.concluida && missao.tipo === 'ganhe-xp' && xpGanho > 0) {
       missao.progresso = (missao.progresso || 0) + xpGanho;
       if (missao.progresso >= missao.quantidade) {
@@ -229,9 +297,45 @@ export async function atualizarProgressoMissoes(uid, tipoTarefa, xpGanho = 0) {
       }
       alterou = true;
     }
+
+    // ✅ Missão compartilhada
+    if (!missao.concluida && missao.tipo === "compartilhada" && missao.com && missao.descricao && missao.descricao.toLowerCase().includes(tipoTarefa.toLowerCase())) {
+      missao.progresso = (missao.progresso || 0) + 1;
+      if (missao.progresso >= missao.quantidade) {
+        missao.concluida = true;
+        await darRecompensa(uid, missao.xp, 0);
+        mostrarPopup(`Missão compartilhada concluída! +${missao.xp} XP`);
+      }
+      alterou = true;
+
+      // 🔁 Atualiza também a missão do amigo
+      const refAmigo = doc(db, "usuarios", missao.com, "missoes", "diaria");
+      const snapAmigo = await getDoc(refAmigo);
+      if (snapAmigo.exists()) {
+        const dataAmigo = snapAmigo.data();
+        let alterouAmigo = false;
+        for (const missaoAmigo of dataAmigo.missoes) {
+          if (!missaoAmigo.concluida && missaoAmigo.tipo === "compartilhada" && missaoAmigo.com === uid && missaoAmigo.descricao === missao.descricao) {
+            missaoAmigo.progresso = (missaoAmigo.progresso || 0) + 1;
+            if (missaoAmigo.progresso >= missaoAmigo.quantidade) {
+              missaoAmigo.concluida = true;
+              await darRecompensa(missao.com, missaoAmigo.xp, 0);
+              // Você pode também adicionar um popup remoto via notificação ou flag
+            }
+            alterouAmigo = true;
+            break;
+          }
+        }
+        if (alterouAmigo) {
+          await setDoc(refAmigo, dataAmigo);
+        }
+      }
+    }
   }
 
-  if (alterou) await setDoc(ref, data);
+  if (alterou) {
+    await setDoc(ref, data);
+  }
 }
 
 const INIMIGOS = [
@@ -516,6 +620,7 @@ document.getElementById('delete-all-tasks-button').addEventListener('click', asy
 
 document.addEventListener('DOMContentLoaded', () => {
   const auth = getAuth();
+  
   onAuthStateChanged(auth, (user) => {
     if (user) {
       carregarMeuSimpleID();
