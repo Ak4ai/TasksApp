@@ -1699,7 +1699,7 @@ span.next-event.icons-info {
   text-align: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   aspect-ratio: 1;
-  overflow-x: auto;
+  overflow: hidden;
   box-sizing: border-box;
 }
 
@@ -3194,7 +3194,7 @@ div#tab-home {
   margin-right: 0 !important;
   left: 0 !important;
   right: 0 !important;
-  overflow-x: auto !important;
+  overflow: hidden !important;
 }
 
 .ios .grafico-card > *,
@@ -3587,7 +3587,7 @@ div#tab-home {
   max-width: 100%;
   width: 100%;
   box-sizing: border-box;
-  overflow-x: auto;
+  overflow: hidden;
 }
 
 /* Cards de tarefa nunca maiores que o modal */
