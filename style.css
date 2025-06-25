@@ -442,6 +442,9 @@ div#calendario-home {
   top: calc(env(safe-area-inset-top, 0px) + 72px) !important; /* fallback para iOS antigo */
 }
 
+
+/* ESTILOS NAO USADOS */
+
 /* Estilos para caixas de entrada de texto */
 input {
   width: 100%;
@@ -1696,7 +1699,7 @@ span.next-event.icons-info {
   text-align: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   aspect-ratio: 1;
-  overflow: hidden;
+  overflow-x: auto;
   box-sizing: border-box;
 }
 
@@ -3165,6 +3168,41 @@ div#tab-home {
     padding-top: 0px;
 }
 
+/* Ajuste para containers desalinhados no iOS (safe-area) */
+.ios .main-content, 
+.ios .tarefas-slider-card, 
+.ios .grafico-card, 
+.ios .tarefas-proximas-container {
+  margin-top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
+}
+
+@media (max-width: 600px) {
+  .ios .main-content, 
+  .ios .tarefas-slider-card, 
+  .ios .grafico-card, 
+  .ios .tarefas-proximas-container {
+    margin-top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
+  }
+}
+
+/* Corrige desalinhamento de cards e gráficos no iOS (home) */
+.ios .grafico-card,
+.ios .tasks-container .task-rect {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  overflow-x: auto !important;
+}
+
+.ios .grafico-card > *,
+.ios .tasks-container .task-rect > * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
 /* Animação de ataque especial do inimigo */
 .inimigo-anim-ataque {
   animation: inimigoAtaqueAnim 0.4s cubic-bezier(.36,.07,.19,.97) both;
@@ -3549,7 +3587,7 @@ div#tab-home {
   max-width: 100%;
   width: 100%;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 /* Cards de tarefa nunca maiores que o modal */
@@ -3560,4 +3598,9 @@ div#tab-home {
   margin-left: 0;
   margin-right: 0;
   word-break: break-word;
+}
+
+.ios .grafico-card,
+.ios .tasks-container .task-rect {
+  overflow: hidden !important;
 }
