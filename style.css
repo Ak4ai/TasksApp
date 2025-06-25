@@ -447,7 +447,7 @@ div#calendario-home {
 }
 
 .ios #ajuda-btn {
-  top: 56px !important; /* fallback para iOS antigo, ajuste se a topbar for maior/menor */
+  top: calc(env(safe-area-inset-top, 0px) + 56px) !important; /* fallback para iOS antigo, ajuste se a topbar for maior/menor */
 }
 
 /* ESTILOS NAO USADOS */
