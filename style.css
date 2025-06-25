@@ -1689,34 +1689,6 @@ span.next-event.icons-info {
   width: 100%;
 }
 
-/* Estilo padrão dos gráficos */
-.grafico-card {
-  max-width: 100%;
-  width: 100%;
-  background-color: #1f1f1f;
-  padding: 10px;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  aspect-ratio: 1;
-  overflow-x: auto;
-  box-sizing: border-box;
-}
-
-
-.grafico-grid {
-    display: flex
-;
-    flex-direction: row;
-    gap: 20px;
-    flex-wrap: wrap;
-    align-content: stretch;
-    align-items: stretch;
-    justify-content: center;
-    width: 100%;
-    padding: 1rem;
-}
-
 .grafico-card {
   background-color: #1f1f1f;
   border: 1px solid #343434;
@@ -1732,6 +1704,8 @@ span.next-event.icons-info {
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
+  position: relative;
 }
 
 /* 🔁 Quando empilhar (telas pequenas), aumentar os gráficos */
@@ -1773,6 +1747,8 @@ span.next-event.icons-info {
     padding-bottom: 1rem;
     border: none;
     box-shadow: none;
+    overflow: hidden;
+    position: relative;
   }
 }
 
@@ -3166,41 +3142,6 @@ body.tab-settings-active #modal-personagem > div > div {
 
 div#tab-home {
     padding-top: 0px;
-}
-
-/* Ajuste para containers desalinhados no iOS (safe-area) */
-.ios .main-content, 
-.ios .tarefas-slider-card, 
-.ios .grafico-card, 
-.ios .tarefas-proximas-container {
-  margin-top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
-}
-
-@media (max-width: 600px) {
-  .ios .main-content, 
-  .ios .tarefas-slider-card, 
-  .ios .grafico-card, 
-  .ios .tarefas-proximas-container {
-    margin-top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
-  }
-}
-
-/* Corrige desalinhamento de cards e gráficos no iOS (home) */
-.ios .grafico-card,
-.ios .tasks-container .task-rect {
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  overflow-x: auto !important;
-}
-
-.ios .grafico-card > *,
-.ios .tasks-container .task-rect > * {
-  max-width: 100% !important;
-  box-sizing: border-box !important;
 }
 
 /* Animação de ataque especial do inimigo */
