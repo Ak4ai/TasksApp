@@ -439,7 +439,7 @@ div#calendario-home {
 }
 
 .ios #ajuda-btn {
-  top: calc(env(safe-area-inset-top, 0px) + 56px) !important; /* fallback para iOS antigo */
+  top: calc(env(safe-area-inset-top, 0px) + 72px) !important; /* fallback para iOS antigo */
 }
 
 
@@ -1220,7 +1220,7 @@ textarea:focus {
   display: flex;
   padding: 10px;
   color: #ccc;
-  text-align-last: center;
+  text-align: last;
   border-radius: 4px;
   font-size: 16px;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
@@ -3183,6 +3183,24 @@ div#tab-home {
   .ios .tarefas-proximas-container {
     margin-top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
   }
+}
+
+/* Corrige desalinhamento de cards e gráficos no iOS (home) */
+.ios .grafico-card,
+.ios .tasks-container .task-rect {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  overflow-x: auto !important;
+}
+
+.ios .grafico-card > *,
+.ios .tasks-container .task-rect > * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 /* Animação de ataque especial do inimigo */

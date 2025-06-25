@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `Mais ajustes para IOS`, hash: 'ea2b0ac', date: '2025-06-25 18:58:41' };
+window.APP_VERSION = { msg: `Testando mudanças`, hash: 'f3023ac', date: '2025-06-25 19:14:44' };
