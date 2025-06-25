@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `Update style.css`, hash: '497753f', date: '2025-06-25 19:54:00' };
+window.APP_VERSION = { msg: `Ajustes visuais no modal de criação`, hash: '7789574', date: '2025-06-25 20:36:34' };
