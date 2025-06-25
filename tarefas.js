@@ -1,5 +1,6 @@
 import { auth } from './auth.js';
 import { db } from './firebase-config.js';
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { collection, query, where, getDocs, getDoc, doc, updateDoc, deleteDoc, Timestamp, addDoc, increment, arrayUnion, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 import { atacarInimigo, inimigoAtaca, darRecompensa, atualizarProgressoMissoes, mostrarMissoesDiarias } from './script.js';
 export { carregarTarefas, tempoMaisRecente, atualizarDataAtual, calcularDefesa };
@@ -237,7 +238,7 @@ function preencherClasseSelectorComBonus() {
 
     select.appendChild(option);
   });
-
+  let classeAtiva = localStorage.getItem('classeAtiva') || 'Guerreiro';
   if (classeAtiva && classesJogador[classeAtiva]) {
     select.value = classeAtiva;
   }
@@ -1438,11 +1439,16 @@ function adicionarNaCard(tarefa, cardClass) {
   adicionarIconeDeExcluir(p, tarefa);
 }
 
+
 async function atualizarTarefaNoFirestore(id, dados) {
-  const usuario = auth.currentUser;
-  const refDoc = doc(db, "usuarios", usuario.uid, "tarefas", id);
-  await updateDoc(refDoc, dados);
+  const auth = getAuth();
+  const user = auth.currentUser;
+  if (!user) throw new Error('Usuário não autenticado');
+
+  const ref = doc(db, "usuarios", user.uid, "tarefas", id);
+  await setDoc(ref, dados, { merge: true });
 }
+
 
 
 
@@ -1675,7 +1681,7 @@ function abrirModalDetalhe(tarefa) {
     updateData.modoPersonalizado = null;
     updateData.permitirConclusao = null;
   }
-
+  console.log('Dados atualizados:', updateData);
   await atualizarTarefaNoFirestore(tarefa.id, updateData);
 
   modal.style.display = 'none';
@@ -2661,7 +2667,6 @@ export async function carregarInventario() {
 
 document.addEventListener('DOMContentLoaded', () => {
   preencherClasseSelectorComBonus();
-  atualizarVisualClasse(); 
 }); // Essa função atualiza a barra de rolagem do selecionador de classe
 
 document.addEventListener("click", function () {
