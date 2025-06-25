@@ -3599,8 +3599,3 @@ div#tab-home {
   margin-right: 0;
   word-break: break-word;
 }
-
-.ios .grafico-card,
-.ios .tasks-container .task-rect {
-  overflow: hidden !important;
-}
