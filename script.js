@@ -2,7 +2,6 @@ import { auth } from './auth.js';
 import { db, carregarMeuSimpleID, listarAmigosAceitos } from './firebase-config.js';
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { query, where, doc, collection, addDoc, getDocs, Timestamp, deleteDoc, serverTimestamp, setDoc, getDoc, increment } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
-// script.js
 import { carregarTarefas,mostrarPopup,carregarInventario, calcularDefesa } from './tarefas.js';
 export { atacarInimigo, inimigoAtaca, darRecompensa, mostrarMissoesDiarias };
 
@@ -11,7 +10,7 @@ const MISSOES_DIARIAS = [
   {
     id: 'fisico',
     descricao: 'Conclua 2 tarefas do tipo Físico',
-    tipo: 'Físico', // <-- igual ao valor da tag
+    tipo: 'Físico', 
     quantidade: 2,
     xp: 50
   },
@@ -80,8 +79,28 @@ const MISSOES_COMPARTILHADAS = [
     tipo: 'Social',
     quantidade: 2,
     xp: 100
+  },
+  {
+    id: 'coop-intelecto',
+    descricao: 'Você e um amigo devem completar 2 tarefas de Intelecto cada',
+    tipo: 'Intelecto',
+    quantidade: 2,
+    xp: 100
+  },
+  {
+    id: 'coop-criativo',
+    descricao: 'Em cooperação, façam 2 tarefas do tipo Criativo cada um',
+    tipo: 'Criativo',
+    quantidade: 2,
+    xp: 100
+  },
+  {
+    id: 'coop-espiritual',
+    descricao: 'Junto com um amigo, concluam 1 tarefa Espiritual cada',
+    tipo: 'Espiritual',
+    quantidade: 1,
+    xp: 100
   }
-  // você pode adicionar mais tipos
 ];
 
 
