@@ -1,1 +1,1 @@
-window.APP_VERSION = { msg: `Ajustes visuais no modal de criação`, hash: '7789574', date: '2025-06-25 20:36:34' };
+window.APP_VERSION = { msg: `atualização no visual de missão de amigos`, hash: '7d05256', date: '2025-07-01 18:56:23' };
