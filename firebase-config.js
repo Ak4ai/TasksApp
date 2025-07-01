@@ -316,7 +316,6 @@ export async function listarAmigosAceitos() {
 
       if (data) {
         const li = document.createElement("li");
-        console.log("Amigo encontrado:", data);
         li.innerHTML = `
           <div class="amigo-detalhes" style="margin-bottom: 12px; border: 1px solid #ccc; border-radius: 8px; padding: 10px;">
             <span class="amigo-nome" style="cursor:pointer;font-weight:bold; font-size: 1.1em;">${data.simpleID}</span><br>
