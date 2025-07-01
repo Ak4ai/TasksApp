@@ -95,41 +95,42 @@ async function sortearMissoesDiarias(uid) {
     const idx = Math.floor(Math.random() * MISSOES_DIARIAS.length);
     if (!indices.includes(idx)) {
       indices.push(idx);
-      missoes.push({ ...MISSOES_DIARIAS[idx], progresso: 0, concluida: false });
+      missoes.push({
+        ...MISSOES_DIARIAS[idx],
+        progresso: 0,
+        concluida: false
+      });
     }
   }
 
-  // Tenta sortear missão compartilhada se houver amigos
+  // Tenta sortear missão compartilhada, se tiver amigo
   const amigos = await obterAmigosUID(uid);
+
   if (amigos.length > 0) {
-    const amigoSorteado = amigos[Math.floor(Math.random() * amigos.length)];
-    const missaoCoop = MISSOES_COMPARTILHADAS[Math.floor(Math.random() * MISSOES_COMPARTILHADAS.length)];
+    // Escolhe um amigo aleatório
+    const randomAmigoUid = amigos[Math.floor(Math.random() * amigos.length)];
 
-    const missaoComAmigo = {
-      ...missaoCoop,
-      progresso: 0,
-      concluida: false,
-      tipo: "compartilhada",
-      com: amigoSorteado // UID do amigo
-    };
+    // Busca o simpleID do amigo
+    const amigoDoc = await getDoc(doc(db, "usuarios", randomAmigoUid));
+    const amigoData = amigoDoc.exists() ? amigoDoc.data() : null;
 
-    missoes.push(missaoComAmigo);
+    if (amigoData) {
+      const missaoCompartilhada = MISSOES_COMPARTILHADAS[
+        Math.floor(Math.random() * MISSOES_COMPARTILHADAS.length)
+      ];
 
-    // Salva também a missão para o amigo
-    const refAmigo = doc(db, "usuarios", amigoSorteado, "missoes", "diaria");
-    const snapAmigo = await getDoc(refAmigo);
-    const hoje = new Date().toDateString();
-    const missoesAmigo = snapAmigo.exists() && snapAmigo.data().data === hoje
-      ? snapAmigo.data().missoes
-      : [];
-
-    await setDoc(refAmigo, {
-      data: hoje,
-      missoes: [...missoesAmigo, { ...missaoComAmigo, com: uid }]
-    });
+      missoes.push({
+        ...missaoCompartilhada,
+        progresso: 0,
+        concluida: false,
+        tipo: "compartilhada",
+        com: randomAmigoUid,
+        comSimpleID: amigoData.simpleID || "Amigo"
+      });
+    }
   }
 
-  // Salva missões do usuário
+  // Salva tudo no Firestore
   const ref = doc(db, "usuarios", uid, "missoes", "diaria");
   await setDoc(ref, {
     data: new Date().toDateString(),
@@ -138,6 +139,7 @@ async function sortearMissoesDiarias(uid) {
 
   return missoes;
 }
+
 
 async function obterAmigosUID(uid) {
   const q1 = query(collection(db, "amizades"), where("from", "==", uid), where("status", "==", "accepted"));
@@ -231,14 +233,13 @@ async function mostrarMissoesDiarias(uid) {
       "Espiritual": "#f06292"
     };
     div.style.borderLeft = `5px solid ${cores[missao.tipo] || "#90caf9"}`;
-    // Progresso com ícone
+    const amigoInfo = missao.comSimpleID ? `<br><small>🤝 Com: ${missao.comSimpleID}</small>` : '';
+
     div.innerHTML = `
-      <span class="missao-desc">${missao.descricao}</span>
+      <span class="missao-desc">${missao.descricao}${amigoInfo}</span>
       <span class="missao-info-lateral">
         <span class="missao-progresso">
-          ${missao.concluida
-            ? '<span class="missao-check">✔️</span>'
-            : '<span class="missao-tempo">⏳</span>'}
+          ${missao.concluida ? '<span class="missao-check">✔️</span>' : '<span class="missao-tempo">⏳</span>'}
           ${missao.progresso || 0} / ${missao.quantidade}
         </span>
         <span class="missao-xp" title="XP da missão">
@@ -250,6 +251,7 @@ async function mostrarMissoesDiarias(uid) {
     div.onclick = () => abrirModalTrocarMissao(missao, idx, uid);
     container.appendChild(div);
   });
+
 } 
 
 export async function atualizarProgressoMissoes(uid, tipoTarefa, xpGanho = 0) {
@@ -620,7 +622,7 @@ document.getElementById('delete-all-tasks-button').addEventListener('click', asy
 
 document.addEventListener('DOMContentLoaded', () => {
   const auth = getAuth();
-  
+
   onAuthStateChanged(auth, (user) => {
     if (user) {
       carregarMeuSimpleID();
