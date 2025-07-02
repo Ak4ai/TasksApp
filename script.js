@@ -2,7 +2,7 @@ import { auth } from './auth.js';
 import { db, carregarMeuSimpleID, listarAmigosAceitos } from './firebase-config.js';
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { query, where, doc, collection, addDoc, getDocs, Timestamp, deleteDoc, serverTimestamp, setDoc, getDoc, increment } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
-import { carregarTarefas,mostrarPopup,carregarInventario, calcularDefesa } from './tarefas.js';
+import { carregarTarefas,mostrarPopup,carregarInventario, calcularDefesa, atualizarXP, atualizarMoedas } from './tarefas.js';
 export { atacarInimigo, inimigoAtaca, darRecompensa, mostrarMissoesDiarias };
 
 
@@ -294,7 +294,7 @@ export async function atualizarProgressoMissoes(uid, tipoTarefa, xpGanho = 0) {
     }
 
     // Missão "dois tipos"
-    if (!missao.concluida && missao.tipo === 'dois-tipos') {
+    if (!missao.concluida && missao.tipo === 'dois-tipos' && tipoTarefa) {
       if (!missao.tipos) missao.tipos = [];
       if (!missao.tipos.includes(tipoTarefa)) {
         missao.tipos.push(tipoTarefa);
@@ -320,7 +320,7 @@ export async function atualizarProgressoMissoes(uid, tipoTarefa, xpGanho = 0) {
     }
 
     // ✅ Missão compartilhada
-    if (!missao.concluida && missao.tipo === "compartilhada" && missao.com && missao.descricao && missao.descricao.toLowerCase().includes(tipoTarefa.toLowerCase())) {
+    if (!missao.concluida && missao.tipo === "compartilhada" && missao.com && missao.descricao && tipoTarefa && missao.descricao.toLowerCase().includes(tipoTarefa.toLowerCase())) {
       missao.progresso = (missao.progresso || 0) + 1;
       if (missao.progresso >= missao.quantidade) {
         missao.concluida = true;
@@ -501,7 +501,7 @@ async function atualizarUIInimigo() {
   if (btn) {
     const ataques = inimigo.ataquesDisponiveis || 0;
     btn.textContent = ataques > 0 ? `Atacar (${ataques})` : 'Atacar (0)';
-    //btn.disabled = ataques <= 0;
+    btn.disabled = ataques <= 0;
   }
 
   // Troca o background da main-content.show conforme a tag do inimigo
@@ -555,11 +555,17 @@ async function atacarInimigo(dano = 10) {
   // Sempre que der dano automático, adiciona 1 ataque extra
   inimigo.ataquesDisponiveis = (inimigo.ataquesDisponiveis || 0) + 1;
 
+  // Adiciona progresso para ataque especial
+  inimigo.ataquesNormaisDados = (inimigo.ataquesNormaisDados || 0) + 1;
+
   // Salva o inimigo atualizado
   await salvarInimigoFirestore(usuario.uid, inimigo);
 
   // Atualiza a UI
   atualizarUIInimigo();
+
+  // Atualiza botão especial
+  atualizarBotaoEspecial();
 
   await atualizarProgressoDanoInimigo(usuario.uid, dano);
 
@@ -570,6 +576,10 @@ async function atacarInimigo(dano = 10) {
 
     await atualizarProgressoMissoes(usuario.uid, null, inimigo.recompensaXP);
 
+    // Preserva ataques extras e especiais antes de trocar de inimigo
+    const ataquesExtrasPreservados = inimigo.ataquesDisponiveis || 0;
+    const ataquesEspeciaisPreservados = inimigo.ataquesNormaisDados || 0;
+
     // Avança para o próximo inimigo
     const proximoIndice = (inimigo.indice ?? 0) + 1;
     if (proximoIndice < INIMIGOS.length) {
@@ -577,6 +587,11 @@ async function atacarInimigo(dano = 10) {
     } else {
       inimigo = getNovoInimigo(0);
     }
+    
+    // Restaura as contagens preservadas
+    inimigo.ataquesDisponiveis = ataquesExtrasPreservados;
+    inimigo.ataquesNormaisDados = ataquesEspeciaisPreservados;
+    
     await salvarInimigoFirestore(usuario.uid, inimigo);
     atualizarUIInimigo();
   }
@@ -646,6 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (user) {
       carregarMeuSimpleID();
       atualizarUIInimigo();
+      atualizarBotaoEspecial();
       mostrarMissoesDiarias(user.uid);
   }
   });
@@ -1557,10 +1573,10 @@ export async function atacarInimigoExtra(dano = 10) {
   if (!usuario) return;
   let inimigo = await carregarInimigoFirestore(usuario.uid);
 
-  //if ((inimigo.ataquesDisponiveis || 0) <= 0) {
-    //mostrarPopup("Você não possui ataques extras disponíveis!");
-    //return;
-  //}
+  if ((inimigo.ataquesDisponiveis || 0) <= 0) {
+    mostrarPopup("Você não possui ataques extras disponíveis!");
+    return;
+  }
 
   // --- ANIMAÇÃO DE ATAQUE ---
   const inimigoImgDiv = document.getElementById('inimigo-img');
@@ -1584,14 +1600,27 @@ export async function atacarInimigoExtra(dano = 10) {
   await atualizarProgressoDanoInimigo(usuario.uid, dano);
 
   if (inimigo.vidaAtual <= 0) {
+    // Preserva ataques extras e especiais ANTES de dar recompensas
+    const ataquesExtrasPreservados = inimigo.ataquesDisponiveis || 0;
+    const ataquesEspeciaisPreservados = inimigo.ataquesNormaisDados || 0;
+
     mostrarPopup(`Você derrotou ${inimigo.nome}! Ganhou ${inimigo.recompensaXP} XP e ${inimigo.recompensaMoedas} moedas!`);
     await darRecompensa(usuario.uid, inimigo.recompensaXP, inimigo.recompensaMoedas);
+
+    // Atualiza a interface após dar as recompensas
+    await atualizarXP();
+    await atualizarMoedas();
 
     await atualizarProgressoMissoes(usuario.uid, null, inimigo.recompensaXP);
 
     // Próximo inimigo
     const proximoIndice = (inimigo.indice ?? 0) + 1;
     inimigo = getNovoInimigo(proximoIndice < INIMIGOS.length ? proximoIndice : 0);
+    
+    // Restaura as contagens preservadas
+    inimigo.ataquesDisponiveis = ataquesExtrasPreservados;
+    inimigo.ataquesNormaisDados = ataquesEspeciaisPreservados;
+    
     await salvarInimigoFirestore(usuario.uid, inimigo);
     await atualizarUIInimigo();
   }
@@ -1635,11 +1664,26 @@ export async function ataqueEspecialInimigo() {
   mostrarPopup("Ataque especial realizado! 💥");
 
   if (inimigo.vidaAtual <= 0) {
+    // Preserva ataques extras e especiais ANTES de dar recompensas
+    const ataquesExtrasPreservados = inimigo.ataquesDisponiveis || 0;
+    const ataquesEspeciaisPreservados = inimigo.ataquesNormaisDados || 0;
+
     mostrarPopup(`Você derrotou ${inimigo.nome}! Ganhou ${inimigo.recompensaXP} XP e ${inimigo.recompensaMoedas} moedas!`);
     await darRecompensa(usuario.uid, inimigo.recompensaXP, inimigo.recompensaMoedas);
+
+    // Atualiza a interface após dar as recompensas
+    await atualizarXP();
+    await atualizarMoedas();
+
     await atualizarProgressoMissoes(usuario.uid, null, inimigo.recompensaXP);
+    
     const proximoIndice = (inimigo.indice ?? 0) + 1;
     inimigo = getNovoInimigo(proximoIndice < INIMIGOS.length ? proximoIndice : 0);
+    
+    // Restaura as contagens preservadas
+    inimigo.ataquesDisponiveis = ataquesExtrasPreservados;
+    inimigo.ataquesNormaisDados = ataquesEspeciaisPreservados;
+    
     await salvarInimigoFirestore(usuario.uid, inimigo);
     await atualizarUIInimigo();
   }

@@ -217,8 +217,21 @@ async function listarPedidosDeAmizade() {
   );
 
   const snapshot = await getDocs(q);
-  const lista = document.getElementById("lista-pedidos-amizade");
+  
+  // MUDANÇA: usar o novo container na aba de amigos
+  const lista = document.querySelector('#pedidos-amizade-bloco #lista-pedidos-amizade');
+  const semPedidos = document.getElementById('sem-pedidos');
+  
+  if (!lista) return;
+  
   lista.innerHTML = "";
+
+  if (snapshot.empty) {
+    if (semPedidos) semPedidos.style.display = 'block';
+    return;
+  }
+
+  if (semPedidos) semPedidos.style.display = 'none';
 
   for (const docSnap of snapshot.docs) {
     const dados = docSnap.data();
@@ -229,11 +242,16 @@ async function listarPedidosDeAmizade() {
     const remetenteID = remetenteSnap.exists() ? remetenteSnap.data().simpleID : "(usuário)";
 
     const li = document.createElement("li");
+    li.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; width: 90%; margin: 5px 0; background: #292940; border: #4fc3f7 solid 2px; border-style: dashed; border-radius: 16px;';
+    
     li.innerHTML = `
-      <strong>${remetenteID}</strong>
-      <button onclick="aceitarPedido('${idDoc}')">Aceitar</button>
-      <button onclick="rejeitarPedido('${idDoc}')">Rejeitar</button>
+      <span>${remetenteID}</span>
+      <div>
+        <button onclick="aceitarPedido('${idDoc}')" style="background: #4caf50; color: white; margin-right: 5px; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;">Aceitar</button>
+        <button onclick="rejeitarPedido('${idDoc}')" style="background: #f44336; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;">Rejeitar</button>
+      </div>
     `;
+    
     lista.appendChild(li);
   }
 }
@@ -242,14 +260,15 @@ async function aceitarPedido(idDoc) {
   const ref = doc(db, "amizades", idDoc);
   await setDoc(ref, { status: "accepted" }, { merge: true });
   alert("Pedido aceito!");
-  listarPedidosDeAmizade();
+  listarPedidosDeAmizade(); // Recarrega a lista na nova posição
+  listarAmigosAceitos(); // Atualiza também a lista de amigos
 }
 
 async function rejeitarPedido(idDoc) {
   const ref = doc(db, "amizades", idDoc);
   await setDoc(ref, { status: "rejected" }, { merge: true });
   alert("Pedido rejeitado.");
-  listarPedidosDeAmizade();
+  listarPedidosDeAmizade(); // Recarrega a lista na nova posição
 }
 
 function abrirModalAmigo(nome, uid) {
@@ -273,6 +292,8 @@ export async function listarAmigosAceitos() {
     const auth = getAuth();
     const user = auth.currentUser;
     if (!user) return;
+
+    listarPedidosDeAmizade();
 
     const container = document.getElementById("amigos-container");
     container.innerHTML = "";
@@ -317,7 +338,7 @@ export async function listarAmigosAceitos() {
       if (data) {
         const li = document.createElement("li");
         li.innerHTML = `
-          <div class="amigo-detalhes" style="margin-bottom: 12px; border: 1px solid #ccc; border-radius: 8px; padding: 10px;">
+          <div class="amigo-detalhes" style="padding: 10px; width: 100%">
             <span class="amigo-nome" style="cursor:pointer;font-weight:bold; font-size: 1.1em;">${data.simpleID}</span><br>
             <small><strong>Nível:</strong> ${data.nivel || 0}</small><br>
             <small><strong>XP:</strong> ${data.xp || 0}</small><br>
@@ -372,22 +393,6 @@ window.definirMeuID = definirMeuID; // <-- Torna a função acessível globalmen
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btn-adicionar-amigo").addEventListener("click", adicionarAmigoPorSimpleID);
   document.getElementById("buscar-amigo").addEventListener("focus", carregarUsuariosParaAutocomplete);
-  const modal = document.getElementById("modal-amizades");
-  const fecharBtn = document.getElementById("fechar-modal-amizades");
-  const abrirBtn = document.getElementById("btn-pedidos-amizade");
-
-  abrirBtn.addEventListener("click", () => {
-    modal.style.display = "flex";
-    listarPedidosDeAmizade();
-  });
-
-  fecharBtn.addEventListener("click", () => {
-    modal.style.display = "none";
-  });
-
-  window.addEventListener("click", (e) => {
-    if (e.target === modal) modal.style.display = "none";
-  });
 });
 
 
@@ -398,3 +403,4 @@ window.aceitarPedido = aceitarPedido;
 window.rejeitarPedido = rejeitarPedido;
 window.listarAmigosAceitos = listarAmigosAceitos;
 window.desfazerAmizade = desfazerAmizade;
+window.listarPedidosDeAmizade = listarPedidosDeAmizade; // <-- ADICIONE ESTA LINHA
