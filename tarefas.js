@@ -3,7 +3,7 @@ import { db } from './firebase-config.js';
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { collection, query, where, getDocs, getDoc, doc, updateDoc, deleteDoc, Timestamp, addDoc, increment, arrayUnion, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 import { atacarInimigo, inimigoAtaca, darRecompensa, atualizarProgressoMissoes, mostrarMissoesDiarias } from './script.js';
-export { carregarTarefas, tempoMaisRecente, atualizarDataAtual, calcularDefesa };
+export { carregarTarefas, tempoMaisRecente, atualizarDataAtual, calcularDefesa, atualizarXP, atualizarMoedas };
 
 let dropdownAcoesAberto = null;
 let carregandoTarefas = false;
