@@ -352,7 +352,7 @@ div#calendario-home {
   border: 3px solid #31313121;
   border-radius: 15px;
   display: flex;
-  transition: all 2s ease, width 0.8s ease, height 0.8s ease;
+  transition: all 1s ease, width 0.8s ease, height 0.8s ease;
 }
 
 #btn-tasks {
@@ -363,14 +363,12 @@ div#calendario-home {
 #btn-tasks-nao-periodicas {
   display: none;
   opacity: 0;
-  transform: scale(0.8);
   transition: opacity 0.5s ease, transform 0.5s ease, width 0.3s ease;
 }
 
 #btn-tasks-personalizadas {
   display: none;
   opacity: 0;
-  transform: scale(0.8);
   transition: opacity 0.5s ease, transform 0.5s ease, width 0.3s ease;
 }
 
@@ -378,7 +376,6 @@ div#calendario-home {
 .nav-separator-active #btn-tasks-personalizadas {
   display: block;
   opacity: 1;
-  transform: scale(1);
 }
 
 .top-info-bar {
@@ -479,7 +476,7 @@ input {
   padding: 10px;
   margin-bottom: 10px;
   border: 1px solid rgba(255, 255, 255, 0.222);
-  background-color: #27243e80;
+  background-color: #22222280;
   color: #ccc;
   border-radius: 4px;
   font-size: 16px;
@@ -2687,7 +2684,7 @@ ul#amigos-container {
     padding: 10px 1rem;
     border-radius: 10px;
     border: 1px solid #343434;
-    margin: 10px 0;
+    margin: 0px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     justify-content: center;
     align-content: center;
@@ -3124,21 +3121,23 @@ div#tab-enemy {
 
 div#simpleid-container {
     display: flex;
-    gap: 10px;
-    max-width: 400px;
-    margin: 20px 0;
     align-items: center;
+    justify-content: center;
+    width: 90% !important;
+    padding: 1rem !important;
+    background-color: #3b3b3b !important;
+    border-radius: 10px;
+    border: 1px solid #343434 !important;
+    font-size: medium !important;
+    gap: 10px;
+    margin: 10px !important;
 }
 
 button#btn-salvar-id{
-    padding: 12px 30px;
-    background-color: #22c55e;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    margin-top: 0px;
+  background-color: #1f691f; 
+  color:  #cbffc9; 
+  border-color: #73f66e;
+  width: 100%;
 }
 
 button#logout-button {
@@ -3156,9 +3155,7 @@ button#logout-button {
 
 #simpleid-container button,
 #friend-request-container button {
-  width: 180px; /* ou ajuste conforme desejar */
   text-align: center;
-  margin: 0 auto;
   display: block;
 }
 
