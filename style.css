@@ -340,16 +340,45 @@ div#calendario-home {
 
 .bottom-nav-separator.active {
   background-color: #3835356c;
-  padding: 3px;
+  padding: 1px;
   border: 3px solid #6b6b6b;
   border-radius: 15px;
+  transition: all 2s ease;
 }
 
 .bottom-nav-separator {
-  background-color: #30303037;
+  background-color: #30303017;
   padding: 3px;
-  border: 3px solid #31313143;
+  border: 3px solid #31313121;
   border-radius: 15px;
+  display: flex;
+  transition: all 2s ease, width 0.8s ease, height 0.8s ease;
+}
+
+#btn-tasks {
+  margin: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease, width 0.3s ease;
+}
+
+#btn-tasks-nao-periodicas {
+  display: none;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.5s ease, transform 0.5s ease, width 0.3s ease;
+}
+
+#btn-tasks-personalizadas {
+  display: none;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.5s ease, transform 0.5s ease, width 0.3s ease;
+}
+
+.nav-separator-active #btn-tasks-nao-periodicas,
+.nav-separator-active #btn-tasks-personalizadas {
+  display: block;
+  opacity: 1;
+  transform: scale(1);
 }
 
 .top-info-bar {
@@ -398,23 +427,22 @@ div#calendario-home {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 45px;
-  border-radius: 30px 0 0 30px; /* Apenas lado direito arredondado */
+  width: 24px;
+  height: 32px;
+  border-radius: 0px 30px 30px 0px;
   background: #1f1f1f;
   color: #fff;
   font-size: 1.2em;
   font-weight: bold;
   cursor: pointer;
   border: 2px solid #343434;
-  border-right: none;
+  border-left: none;
   transition: border-color 0.2s, color 0.8s, transform 0.15s, height 0.15s, width 0.15s, border-radius 0.25s, right 0.15s;
   position: fixed;
-  top: 74px;        /* Centralizado verticalmente */
-  right: 0;        /* Grudado na direita */
-  left: auto;
+  top: 74px;
+  left: 0;
   margin: 0;
-  z-index: 4000;
+  z-index: 1000;
   transform: translateY(-50%);
 }
 
@@ -431,7 +459,7 @@ div#calendario-home {
 .ajuda-btn:hover, .ajuda-btn:focus {
   background: #1f1f1f;
   color: #232232;
-  right: 10px;
+  left: 10px;
   border: 1.5px solid #4fc3f7;
   height: 35px;
   width: 35px;
@@ -584,6 +612,7 @@ h1,h2,h3{
 
 .nav-button.active{
   opacity: 1;
+  margin: 5px !important;
 }
 
 /* estilo comum */
