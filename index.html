@@ -563,15 +563,15 @@
             <input type="text" id="meu-id-simples" placeholder="Escolha seu ID público (ex: joao123)">
             <button id="btn-salvar-id" onclick="definirMeuID()">SalvarID</button>
           </div>
-          
-          <button id="logout-button">Logout</button>
+
+          <button id="logout-button" style="background-color: #691f1f; color:  #ffc9c9; border-color: #f66e6e;">Logout</button>
         </div>
         <div class="settings-container">
           <h3>Teste</h3>
           <div id="config-buttosn-container">
             <button id="clear-cache-button">Limpar Cache</button>
-            <button id="delete-all-tasks-button" style="color: red;">Excluir Todas as Tarefas</button>
-            <button id="test-notification-btn" style="background:#4caf50; color:white;">Testar Notificação</button>
+            <button id="delete-all-tasks-button" style="background-color: #691f1f; color:  #ffc9c9; border-color: #f66e6e;">Excluir Todas as Tarefas</button>
+            <button id="test-notification-btn" style="background-color: #1f691f; color:  #cbffc9; border-color: #73f66e;">Testar Notificação</button>
             <!-- Modal de Teste de Notificação -->
             <div id="modal-test-notification" class="modal" style="display:none;">
               <div class="modal-content">
@@ -586,7 +586,7 @@
                 <button id="enviar-test-notification" style="margin-top:10px;">Agendar Notificação</button>
               </div>
             </div>
-            <button id="ativar-notificacoes-btn" style="background:#1976d2; color:white;">Ativar Notificações</button>
+            <button id="ativar-notificacoes-btn" style="background-color: #1f3369; color:  #c9dfff; border-color: #6ea4f6;">Ativar Notificações</button>
           </div> 
         </div>
         <div class="settings-container">
@@ -649,146 +649,156 @@
       </div>
       <!-- Aba Loja -->
       <div id="tab-loja" class="tab-content">
-      <h2>Loja</h2>
-      <div class="app-loja">
-        <div class="LojaSection">
-          <h3 class="loja-titulo loja-titulo-cosmeticos">Cosméticos</h3>
-          <div class="loja-grid loja-cosmeticos">
-            <div class="item-card" data-funcao="Apenas visual. Deixa seu personagem estiloso!">
-              <img src="img/hat.png" alt="Chapéu de Caubói" class="item-imagem">
-              <span class="item-nome">Chapéu de Caubói</span>
-              <span class="item-preco">💰 50</span>
-              <button class="btn-comprar" onclick="comprarItem('hat', 50)">Comprar</button>
-            </div>
-            <div class="item-card" data-funcao="Apenas visual. Deixa seu personagem estiloso!">
-              <img src="img/viking.png" alt="Capacete Viking" class="item-imagem">
-              <span class="item-nome">Capacete Viking</span>
-              <span class="item-preco">💰 70</span>
-              <button class="btn-comprar" onclick="comprarItem('viking', 70)">Comprar</button>
-            </div>
-            <div class="item-card" data-funcao="Apenas visual. Deixa seu personagem estiloso!">
-              <img src="img/mago.png" alt="Chapéu de Mago" class="item-imagem">
-              <span class="item-nome">Chapéu de Mago</span>
-              <span class="item-preco">💰 100</span>
-              <button class="btn-comprar" onclick="comprarItem('mago', 100)">Comprar</button>
-            </div>
-            <div class="item-card" data-funcao="Apenas visual. Deixa seu personagem estiloso!">
-              <img src="img/cartola.png" alt="Cartola de Mágico" class="item-imagem">
-              <span class="item-nome">Cartola de Mágico</span>
-              <span class="item-preco">💰 60</span>
-              <button class="btn-comprar" onclick="comprarItem('cartola', 60)">Comprar</button>
-            </div>
-            <div class="item-card" data-funcao="Apenas visual. Deixa seu personagem estiloso!">
-              <img src="img/astronauta.png" alt="Capacete Astronauta" class="item-imagem">
-              <span class="item-nome">Capacete Astronauta</span>
-              <span class="item-preco">💰 150</span>
-              <button class="btn-comprar" onclick="comprarItem('astronauta', 180)">Comprar</button>
-            </div>
-            <div class="item-card" data-funcao="Apenas visual. Deixa seu personagem estiloso!">
-              <img src="img/mascara.png" alt="Máscara de Carnaval" class="item-imagem">
-              <span class="item-nome">Máscara de Carnaval</span>
-              <span class="item-preco">💰 40</span>
-              <button class="btn-comprar" onclick="comprarItem('mascara', 40)">Comprar</button>
-            </div>
-            <div class="item-card" data-funcao="Apenas visual. Deixa seu personagem estiloso!">
-              <img src="img/oculos.png" alt="Óculos Descolado" class="item-imagem">
-              <span class="item-nome">Óculos Descolado</span>
-              <span class="item-preco">💰 75</span>
-              <button class="btn-comprar" onclick="comprarItem('oculos', 75)">Comprar</button>
-            </div>
-          </div>
+        <h2>Loja</h2>
+        <div style="text-align: center; margin-bottom: 20px;">
+          <button id="btn-abrir-inventario" class="nav-button" style="padding: 10px 20px; font-size: 1.2em; background: #1f1f1f; border: 2px solid #4fc3f7; border-radius: 8px;">
+            🎒 Abrir Inventário
+          </button>
         </div>
-        <div class="LojaSection">
-          <!-- Armas -->
-          <h3 class="loja-titulo loja-titulo-armas">Armas</h3>
-          <div class="loja-grid loja-armas">
-          <div class="item-card" data-funcao="Aumenta o dano em batalhas (+10 de dano)">
-            <img src="img/espada.png" alt="Espada Lendária" class="item-imagem">
-            <span class="item-nome">Espada Lendária</span>
-            <span class="item-preco">💰 200</span>
-            <button class="btn-comprar" onclick="comprarItem('espada', 200)">Comprar</button>
-          </div>
-          <div class="item-card" data-funcao="Aumenta o dano em batalhas (+8 de dano)">
-            <img src="img/machado.png" alt="Machado de Guerra" class="item-imagem">
-            <span class="item-nome">Machado de Guerra</span>
-            <span class="item-preco">💰 100</span>
-            <button class="btn-comprar" onclick="comprarItem('machado', 100)">Comprar</button>
-          </div>
-          <div class="item-card" data-funcao="Aumenta o dano em batalhas (+7 de dano)">
-            <img src="img/arco.png" alt="Arco Élfico" class="item-imagem">
-            <span class="item-nome">Arco Élfico</span>
-            <span class="item-preco">💰 150</span>
-            <button class="btn-comprar" onclick="comprarItem('arco', 150)">Comprar</button>
-          </div>
-          <div class="item-card" data-funcao="Aumenta o dano em batalhas (+5 de dano)">
-            <img src="img/cajado.png" alt="Cajado Arcano" class="item-imagem">
-            <span class="item-nome">Cajado Arcano</span>
-            <span class="item-preco">💰 180</span>
-            <button class="btn-comprar" onclick="comprarItem('cajado', 180)">Comprar</button>
-          </div>
-          </div>
-        </div>
-        <!-- Seção Proteção -->
-        <div class="LojaSection">
-          <h3 class="loja-titulo loja-titulo-protecao">Proteção</h3>
-          <div class="loja-grid loja-protecao">
-            <div class="item-card" data-funcao="Aumenta a defesa em batalhas (+5 de defesa)">
-              <img src="img/escudo.png" alt="Escudo Resistente" class="item-imagem">
-              <span class="item-nome">Escudo Resistente</span>
-              <span class="item-preco">💰 120</span>
-              <button class="btn-comprar" onclick="comprarItem('escudo', 120)">Comprar</button>
+        <div class="app-loja">
+          <div class="LojaSection">
+            <h3 class="loja-titulo loja-titulo-cosmeticos">Cosméticos</h3>
+            <div class="loja-grid loja-cosmeticos">
+              <div class="item-card" data-funcao="Apenas visual. Deixa seu personagem estiloso!">
+                <img src="img/hat.png" alt="Chapéu de Caubói" class="item-imagem">
+                <span class="item-nome">Chapéu de Caubói</span>
+                <span class="item-preco">💰 50</span>
+                <button class="btn-comprar" onclick="comprarItem('hat', 50)">Comprar</button>
+              </div>
+              <div class="item-card" data-funcao="Apenas visual. Deixa seu personagem estiloso!">
+                <img src="img/viking.png" alt="Capacete Viking" class="item-imagem">
+                <span class="item-nome">Capacete Viking</span>
+                <span class="item-preco">💰 70</span>
+                <button class="btn-comprar" onclick="comprarItem('viking', 70)">Comprar</button>
+              </div>
+              <div class="item-card" data-funcao="Apenas visual. Deixa seu personagem estiloso!">
+                <img src="img/mago.png" alt="Chapéu de Mago" class="item-imagem">
+                <span class="item-nome">Chapéu de Mago</span>
+                <span class="item-preco">💰 100</span>
+                <button class="btn-comprar" onclick="comprarItem('mago', 100)">Comprar</button>
+              </div>
+              <div class="item-card" data-funcao="Apenas visual. Deixa seu personagem estiloso!">
+                <img src="img/cartola.png" alt="Cartola de Mágico" class="item-imagem">
+                <span class="item-nome">Cartola de Mágico</span>
+                <span class="item-preco">💰 60</span>
+                <button class="btn-comprar" onclick="comprarItem('cartola', 60)">Comprar</button>
+              </div>
+              <div class="item-card" data-funcao="Apenas visual. Deixa seu personagem estiloso!">
+                <img src="img/astronauta.png" alt="Capacete Astronauta" class="item-imagem">
+                <span class="item-nome">Capacete Astronauta</span>
+                <span class="item-preco">💰 150</span>
+                <button class="btn-comprar" onclick="comprarItem('astronauta', 180)">Comprar</button>
+              </div>
+              <div class="item-card" data-funcao="Apenas visual. Deixa seu personagem estiloso!">
+                <img src="img/mascara.png" alt="Máscara de Carnaval" class="item-imagem">
+                <span class="item-nome">Máscara de Carnaval</span>
+                <span class="item-preco">💰 40</span>
+                <button class="btn-comprar" onclick="comprarItem('mascara', 40)">Comprar</button>
+              </div>
+              <div class="item-card" data-funcao="Apenas visual. Deixa seu personagem estiloso!">
+                <img src="img/oculos.png" alt="Óculos Descolado" class="item-imagem">
+                <span class="item-nome">Óculos Descolado</span>
+                <span class="item-preco">💰 75</span>
+                <button class="btn-comprar" onclick="comprarItem('oculos', 75)">Comprar</button>
+              </div>
             </div>
-            <div class="item-card" data-funcao="Aumenta a defesa em batalhas (+5 de defesa)">
-              <img src="img/escudo.png" alt="Escudo Resistente" class="item-imagem">
-              <span class="item-nome">Escudo Resistente</span>
-              <span class="item-preco">💰 120</span>
-              <button class="btn-comprar" onclick="comprarItem('escudo', 120)">Comprar</button>
-            </div>
-            <!-- Adicione outros itens de proteção aqui -->
           </div>
-        </div>
-          <!-- Bônus -->
-        <div class="LojaSection">
-          <h3 class="loja-titulo loja-titulo-bonus">Bônus</h3>
-          <div class="loja-grid loja-bonus">
-            <div class="item-card" data-funcao="Ganha +20% de XP ao concluir tarefas">
-              <img src="img/livro.png" alt="Livro de Feitiços" class="item-imagem">
-              <span class="item-nome">Livro de Feitiços</span>
-              <span class="item-preco">💰 120</span>
-              <button class="btn-comprar" onclick="comprarItem('livro', 120)">Comprar</button>
-            </div>
-            <div class="item-card" data-funcao="Ganha +3 moedas extras ao concluir tarefas">
-              <img src="img/anel.png" alt="Anel do Herói" class="item-imagem">
-              <span class="item-nome">Anel do Herói</span>
-              <span class="item-preco">💰 70</span>
-              <button class="btn-comprar" onclick="comprarItem('anel', 70)">Comprar</button>
-            </div>
-            <div class="item-card" data-funcao="+5 de xp em todas as tarefas">
-              <img src="img/pergaminho.png" alt="Pergaminho Antigo" class="item-imagem">
-              <span class="item-nome">Pergaminho Antigo</span>
-              <span class="item-preco">💰 80</span>
-              <button class="btn-comprar" onclick="comprarItem('pergaminho', 80)">Comprar</button>
-            </div>
-            <div class="item-card" data-funcao="Ganha +5 moedas extras ao concluir tarefas">
-              <img src="img/coroa.png" alt="Coroa Brilhante" class="item-imagem">
-              <span class="item-nome">Coroa Brilhante</span>
-              <span class="item-preco">💰 120</span>
-              <button class="btn-comprar" onclick="comprarItem('coroa', 120)">Comprar</button>
-            </div>
-            <div class="item-card" data-funcao="Remove o Cooldown de Troca de Classe">
-              <img src="img/pocao.png" alt="Poção" class="item-imagem">
-              <span class="item-nome">Poção de Classe</span>
+          <div class="LojaSection">
+            <!-- Armas -->
+            <h3 class="loja-titulo loja-titulo-armas">Armas</h3>
+            <div class="loja-grid loja-armas">
+            <div class="item-card" data-funcao="Aumenta o dano em batalhas (+10 de dano)">
+              <img src="img/espada.png" alt="Espada Lendária" class="item-imagem">
+              <span class="item-nome">Espada Lendária</span>
               <span class="item-preco">💰 200</span>
-              <button class="btn-comprar" onclick="comprarItem('removerCooldown', 200)">Comprar</button>
+              <button class="btn-comprar" onclick="comprarItem('espada', 200)">Comprar</button>
+            </div>
+            <div class="item-card" data-funcao="Aumenta o dano em batalhas (+8 de dano)">
+              <img src="img/machado.png" alt="Machado de Guerra" class="item-imagem">
+              <span class="item-nome">Machado de Guerra</span>
+              <span class="item-preco">💰 100</span>
+              <button class="btn-comprar" onclick="comprarItem('machado', 100)">Comprar</button>
+            </div>
+            <div class="item-card" data-funcao="Aumenta o dano em batalhas (+7 de dano)">
+              <img src="img/arco.png" alt="Arco Élfico" class="item-imagem">
+              <span class="item-nome">Arco Élfico</span>
+              <span class="item-preco">💰 150</span>
+              <button class="btn-comprar" onclick="comprarItem('arco', 150)">Comprar</button>
+            </div>
+            <div class="item-card" data-funcao="Aumenta o dano em batalhas (+5 de dano)">
+              <img src="img/cajado.png" alt="Cajado Arcano" class="item-imagem">
+              <span class="item-nome">Cajado Arcano</span>
+              <span class="item-preco">💰 180</span>
+              <button class="btn-comprar" onclick="comprarItem('cajado', 180)">Comprar</button>
+            </div>
+            </div>
+          </div>
+          <!-- Seção Proteção -->
+          <div class="LojaSection">
+            <h3 class="loja-titulo loja-titulo-protecao">Proteção</h3>
+            <div class="loja-grid loja-protecao">
+              <div class="item-card" data-funcao="Aumenta a defesa em batalhas (+5 de defesa)">
+                <img src="img/escudo.png" alt="Escudo Resistente" class="item-imagem">
+                <span class="item-nome">Escudo Resistente</span>
+                <span class="item-preco">💰 120</span>
+                <button class="btn-comprar" onclick="comprarItem('escudo', 120)">Comprar</button>
+              </div>
+              <div class="item-card" data-funcao="Aumenta a defesa em batalhas (+5 de defesa)">
+                <img src="img/escudo.png" alt="Escudo Resistente" class="item-imagem">
+                <span class="item-nome">Escudo Resistente</span>
+                <span class="item-preco">💰 120</span>
+                <button class="btn-comprar" onclick="comprarItem('escudo', 120)">Comprar</button>
+              </div>
+              <!-- Adicione outros itens de proteção aqui -->
+            </div>
+          </div>
+            <!-- Bônus -->
+          <div class="LojaSection">
+            <h3 class="loja-titulo loja-titulo-bonus">Bônus</h3>
+            <div class="loja-grid loja-bonus">
+              <div class="item-card" data-funcao="Ganha +20% de XP ao concluir tarefas">
+                <img src="img/livro.png" alt="Livro de Feitiços" class="item-imagem">
+                <span class="item-nome">Livro de Feitiços</span>
+                <span class="item-preco">💰 120</span>
+                <button class="btn-comprar" onclick="comprarItem('livro', 120)">Comprar</button>
+              </div>
+              <div class="item-card" data-funcao="Ganha +3 moedas extras ao concluir tarefas">
+                <img src="img/anel.png" alt="Anel do Herói" class="item-imagem">
+                <span class="item-nome">Anel do Herói</span>
+                <span class="item-preco">💰 70</span>
+                <button class="btn-comprar" onclick="comprarItem('anel', 70)">Comprar</button>
+              </div>
+              <div class="item-card" data-funcao="+5 de xp em todas as tarefas">
+                <img src="img/pergaminho.png" alt="Pergaminho Antigo" class="item-imagem">
+                <span class="item-nome">Pergaminho Antigo</span>
+                <span class="item-preco">💰 80</span>
+                <button class="btn-comprar" onclick="comprarItem('pergaminho', 80)">Comprar</button>
+              </div>
+              <div class="item-card" data-funcao="Ganha +5 moedas extras ao concluir tarefas">
+                <img src="img/coroa.png" alt="Coroa Brilhante" class="item-imagem">
+                <span class="item-nome">Coroa Brilhante</span>
+                <span class="item-preco">💰 120</span>
+                <button class="btn-comprar" onclick="comprarItem('coroa', 120)">Comprar</button>
+              </div>
+              <div class="item-card" data-funcao="Remove o Cooldown de Troca de Classe">
+                <img src="img/pocao.png" alt="Poção" class="item-imagem">
+                <span class="item-nome">Poção de Classe</span>
+                <span class="item-preco">💰 200</span>
+                <button class="btn-comprar" onclick="comprarItem('removerCooldown', 200)">Comprar</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
     </div>
       
 
     <div id="tab-inventario" class="tab-content">
       <h2 style="text-align:center;">Inventário</h2>
+      <div style="text-align: center; margin-bottom: 20px;">
+        <button id="btn-voltar-loja" class="nav-button" style="padding: 10px 20px; font-size: 1.2em; background: #1f1f1f; border: 2px solid #4fc3f7; border-radius: 8px;">
+          🛒 Voltar para Loja
+        </button>
+      </div>
       <div class="inventario-grid" id="inventario-grid">
         <!-- Cards dos itens ativados/comprados aparecem aqui via JS -->
       </div>
@@ -857,7 +867,7 @@
       <button class="nav-button" id="btn-tasks-personalizadas" data-tab="tab-tasks-personalizadas">✏️</button>
     </div>
     <button class="nav-button" data-tab="tab-loja">🛒</button>
-    <button class="nav-button" data-tab="tab-inventario">🎒</button>
+    <!--<button class="nav-button" data-tab="tab-inventario">🎒</button>-->
     <button class="nav-button" data-tab="tab-amigos">👤</button>
     
     <button class="nav-button" data-tab="tab-settings">⚙️</button>

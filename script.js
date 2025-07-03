@@ -924,9 +924,9 @@ document.addEventListener('DOMContentLoaded', () => {
         carregarTarefas();
       }
 
-      if (alvo === 'tab-inventario') {
-        carregarInventario();
-      }
+      //if (alvo === 'tab-inventario') {
+      //  carregarInventario();
+      //}
 
       if (alvo === 'tab-amigos') {
         listarAmigosAceitos(); // <-- carrega amigos
@@ -953,6 +953,93 @@ document.addEventListener('DOMContentLoaded', () => {
       atualizarVisibilidadeAppBody();
     });
   });
+
+  // Adiciona evento para o botão de abrir inventário
+  const btnAbrirInventario = document.getElementById('btn-abrir-inventario');
+  if (btnAbrirInventario) {
+    btnAbrirInventario.addEventListener('click', () => {
+      // Esconde todas as tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Mostra a tab do inventário
+      document.getElementById('tab-inventario').classList.add('active');
+      
+      // Remove active de todos os botões da navegação
+      document.querySelectorAll('.nav-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Adiciona active no botão da loja (já que o inventário agora faz parte da loja)
+      document.querySelector('[data-tab="tab-loja"]').classList.add('active');
+      
+      // Carrega o inventário
+      carregarInventario();
+      
+      // Atualiza classes do body
+      document.body.classList.remove(
+        'tab-home-active',
+        'tab-tasks-active',
+        'tab-tasks-nao-periodicas-active',
+        'tab-tasks-personalizadas-active',
+        'tab-amigos-active',
+        'tab-settings-active',
+        'tab-enemy-active'
+      );
+      document.body.classList.add('tab-loja-active');
+      
+      // Remove a classe show da main-content (caso esteja ativa)
+      const mainContent = document.querySelector('.main-content');
+      if (mainContent) {
+        mainContent.classList.remove('show');
+      }
+      
+      atualizarVisibilidadeAppBody();
+    });
+  }
+
+  // Adiciona evento para o botão de voltar para loja
+  const btnVoltarLoja = document.getElementById('btn-voltar-loja');
+  if (btnVoltarLoja) {
+    btnVoltarLoja.addEventListener('click', () => {
+      // Esconde todas as tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Mostra a tab da loja
+      document.getElementById('tab-loja').classList.add('active');
+      
+      // Remove active de todos os botões da navegação
+      document.querySelectorAll('.nav-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Adiciona active no botão da loja
+      document.querySelector('[data-tab="tab-loja"]').classList.add('active');
+      
+      // Atualiza classes do body
+      document.body.classList.remove(
+        'tab-home-active',
+        'tab-tasks-active',
+        'tab-tasks-nao-periodicas-active',
+        'tab-tasks-personalizadas-active',
+        'tab-amigos-active',
+        'tab-settings-active',
+        'tab-enemy-active'
+      );
+      document.body.classList.add('tab-loja-active');
+      
+      // Remove a classe show da main-content (caso esteja ativa)
+      const mainContent = document.querySelector('.main-content');
+      if (mainContent) {
+        mainContent.classList.remove('show');
+      }
+      
+      atualizarVisibilidadeAppBody();
+    });
+  }
 
   // Inicializa na home
   document.querySelector('.nav-button[data-tab="tab-home"]').click();
@@ -1022,6 +1109,15 @@ function handleSwipe() {
     navButtons.forEach(b => b.classList.remove('active'));
     nextBtn.classList.add('active');
 
+    // Ações específicas por aba
+    if (nextTabId === 'tab-tasks') {
+      carregarTarefas();
+    }
+
+    if (nextTabId === 'tab-amigos') {
+      listarAmigosAceitos(); // <-- carrega amigos no swipe também
+    }
+
     // Atualiza classes do body
     document.body.classList.remove(
       'tab-home-active',
@@ -1030,6 +1126,7 @@ function handleSwipe() {
       'tab-tasks-personalizadas-active',
       'tab-enemy-active',
       'tab-settings-active',
+      'tab-amigos-active'
     );
     if (nextTabId === 'tab-home') document.body.classList.add('tab-home-active');
     if (nextTabId === 'tab-tasks') document.body.classList.add('tab-tasks-active');
@@ -1037,6 +1134,7 @@ function handleSwipe() {
     if (nextTabId === 'tab-tasks-personalizadas') document.body.classList.add('tab-tasks-personalizadas-active');
     if (nextTabId === 'tab-enemy') document.body.classList.add('tab-enemy-active');
     if (nextTabId === 'tab-settings') document.body.classList.add('tab-settings-active');
+    if (nextTabId === 'tab-amigos') document.body.classList.add('tab-amigos-active');
     
 
     // Adiciona ou remove a classe show em main-content igual aos botões
