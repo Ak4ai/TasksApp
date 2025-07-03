@@ -1116,13 +1116,13 @@ function atualizarVisibilidadeAppBody() {
 
   const mostrar = abaAtiva && abasComTarefas.includes(abaAtiva.id);
 
-  // Atualiza app-body
-  appBody.style.display = mostrar ? 'flex' : 'none';
-
   // Atualiza estilo do separador
   if (navSeparator) {
     navSeparator.classList.toggle('active', mostrar);
   }
+
+  // Adiciona classe no body para controlar visibilidade dos botões
+  document.body.classList.toggle('nav-separator-active', mostrar);
 }
 
 document.querySelectorAll('.criar-button').forEach(botao => {
